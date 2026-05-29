@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Council Verdict — Which Cases to Demo</title>
+<style>
+  :root{
+    --ink:#16181d; --muted:#5b6270; --line:#e6e8ec; --bg:#fbfbfa;
+    --lime:#c6f23f; --lime-deep:#9bc400;
+    --contrarian:#e5484d; --firstp:#2f6fed; --expand:#1aa86b; --outsider:#8b5cf6; --executor:#e8820c;
+    --good:#1aa86b; --bad:#e5484d; --warn:#e8820c; --neutral:#aab0bb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:0 24px 96px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  header{background:var(--ink);color:#fff;margin-bottom:40px;
+    background-image:repeating-linear-gradient(135deg,rgba(198,242,63,.07) 0 2px,transparent 2px 11px)}
+  .head-inner{max-width:900px;margin:0 auto;padding:48px 24px 44px}
+  .tag{display:inline-block;background:var(--lime);color:#000;font-weight:700;font-size:11px;
+    letter-spacing:.18em;text-transform:uppercase;padding:6px 12px;border-radius:3px}
+  header h1{font-size:33px;line-height:1.15;margin:20px 0 8px;letter-spacing:-.01em}
+  header .sub{color:#b9c0cc;font-size:15px;margin:0}
+  .qbox{margin-top:26px;border-left:3px solid var(--lime);padding:6px 0 6px 18px}
+  .qbox .qlabel{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);font-weight:700}
+  .qbox p{margin:6px 0 0;color:#e9ecf1;font-size:15.5px}
+  section{margin:46px 0}
+  h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    border-bottom:2px solid var(--ink);padding-bottom:8px;margin:0 0 22px}
+  h2 .n{color:var(--lime-deep);margin-right:10px;font-weight:800}
+  .vcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin:14px 0;
+    box-shadow:0 1px 2px rgba(20,24,30,.03)}
+  .vcard h3{margin:0 0 8px;font-size:17px;display:flex;align-items:center;gap:9px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .vcard p{margin:0 0 10px}
+  .vcard ul{margin:6px 0 0;padding-left:20px}.vcard li{margin:7px 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 9px;border-radius:20px}
+  .pill.agree{background:#e7f7ee;color:#11774d}.pill.clash{background:#fdeaea;color:#b42318}.pill.blind{background:#efeafe;color:#5b34d6}
+  .reco{background:linear-gradient(180deg,#1f2228,#16181d);color:#fff;border:none}
+  .reco h3{color:#fff}.reco p{color:#e7eaef}.reco strong{color:var(--lime)}
+  .verdict-line{font-size:18px;font-weight:600;border-left:3px solid var(--lime);padding-left:16px;margin:0 0 16px}
+  .pickrow{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 6px}
+  .pickbox{flex:1;min-width:240px;background:#11140f;border:1px solid #2c3326;border-radius:10px;padding:16px 18px}
+  .pickbox .role{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+  .pickbox.green .role{color:var(--lime)} .pickbox.amber .role{color:#ffd24a}
+  .pickbox .cname{font-size:18px;font-weight:800;color:#fff;margin:4px 0 6px}
+  .pickbox p{font-size:13.5px;color:#cdd3da;margin:0}
+  .alt{background:#fff7e9;border:1px solid #f0d9a8;border-radius:10px;padding:14px 18px;margin-top:8px}
+  .alt b{color:#9a6a00}
+  .first{background:#101216;color:#fff;border:none;text-align:center;padding:30px 22px}
+  .first .lab{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);font-weight:700}
+  .first h3{display:block;font-size:20px;margin:12px 0 6px}
+  .first p{color:#dfe3e9;max-width:660px;margin:0 auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{padding:9px 9px;text-align:center;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{background:#f4f5f7;font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  td:first-child,th:first-child{text-align:left}
+  tr:last-child td{border-bottom:none}
+  .mk{font-weight:800}.mk.hi{color:var(--good)}.mk.lo{color:var(--bad)}.mk.mid{color:var(--warn)}.mk.na{color:var(--neutral)}
+  tr.rec{background:#f3fbe8}
+  tr.rec td:first-child{box-shadow:inset 3px 0 0 var(--lime-deep)}
+  .casetag{font-weight:700}
+  .legend{font-size:12px;color:var(--muted);margin-top:10px;display:flex;gap:16px;flex-wrap:wrap}
+  details{background:#fff;border:1px solid var(--line);border-radius:10px;margin:11px 0;overflow:hidden}
+  summary{cursor:pointer;padding:16px 20px;font-weight:600;list-style:none;display:flex;align-items:center;gap:11px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .chev{margin-left:auto;color:var(--muted);transition:transform .2s;font-size:13px}
+  details[open] summary .chev{transform:rotate(90deg)}
+  details[open] summary{border-bottom:1px solid var(--line)}
+  .body{padding:18px 22px 22px}.body p{margin:0 0 12px}
+  .role-lbl{font-size:12px;color:var(--muted);font-weight:500}
+  .badge{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:5px;color:#fff}
+  .pickline{font-size:12.5px;font-weight:700;color:var(--ink);background:#f1f3f5;border-radius:6px;padding:6px 10px;margin:0 0 12px;display:inline-block}
+  .consensus{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 18px}
+  .cbox{flex:1;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+  .cbox .big{font-size:25px;font-weight:800}.cbox .big small{font-size:13px;color:var(--muted);font-weight:600}
+  .cbox .lab{font-size:12px;color:var(--muted);margin-top:2px}
+  .rev{border-left:3px solid var(--line);padding:4px 0 4px 16px;margin:16px 0}
+  .rev .q{font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px}
+  footer{border-top:1px solid var(--line);margin-top:60px;padding-top:22px;color:var(--muted);font-size:13px}
+  .disc{font-size:12px;color:var(--neutral);margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <span class="tag">⚖ LLM Council · Verdict #2</span>
+    <h1>Which two cases should anchor the demo?</h1>
+    <p class="sub">5 advisors · anonymised peer review · chairman synthesis — run across the 10 provided case files (<span class="mono">cases/</span>)</p>
+    <div class="qbox">
+      <div class="qlabel">The question put to the council</div>
+      <p>The revised plan demands a live demo of <strong>two real cases from the provided set — one the agent honestly turns away ("talk them down"), one it prepares &amp; escalates.</strong> (1) Which case is the best <em>strong→escalate</em> and which the best <em>honest-no→talk-down</em>? (2) Keep the damp-&amp;-mould-only build, or widen — given only <strong>1 of 10 cases is disrepair, and it's a council/social tenancy that breaks the Section-21 "why now" hook</strong>? (3) What does the case set reveal that should change the plan?</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2><span class="n">★</span> Council Verdict</h2>
+
+    <div class="vcard reco">
+      <p class="verdict-line">The whole council agrees on the binding constraint, and it isn't "wow." It's <strong>don't let the agent be legally wrong in front of a room of solicitors.</strong> Every case pick must survive that test first.</p>
+      <p>That reframes the choice. The flashiest cases (the dismissal-with-settlement-clock, the lost-appeal) are the ones most likely to make the agent say something a Lawhive solicitor contradicts live — which kills the access-to-justice argument, because a tool that can't be trusted on the law doesn't widen access to anything. Pick cases you can <em>defend cold against a hostile expert.</em></p>
+    </div>
+
+    <div class="pickrow">
+      <div class="pickbox green">
+        <div class="role">Recommended · Strong → escalate (hero)</div>
+        <div class="cname">Case 07 — Council damp &amp; mould</div>
+        <p>It's what you actually built, it's the most human case in the set (single mum, child's cough, GP letter), and it exercises the full stack: prospects → HHSRS → protocol letter + EH complaint → handoff with the dodgy "works completed" form flagged. <strong>Reframe the hook to Awaab's Law</strong> — which fits this case perfectly and hits harder than Section 21 ever did.</p>
+      </div>
+      <div class="pickbox amber">
+        <div class="role">Recommended · Honest no → talk down</div>
+        <div class="cname">Case 04 — Flight delay (ATC defence)</div>
+        <p>A genuinely defensible "you may not win, and it's £220 — here's the cost/benefit." Light docs (safe to ingest live), the law really is "it depends" so the honest no is <em>correct</em>, not a dodge — and the "no" needs only an assessment, not a drafted letter, so it's cheap to build.</p>
+      </div>
+    </div>
+    <div class="alt"><b>The strong alternative the peer review leaned toward:</b> <strong>Case 01 (deposit) → escalate + Case 10 (lost appeal) → talk-down.</strong> Choose this if you'd rather put the <em>emotion in the "no"</em> (a retiree talked out of throwing good money after bad) and keep the escalate legally bulletproof (deposit protection is binary, settled law, light docs). <b>But only if your lawyer can make the appeal/CPR reasoning airtight</b> — Case 10's "no" is itself a correctness landmine (set-aside vs appeal, time limits, res judicata). See the decision rule below.</div>
+
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--good)"></span> Where the council agrees <span class="pill agree">high confidence</span></h3>
+      <ul>
+        <li><strong>Correctness &gt; everything.</strong> Unanimous in peer review: the demo's failure mode is the agent misstating law in front of solicitor-judges. This is the lens for every pick.</li>
+        <li><strong>Widen the <em>framing</em> beyond damp-and-mould.</strong> 4 of 5 advisors. The product is "honest triage that can say no"; disrepair is the wedge, not the whole product. "Damp-only" optimises the build, not the thesis.</li>
+        <li><strong>Case 10 is the most resonant "no"</strong> — a retiree talked out of a hopeless appeal directly answers Lawhive's own Track B question. (But see the landmine below.)</li>
+        <li><strong>The Section-21 hook is broken for these cases.</strong> No provided case even involves Section 21 — the one disrepair case is social housing. The hook must change.</li>
+      </ul>
+    </div>
+
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--bad)"></span> Where the council clashes <span class="pill clash">genuine disagreement</span></h3>
+      <p><strong>1. The escalate case — safe or deep?</strong> Advisors split four ways: Case&nbsp;1 (deposit — clean, safe, forgettable), Case&nbsp;7 (damp — what you built, most resonant, heavy docs), Case&nbsp;9 (dismissal — cinematic but legally intricate, a "trap"), Case&nbsp;2 (photographer — defensible but legally thin). Peer review corrected toward <em>Case&nbsp;1</em> on safety grounds. The chairman lands on <em>Case&nbsp;7</em> instead — see the recommendation reasoning.</p>
+      <p><strong>2. The talk-down — resonance vs safety.</strong> Case&nbsp;10 is the emotional gut-punch but legally tricky to get right live; Case&nbsp;4 is a defensible, low-risk "no" but lower drama. This is the real trade, and it depends on how much you trust your lawyer + rehearsal.</p>
+      <p><strong>3. Depth vs breadth.</strong> "Build a deep engine + 2 templates" (safe, buildable) vs "breadth IS the product — cross-domain intake is the venture story" (ambitious, but unbuildable-in-a-day if taken literally).</p>
+    </div>
+
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--outsider)"></span> Blind spots the council caught in peer review <span class="pill blind">emerged in round 2</span></h3>
+      <ul>
+        <li><strong>You have a lawyer — that changes the math.</strong> Every advisor treated "intricate case" as fixed risk. With counsel pre-vetting the reasoning and rehearsing it, the harder cases (7, even 9) become defensible. "Too hard to be right live" is partly a false constraint.</li>
+        <li><strong>Case 10's "no" is the hidden correctness landmine.</strong> Four advisors parked Case 10 as the "safe" half of the demo — but a <em>dismissed claim with appeal rights</em> is procedurally the trickiest reasoning on the board. The agent explaining why it's dead can itself be wrong live.</li>
+        <li><strong>Widening isn't free.</strong> The honest-triage engine is the cheap part; <em>correct domain-specific legal logic</em> for a second deep case is the actual build. Keep the deep build on damp; make the "no" assessment-only.</li>
+        <li><strong>Show the agent <em>routing</em>, not just refusing.</strong> "This isn't disrepair — here's the door it belongs to" demonstrates honest <em>intake</em> better than a flat "no."</li>
+        <li><strong>"Potential to go further" has an obvious answer:</strong> publish the <em>turn-away rate</em> as a trust metric — the thing no one monetising claims dares show.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">→</span> The Recommendation</h2>
+    <div class="vcard reco">
+      <p><strong>Hero = Case 7 (damp). Honest-no = Case 4 (flight delay). Widen the framing, not the deep build.</strong></p>
+      <p>Why Case 7 over the safer Case 1, against the cautious consensus: (a) it's the domain you spent two weeks building — Case 1 means bolting on a second body of law you didn't prepare; (b) it's far more powerful on the criterion that actually wins this panel — <em>access to justice</em> (a child's health, not a £980 deposit); (c) <strong>Awaab's Law</strong> turns the "social housing breaks the hook" flaw into a <em>stronger, more current</em> hook — a child died from mould in social housing; new statutory deadlines are phasing in now; the tools to hold landlords to them don't exist. The two objections to Case 7 are both mitigable: pre-ingest the photo bundles (<em>never parse a folder live on stage</em>), and have your lawyer vet the disrepair reasoning cold (it's your prepared domain).</p>
+      <p>The "no" (Case 4) carries no drafting and settled-enough law that you can't be caught out. Put the emotion in the hero, the integrity in the no.</p>
+      <p style="margin-bottom:0"><strong>On scope:</strong> reframe the pitch to "an honest front door that can say no — disrepair first." Keep the deep build on damp; add only a <em>shallow assessment path</em> for the no. The "judge picks a case" promise → let them pick from a <em>curated shortlist of 2–3 pre-tested cases</em>, not all 10 (this is the honest reconciliation of interactivity vs. correctness). And <strong>retire the Section-21 foil</strong> — no demo case touches it; use "AI confidently gets current law wrong" + Awaab's Law instead.</p>
+    </div>
+    <div class="vcard" style="background:#f6f8fa">
+      <h3 style="font-size:15px"><span class="dot" style="background:var(--firstp)"></span> Decision rule (if you don't want to overthink it)</h3>
+      <p style="margin:0">Lawyer confident on disrepair <em>and</em> you can pre-ingest the photo bundles reliably → <strong>7 + 4</strong>. Nervous about live document-handling or disrepair scrutiny → fall back to <strong>1 + 4</strong> (safest of all). Want the emotional "no" and your lawyer will nail appeal/CPR law → <strong>1 + 10</strong>. Avoid Case 9 as the hero unless your lawyer signs off every line — it's the highest-correctness-risk case in the set.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="vcard first">
+      <div class="lab">The one thing to do first</div>
+      <h3>Lock the escalate case now, and pre-ingest its real documents into the engine this week.</h3>
+      <p>The demo's credibility lives or dies on the agent handling the <em>actual provided files</em> without faceplanting — and the heavy bundles (photo folders, long email chains) must be pre-processed, never parsed live on stage. Everything downstream (corpus, letter template, the hook) depends on which escalate case you commit to. Decide it, then make its documents flow start-to-finish before you build anything else.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">▦</span> The 10 cases, scored for demo fit</h2>
+    <table>
+      <thead>
+        <tr><th>Case</th><th>Domain</th><th>Claim</th><th>Best role</th><th>Doc / build risk</th><th>Legal-correctness risk</th><th>Emotional pull</th></tr>
+      </thead>
+      <tbody>
+        <tr class="rec"><td class="casetag">07 Damp &amp; mould ★</td><td>Disrepair (social)</td><td class="mk hi">Strong</td><td><b>Escalate (hero)</b></td><td class="mk lo">High (photo folders)</td><td class="mk mid">Med — your domain</td><td class="mk hi">Very high</td></tr>
+        <tr class="rec"><td class="casetag">04 Flight delay ★</td><td>Consumer</td><td class="mk mid">Borderline</td><td><b>Talk-down</b></td><td class="mk hi">Low (light)</td><td class="mk hi">Low</td><td class="mk lo">Low</td></tr>
+        <tr><td class="casetag">01 Deposit</td><td>Renting</td><td class="mk hi">Strong</td><td>Escalate (safe alt)</td><td class="mk hi">Low (5 clean docs)</td><td class="mk hi">Low (binary law)</td><td class="mk mid">Medium</td></tr>
+        <tr><td class="casetag">10 Lost appeal</td><td>Small claims</td><td class="mk lo">Very weak</td><td>Talk-down (resonant alt)</td><td class="mk lo">High (10 docs)</td><td class="mk lo">High (appeal/CPR)</td><td class="mk hi">Very high</td></tr>
+        <tr><td class="casetag">09 Dismissal + clock</td><td>Employment</td><td class="mk hi">Strong/nuanced</td><td>Cinematic but risky</td><td class="mk lo">High (10 docs)</td><td class="mk lo">Very high</td><td class="mk hi">High</td></tr>
+        <tr><td class="casetag">02 Photographer</td><td>Consumer</td><td class="mk hi">Strong</td><td>Escalate (defensible)</td><td class="mk mid">Medium</td><td class="mk mid">Medium</td><td class="mk hi">High</td></tr>
+        <tr><td class="casetag">03 Used car</td><td>Consumer</td><td class="mk hi">Strong</td><td>Escalate (time-critical)</td><td class="mk mid">Medium</td><td class="mk mid">Medium</td><td class="mk mid">Medium</td></tr>
+        <tr><td class="casetag">06 Unpaid wages</td><td>Employment</td><td class="mk hi">Strong</td><td>Escalate / route</td><td class="mk lo">High (8 docs)</td><td class="mk mid">Medium</td><td class="mk mid">Medium</td></tr>
+        <tr><td class="casetag">05 Gym auto-renew</td><td>Consumer</td><td class="mk mid">Moderate</td><td>Ambiguous (not a clean no)</td><td class="mk lo">High (8 docs)</td><td class="mk mid">Medium</td><td class="mk mid">Medium</td></tr>
+        <tr><td class="casetag">08 Builder dispute</td><td>Building</td><td class="mk mid">Contested</td><td>"Amber" — exposure case</td><td class="mk lo">High</td><td class="mk lo">High (two-sided)</td><td class="mk mid">Medium</td></tr>
+      </tbody>
+    </table>
+    <div class="legend">
+      <span>★ = chairman's pick</span><span><b class="mk hi">green</b> favourable</span><span><b class="mk mid">amber</b> mixed</span><span><b class="mk lo">red</b> risky</span>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">◆</span> How the advisors picked</h2>
+    <table>
+      <thead><tr><th>Advisor</th><th>Escalate pick</th><th>Talk-down pick</th><th>Scope verdict</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:700;color:var(--contrarian)">Contrarian</td><td>Case 2 <span class="mono">(rejects 9 as a trap)</span></td><td>Case 10</td><td>Widen + reframe hook to "can't price your own claim"</td></tr>
+        <tr><td style="font-weight:700;color:var(--firstp)">First Principles</td><td>Case 7</td><td>Case 10</td><td>Engine + 2 deep templates (7, 10)</td></tr>
+        <tr><td style="font-weight:700;color:var(--expand)">Expansionist</td><td>Case 9</td><td>Case 10</td><td>Widen hard — breadth IS the product (Case-In-A-Box)</td></tr>
+        <tr><td style="font-weight:700;color:var(--outsider)">Outsider</td><td>Case 1</td><td>Case 10</td><td>Widen — "damp-only is a cage"</td></tr>
+        <tr><td style="font-weight:700;color:var(--executor)">Executor</td><td>Case 1</td><td>Case 4</td><td>Doc-agnostic shallow engine, deep only on damp</td></tr>
+        <tr style="background:#f3fbe8"><td style="font-weight:800">▶ Chairman</td><td style="font-weight:800">Case 7</td><td style="font-weight:800">Case 4</td><td style="font-weight:800">Widen framing; keep deep build on damp</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px">Talk-down was near-unanimous on Case 10 in round 1 — until peer review exposed that Case 10's "no" is itself legally intricate. The chairman therefore moves the <em>safe</em> "no" to Case 4 and keeps Case 10 as the higher-ceiling alternative.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">✎</span> The five advisors — full responses</h2>
+
+    <details>
+      <summary><span class="badge" style="background:var(--contrarian)">Contrarian</span> Pick what you can defend cold against a hostile expert <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <div class="pickline">Escalate: Case 2 · Talk-down: Case 10 · Widen + reframe hook</div>
+        <p>Picks: Escalate Case 9 is the trap — take Case 2 instead. Talk-down: Case 10.</p>
+        <p>Here's the fatal flaw nobody's saying out loud: you have ONE disrepair case, it's social housing, and it detonates your entire "why now / Renters' Rights Act" hook on stage. A Lawhive solicitor will catch it in four seconds — Awaab's Law and HHSRS Cat 1 don't touch Section 21, and your pitch will sound like you skimmed a headline. Damp-and-mould-only is a dead end with this case set. <strong>Widen scope to "renter/consumer disrepair-of-promise," reframe the hook from "Renters' Rights Act" to "the asymmetry: ordinary people can't price their own claim."</strong> That hook survives contact with all 10 cases. The legislative hook does not.</p>
+        <p>Escalate case: NOT 9. Case 9 (dismissal/settlement clock) is bait — discrimination, victimisation, clawback, covert recordings, a 5-day timer. Build that in a day and the agent WILL state something a real employment solicitor contradicts live. You lose on the one criterion you can't fake in a legal room: being <em>right</em>. Take Case 2 (wedding photographer) — clean breach, force majeure won't save a no-show, distress damages genuinely limited (so the agent demonstrates honest calibration <em>even on a strong case</em>: "you'll win, but not the number you're imagining"). That nuance is your whole thesis, and it's defensible.</p>
+        <p>Talk-down: Case 10 (lost small claim, wants to appeal). Textbook. Already dismissed, likely out of time, still lacks the expert evidence he lost on — appeals aren't a re-run. The agent says no, explains why, and you've shown the product's soul. Case 4 is the weaker talk-down: "it depends" isn't a turn-away, it's a shrug.</p>
+        <p>The trap you're walking into: you'll over-engineer the <em>turn-away</em> and under-engineer <em>being correct</em>. The judges said "not judging on polish" — so polish isn't your risk. A solicitor watching the agent confidently misstate the law is. One wrong limitation period, one fumbled "discretionary commission," and the access-to-justice argument dies. Pick the two cases you can defend cold against a hostile expert. That's 2 and 10.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge" style="background:var(--firstp)">First Principles</span> Ship the judgment, not the niche <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <div class="pickline">Escalate: Case 7 · Talk-down: Case 10 · Engine + 2 deep templates</div>
+        <p><strong>Strong→escalate: Case 7 (council damp &amp; mould).</strong> It is your only disrepair case, it is genuinely strong, and it's the single case where the prepared-document + solicitor-handoff arc is real. Awaab's Law is the live "why now." The social-tenancy/Section-21 break is irrelevant — that hook was for the <em>plan</em>, not the <em>renter</em>. A renter with a coughing child does not care which statute provides the lever.</p>
+        <p><strong>Honest no→talk down: Case 10 (lost small claim, wants to appeal).</strong> Not Case 4. Case 4 is "it depends / low value" — mush, not a no. Case 10 is a <em>clean</em> no: dismissed, directions missed, appeal grounds near-zero, retiree about to spend more. Talking him down is the highest-integrity act in the whole set.</p>
+        <p>But here's the wrong question. "Damp &amp; mould only" optimizes for your <em>build</em>, not the <em>thesis</em>. The thesis — judges said it outright — is "recalibration": an honest agent that knows the difference between a case and a grievance. If you scope to disrepair-only, your two demo cases come from <em>different domains anyway</em> (7 is disrepair, 10 is small-claims appeal) — so you've already broken the single-domain frame. Don't pretend otherwise.</p>
+        <p>So don't widen to "all consumer law" (unbuildable in a day) and don't narrow to "damp only" (proves nothing about honesty). Build the <strong>honest-triage engine</strong> — the recalibration conversation, prospects scoring, the no — as the product, and <strong>hard-fund exactly two case templates: 7 and 10.</strong> Disrepair is your escalation depth; the appeal is your honesty depth. The engine generalizes; the demos are deep.</p>
+        <p>What the demo proves: not "we built a damp tool" — every team will build a tool. It proves an agent that says <strong>no</strong> when no is correct, and that the same judgment escalates correctly when yes is correct. That moves the access-to-justice needle because the 9-in-10 who shouldn't sue currently get told "you might have a claim!" by everyone monetizing them.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge" style="background:var(--expand)">Expansionist</span> Demo the honest front door to the entire legal system <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <div class="pickline">Escalate: Case 9 · Talk-down: Case 10 · Widen hard (breadth is the point)</div>
+        <p>Strong → escalate: <strong>Case 9 (dismissal after grievance, settlement clock).</strong> Honest no → talk down: <strong>Case 10.</strong></p>
+        <p>Keep damp-and-mould-only? <strong>No. Widen — and make breadth the whole point.</strong> Disrepair-only is a feature you'd build; cross-domain triage is a <em>company</em> you'd fund. The 10 cases were handed to you spanning deposit, consumer, employment, building, small-claims. That's not noise — that's the judges quietly testing whether you noticed the real problem is <em>intake</em>, not damp. The bottleneck in access to justice isn't drafting one more letter; it's that nobody can afford the first hour that tells them which of six doors they're standing in front of. An agent that reads a messy bundle and says "this is employment, not consumer; here's your prospect; here's your clock" is Case-In-A-Box. That's the venture-scale story, and it's exactly Lawhive's own funnel.</p>
+        <p>Pick the two cases that prove <em>range</em>, not depth. Case 9 vs Case 10 does that in one breath: same agent, opposite verdicts, two different legal universes. Case 9 is the cinematic one — settlement expiring in 5 days, £4.4k on the table but ~£8k in future bonus and a live victimisation claim, covert recordings, a clawback trap. The agent doing real triage under a countdown clock is the Twitter moment: <em>"It found the deadline the human would've missed."</em> Case 10 is the heart — a retiree, and the agent's most valuable act is talking him out of throwing good money after bad. That directly answers Track B's "what does success look like."</p>
+        <p>The bigger swing: don't demo a damp letter-writer. Demo <strong>the honest front door to the entire legal system</strong> — domain-agnostic triage that routes, assesses prospects, <em>and</em> refuses. Six months out: every Lawhive case starts here; the turn-away rate becomes the trust metric nobody else dares publish. Acquire-bait, not feature.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge" style="background:var(--outsider)">Outsider</span> "Only damp" is a cage — and the one damp case breaks your own banner <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <div class="pickline">Escalate: Case 1 · Talk-down: Case 10 · Widen to renter + consumer</div>
+        <p>Case picks: <strong>Case 1 (deposit) — "prepare it properly and send to a lawyer."</strong> A renter's £980 was never put in the legal protection scheme. As a normal person, that's the one that made me go "wow, I'd use that." It's black-and-white: a number, a missing thing, a clear penalty. Anyone can follow it in 60 seconds on stage, and it's a renter, so it's on-brand.</p>
+        <p><strong>Case 10 (tree-roots, already lost) — "honestly tell them to stop."</strong> A retired man already went to court six weeks ago, LOST, and wants to go again with money he doesn't have. The AI saying "please don't — you'll lose again and you can't afford it" feels genuinely kind, like a friend protecting him. Compare that to telling the wedding-photographer couple (Case 2) or the dad with the sick kid (Case 7) "no" — that would feel cruel on stage and make the AI look heartless. Pick the case where "stop" is the loving answer. Case 10 is it.</p>
+        <p>Now the uncomfortable part. <strong>"We only do damp and mould" looks weirdly narrow, and the one damp case undercuts your own pitch.</strong> You have ten cases, exactly ONE is damp (Case 7), and that one is a COUNCIL flat — but I'm told your headline is "a private-renting law just changed." So on stage you'd announce a private-renting hook and then demo a council tenant it doesn't cover? A normal person in the audience goes: "wait, does this thing even apply to her?" That's the opposite of the honest-read story you're selling.</p>
+        <p>Bigger issue: your whole brilliant idea is "honestly tell people if they have a case." That idea works on ANY problem — deposit, car, wedding, wages. Boxing it to damp throws away your best demo (Case 1) AND your kindest "stop" demo (Case 10), neither of which is damp. The narrowness isn't focus; it's a cage. Widen to "renter and consumer problems," demo 1 and 10, and your pitch and your prototype finally tell the same story.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge" style="background:var(--executor)">Executor</span> Build the pipe Monday — the law is the easy part <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <div class="pickline">Escalate: Case 1 · Talk-down: Case 4 · Doc-agnostic shallow engine, deep on damp</div>
+        <p><strong>Picks: escalate Case 1 (deposit not protected). Honest-no Case 4 (flight delay).</strong> Not the disrepair case as your hero. Read on.</p>
+        <p>The hard truth: the spec says damp-&amp;-mould-only, but the demo promise — judge picks from the set, agent ingests REAL docs live — means your engine must survive whatever they hand you. Those two facts collide. You cannot build deep disrepair reasoning AND broad ingestion in a day-plus-prep with a team that's never shipped together. So don't. Build a <strong>document-agnostic ingestion + prospects-assessment engine</strong> that's shallow but honest, and make damp-&amp;-mould the one case where your reasoning goes deep.</p>
+        <p>Why 1 and 4 over 7/9/10: Case 1 is 5 clean docs, the law is binary (deposit protected within 30 days — yes/no, screenshots prove no), escalation is a crisp 1–3x penalty claim. Nothing to misread on stage. Case 4 is 5 light docs and the law <em>is</em> "it depends" (extraordinary circumstances), so the honest "you may not have a case" is the correct answer, not a dodge — perfect talk-down. Cases 7/9/10 carry photo folders and zips: live OCR/vision ingestion of a month-1/3/8 mould-photo folder at 4pm on hotel wifi is exactly what faceplants.</p>
+        <p>Hidden time-sink: document ingestion normalization — PDFs, screenshots, DOCX, image folders into clean text the model can reason over. That's 60% of your build, not the legal logic. What breaks at 4pm: a heavy doc stalls or blows the context window mid-demo, and the judge picked that case.</p>
+        <p>Fastest path / Monday: Build the ingestion pipeline first (GCP Document AI or just PDF-to-text + vision-to-caption), test it against ALL 10 doc sets so nothing throws live. Hardcode/pre-cache the two hero cases (1 and 4) so they're bulletproof. Let the engine <em>attempt</em> any case the judge picks (broad but shallow), but steer to your two. Ship the talk-down path day one — saying "no case" is your differentiator and the easiest thing to demo. Build the pipe Monday. The law is the easy part.</p>
+      </div>
+    </details>
+  </section>
+
+  <section>
+    <h2><span class="n">⇄</span> Peer review — the cross-examination</h2>
+    <div class="consensus">
+      <div class="cbox"><div class="big">5<small> / 5</small></div><div class="lab">reviewers named the <strong>Contrarian</strong> the strongest — "correctness is the binding constraint"</div></div>
+      <div class="cbox"><div class="big">4<small> / 5</small></div><div class="lab">converged on <strong>Case 1</strong> as the safest escalate pick (correcting the Contrarian's Case 2)</div></div>
+      <div class="cbox"><div class="big">3<small> / 5</small></div><div class="lab">independently flagged the <strong>team's lawyer</strong> as an under-weighted force multiplier</div></div>
+    </div>
+    <details open>
+      <summary>Read the peer-review highlights <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <div class="rev"><p class="q">Strongest response</p><p>Unanimous: <strong>the Contrarian.</strong> "The only response that correctly identifies the binding constraint: the demo's failure mode isn't weak polish, it's the agent misstating law live in front of solicitor-judges." It also alone confronted the social-housing hook collapse and reframed it into a thesis that survives any case mix.</p></div>
+        <div class="rev"><p class="q">Biggest blind spots</p><p>Split: the Contrarian's <em>timidity</em> (rejecting Case 9 ignores that the team's lawyer can pre-vet intricacy into safety); the Expansionist's <em>venture-narrative tunnel vision</em> (picking the single most legally dangerous case, 9, for a one-day build); and the Executor's <em>forgettable safety</em> ("1 + 4 proves competence, not judgment — the safest-to-build demo is the one nobody remembers").</p></div>
+        <div class="rev"><p class="q">What ALL FIVE missed</p><p><strong>1. The lawyer changes the calculus.</strong> "Every advisor treats difficulty as fixed risk, not a rehearsable asset" — a human-verified script de-risks the intricate cases everyone fears.<br><br>
+        <strong>2. Case 10's "no" is the hidden landmine.</strong> "Four pick the talk-down on 10, but nobody notes it's procedurally complex — appeal deadlines, CPR, res judicata. An agent reasoning out loud about why a dismissed claim is dead can itself be wrong live — the exact correctness failure, hiding in the 'safe' half of the demo."<br><br>
+        <strong>3. Widening isn't free.</strong> "Two legally-defensible deep templates in one day IS the build. The engine is the cheap part; correct domain logic is not."<br><br>
+        <strong>4. Show the agent <em>routing</em></strong> an out-of-scope case ("this is employment, here's where it goes") — proves honest intake better than a flat no. And <strong>turn-away rate as a trust metric</strong> is the strongest "go further" story, raised by one advisor and ignored by four.</p></div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <p><strong>LLM Council</strong> · 5 advisors → anonymised peer review → chairman synthesis. Methodology by Andrej Karpathy.</p>
+    <p class="mono">Counciled: cases/ (10 provided case files) against the revised brief.md + problem pack · Generated 2026-05-29 18:48 · Transcript: council-transcript-cases-20260529-184822.md</p>
+    <p class="disc">Advisor letters were randomised before peer review (A=First Principles, B=Outsider, C=Expansionist, D=Executor, E=Contrarian).</p>
+  </footer>
+
+</div>
+</body>
+</html>

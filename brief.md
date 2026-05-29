@@ -12,9 +12,11 @@
 
 The plan below was rebuilt after a sharp piece of feedback: the build plan came before the pitch. That's backwards. The pitch tells you what to build. This section is the answer to the five questions every judge will ask, and every engineering decision flows from it.
 
+> **Revised again after an LLM-council review against the official problem pack (`problem-tracks.pdf`).** The load-bearing change: this is no longer a claim-accelerator that always says "yes, here's your letter." It is an agent that gives an **honest prospects assessment — including telling a renter when they *don't* have a case** — demonstrated live on the judges' own provided cases. Lawhive's Track B says the first conversation "isn't legal analysis, it's recalibration," and asks point-blank what success looks like when the right answer is "don't pursue this." We answer that on stage. Every fix below traces to that. (Full reasoning: `council-report-*.html`.)
+
 ### 0.1 What the product is, in one sentence
 
-A web app where a renter describes a disrepair problem in plain English, uploads photo evidence, and gets back a legally-grounded explanation of their rights plus sendable pre-action documents — and a clean handoff to a Lawhive solicitor when the case warrants it.
+A web app where a renter describes a disrepair problem in plain English, shares the evidence they already have (photos, their tenancy agreement, the email chain with the landlord), and gets back an **honest, legally-grounded prospects assessment** — what their rights actually are, whether they have a real claim *or not*, and what to do next. When the case is strong it produces sendable, protocol-compliant pre-action documents and a clean handoff to a Lawhive solicitor. When it isn't, it says so plainly and saves them the wasted time and cost. The most valuable thing it can do is sometimes tell you to stand down.
 
 ### 0.2 How big is the problem space
 
@@ -41,10 +43,10 @@ TAM math for the slide: 6.2M × £500–£3,000 average claim value × realistic
 The honest answer: pure D2C acquisition for a one-off legal need is brutal. Renters don't search for "AI disrepair agent" until they have a problem, and at that moment they go to Citizens Advice, Shelter or Google. So GTM is three layered routes, pitched in this order:
 
 **Route 1 — Lawhive partnership (lead with this, the obvious one).**
-We become the intake-and-triage front door for renters within Lawhive's funnel. Self-servable cases stay self-served. Cases that need a solicitor escalate to Lawhive *with a fully prepared case file*. This 10x's Lawhive's intake throughput and lowers cost-to-serve per case. We're not competing with Lawhive — we're the moat extension.
+We become the intake-and-triage front door for renters within Lawhive's funnel. Here's the part that's easy to get wrong and that a sharp judge *will* probe: the value to Lawhive is **not maximum lead volume — it's *qualified* volume.** An agent that honestly filters out the non-cases and the not-yet-cases lowers Lawhive's cost-to-serve *more* than one that funnels everyone through. Self-servable cases stay self-served. Weak cases are told the truth and never become wasted solicitor time. Strong cases escalate *with a fully prepared case file, weak points already flagged*. We raise intake throughput **and** raise the average quality of what reaches a solicitor. We're not competing with Lawhive — we're the moat extension. (This pre-empts the obvious objection: "doesn't an agent that talks people out of claims cannibalise your leads?" No — it kills the leads you *lose money on* and sharpens the ones you don't.)
 
 **Route 2 — Distribution through advocacy orgs.**
-Shelter, Citizens Advice, Generation Rent, ACORN, Renters' Reform Coalition. They have the audience and the trust; they don't have the engineering. Co-brand or white-label. Citizens Advice's 1,800+ disrepair conversations a month are all qualified leads who'd benefit from the tool.
+Shelter, Citizens Advice, Generation Rent, ACORN, Renters' Reform Coalition. They have the audience and the trust; they don't have the engineering. Co-brand or white-label. Citizens Advice's 1,800+ disrepair conversations a month are all people who'd benefit from honest triage — including the many who are better served by "here's why this isn't a claim, and here's the faster fix."
 
 **Route 3 — Lettings agents and corporate landlords (counterintuitive, defensible).**
 Professional letting agents want disrepair claims handled cleanly and fast — a well-formatted pre-action letter is easier to respond to than a confused angry email. Sell to the side with money. Reduces their cost of handling claims, reduces escalation risk. Most defensible commercial path long-term.
@@ -53,35 +55,38 @@ Lead the GTM pitch with Route 1 (Lawhive's on the panel). Gesture at 2 and 3 (GV
 
 ### 0.5 What the demo shows
 
-**Total length: 8 minutes. Tightly scripted.**
+**The thesis the demo must prove:** this is an agent that tells you the truth about your situation — *even when the truth is "you don't have a case."* Lawhive's own Track B brief says the first conversation isn't legal analysis, it's **recalibration**, and asks point-blank: "if the most useful thing an agent could do is talk someone out of pursuing the wrong claim, what does success look like?" We answer that on stage. The demo runs **two real cases from the provided scenario set** — one the agent honestly turns away, one it prepares and escalates — not a single hand-picked winner.
+
+**Time: fit the actual slot.** Confirm the real per-team pitch time on the day — *assume it may be 5 minutes, not 8* — and rehearse both a 5-minute cut (drops the coda, trims the cold open) and the 8-minute cut below.
 
 | Time | Beat | What's on screen |
 |---|---|---|
-| 0:00–0:45 | Cold open | "On 1 May this year, Section 21 was abolished. Renters got more rights than they've had in a generation. The system to exercise those rights wasn't built for them. Tonight we're showing what changes when a renter in a damp flat at 11pm has Lawhive in their pocket." |
-| 0:45–1:30 | **Wow 1: ChatGPT foil** | Second screen: ask ChatGPT about a Section 21 notice. It confidently explains a law that no longer exists. Sets up: current AI cannot be trusted on this domain. |
-| 1:30–4:30 | Live flow | Tenant persona "Sarah" describes the situation. Agent asks 2 clarifying questions. Sarah uploads 3 photos. Agent analyses, classifies the hazard, names the statutory basis. |
-| 4:30–5:30 | **Wow 2: the artefacts** | Pre-action protocol letter renders on screen. Pre-filled environmental health complaint. Timeline of legal deadlines. *These do not exist anywhere else.* Citizens Advice gives advice; we produce a sendable letter. |
-| 5:30–6:30 | **Wow 3: the spatial layer** | Load the 3D scan of Sarah's flat with defects pre-pinned. Rotate. Click a pin — photo + AI analysis appears. "Not a photo, evidence with spatial context. The landlord can't claim the damage isn't there." |
-| 6:30–7:30 | The Lawhive handoff | Agent recognises case exceeds self-serve (vulnerable household member). Hands to a Lawhive solicitor with the case file pre-prepared. Cut to the solicitor's view of the same case file. *This is Route 1 GTM built into the demo.* |
-| 7:30–8:00 | Close + TAM slide | "Three weeks of new law. One agent. Built in a day. 6.2M renters. £hundreds of millions of unmet legal need. This is what access to justice looks like." Sit down. |
+| 0:00–0:40 | Cold open | "On 1 May this year, Section 21 was abolished. Renters got more rights than they've had in a generation. The system to exercise those rights wasn't built for them — and neither was the AI they'll reach for first." |
+| 0:40–1:20 | **Wow 1: the honest "no"** | The hero moment, first. Run a *weak/borderline* provided case live. The agent does **not** manufacture a claim — it explains, with citations, why this isn't actionable (or why the prospects are poor), what the cheaper/faster non-legal step is, and when to come back. "The most useful thing this agent just did was stop someone wasting a year and a filing fee. That's access to justice too." |
+| 1:20–2:00 | **The stale-AI point (reframed foil)** | Briefly, side-by-side: vanilla ChatGPT confidently cites Section 21 as live law. Not a cheap gag — the *category* argument: general models go stale silently, and in a regulated domain stale is malpractice. Ours is pinned to current statute and **shows its source on every legal claim.** |
+| 2:00–4:30 | **Live flow — let a judge choose** | Invite a judge to pick which provided *strong* case to run. The agent ingests that case's actual documents (tenancy agreement, email chain, photos), asks only the questions that change the legal answer, runs a prospects assessment, classifies the hazard (HHSRS), names the statutory basis — citation visible. This is the "working prototype we can actually interact with" the rubric demands. |
+| 4:30–5:30 | **Wow 2: the artefacts** | Pre-action protocol letter renders on screen, **every legal claim footnoted to a corpus source.** Pre-filled environmental-health complaint. Timeline of legal deadlines. *Citizens Advice gives advice; we produce a protocol-compliant, sendable letter.* |
+| 5:30–6:30 | The Lawhive handoff | Agent recognises the case exceeds self-serve (e.g. vulnerable household member) and hands to a Lawhive solicitor *with the case file pre-prepared and the weak points flagged.* Cut to the solicitor's view of the same case file. This is Route 1 GTM built into the demo — and note what the solicitor receives: only the cases worth their time. |
+| 6:30–7:10 | Coda (optional) | *Only if rock-solid:* ≤20 seconds on the 3D spatial layer — "and here's where this goes: evidence with spatial context." A glimpse of the roadmap, not a pillar. Cut entirely under time pressure. |
+| 7:10–8:00 | Close (not a TAM slide) | "An agent that knows today's law, tells you the truth about your case, and prepares it properly when it's real. Disrepair is the wedge — this is Lawhive's honest intake brain for every kind of consumer legal problem. *That's* what access to justice looks like." Sit down. |
 
 ### 0.6 How the demo actually runs (operational)
 
-- Whole demo runs **locally** on the laptop, not over the internet.
-- Flat photos and 3D scan are **pre-captured assets** in `/demo-assets`.
-- Tenant inputs typed live, but **rehearsed** to the exact words. We know which clarifying questions the agent asks.
-- Agent responses are **real, not pre-recorded** — but we've run this flow 30 times so timing and failure modes are known.
-- **Failsafe 1:** pre-recorded video of full demo plays on the second screen with sound off, ready to cut to.
-- **Failsafe 2:** the final case file is a static URL that loads instantly, so we can always end on the strongest beat.
-- We do NOT take questions during the demo. We do NOT let a judge type something in. Both are where demos die.
+- **The demo is interactive by design.** The rubric explicitly rewards "a working prototype we can actually interact with," so refusing all interaction is optimising *against* the judges. The controlled way to honour it: let a judge **choose which provided case to run** from a short list. Vetted inputs, genuine interactivity, no open text box where a demo dies.
+- **Run against the provided synthetic cases and their documents**, not a single hard-coded "Sarah." Build the document-ingestion path so *any* of the day's cases can flow through. If the agent only works on one rehearsed script, it isn't a prototype — it's a video.
+- **Reconcile the stack with what's provided.** The day's GCP environment and tooling are part of the brief, and Google/Gemini are on the panel. Deploy into the provided GCP environment (not just localhost) and have a crisp "right model for each job" answer — Claude for legal reasoning/drafting (Anthropic is judging, and it's strongest here), with at least one task routed through Gemini — so it never reads as ignoring the host's infrastructure.
+- Agent responses are **real, not pre-recorded** — rehearse *both* cases ~30 times so timing and failure modes are known.
+- **Failsafe 1:** pre-recorded video of the full flow, ready to cut to.
+- **Failsafe 2:** the final case file is a static URL that loads instantly, so we can always end on a strong beat.
+- We still don't take freeform Q&A *mid-demo* — but we *do* hand the judge a controlled choice, and we're ready for hard questions after.
 
-### 0.7 The three wow moments, in order
+### 0.7 The wow moments, in order
 
-1. **ChatGPT foil getting Section 21 wrong** — cheap, effective, establishes the problem with stale AI.
-2. **The letter** — a real pre-action protocol letter, correctly cited, that the housing solicitors in the room would sign. Most AI demos generate fluffy advice; this generates correspondence.
-3. **Spatial evidence pin opening to reveal AI-tagged damage** — the visceral one. Judges haven't seen 3D + AI vision + legal classification before. This is the Twitter moment.
+1. **The honest "no"** — the agent talks a weak case down, with citations and dignity. This is the moment that answers Lawhive's actual brief and that no one else in the room will show. Lead with it.
+2. **Stale-AI as a category argument** — ChatGPT citing dead law, reframed: in regulated domains an out-of-date model is *dangerous*, and ours shows its source on every claim. Establishes why this has to exist.
+3. **The letter** — a real, protocol-compliant pre-action letter, every claim footnoted, that the housing solicitors in the room would sign. Most AI demos generate fluffy advice; this generates correspondence.
 
-Order matters: credibility (foil) → substance (letter) → awe (spatial). If you flip substance and awe, judges remember the awe but doubt the substance.
+Order matters: integrity (the "no") → credibility (current-law + sourced) → substance (the letter). The 3D spatial layer is a **roadmap coda, not a wow moment** — if it isn't bulletproof, it doesn't appear. A flashy scan at a panel that opened with "we're not judging on polish" costs more than it earns.
 
 ---
 
@@ -90,7 +95,7 @@ Order matters: credibility (foil) → substance (letter) → awe (spatial). If y
 Get hands-on with every piece of the stack we'll touch on hack day, so we make zero infrastructure mistakes under time pressure.
 
 **v1 is NOT** the polished product, the demo, or anything we show judges.
-**v1 IS** a working scrappy end-to-end thing that proves we know how every component behaves, plus a lawyer-validated case file that proves the Route 1 GTM.
+**v1 IS** a working scrappy end-to-end thing that proves we know how every component behaves, plus a lawyer-validated case file *and* a lawyer-validated "this isn't a claim" recalibration — the two together prove the Route 1 GTM (qualified escalation **and** honest filtering).
 
 ---
 
@@ -102,6 +107,8 @@ Get hands-on with every piece of the stack we'll touch on hack day, so we make z
 - `claude-opus-4-7` for reasoning + letter drafting
 - `claude-haiku-4-5-20251001` for classification + extraction
 - Claude vision (Opus) for defect photo analysis
+
+**Hack-day infrastructure (do not ignore):** Lawhive provides a GCP environment and tooling on the day, and Google/Gemini are on the panel. Plan to deploy into the provided GCP environment rather than only localhost, and make the model choice **deliberate and defensible**: Claude for legal reasoning + drafting (Anthropic is also judging, and it's strongest here), with at least one task — e.g. document extraction/OCR or photo analysis — routed through **Gemini** so the build visibly uses what the host gave us. "We used your environment and picked the right model for each job" beats "we ignored your stack." (For the prep sprint, localhost is fine; the GCP deploy is a hack-day task.)
 
 **Legal corpus:** flat files in `/corpus`, loaded into context directly with **prompt caching enabled from day 1** (cached input cost drops from $5/MTok to $0.50/MTok — critical for dev budget).
 - Renters' Rights Act 2025 (relevant sections)
@@ -121,24 +128,26 @@ Get hands-on with every piece of the stack we'll touch on hack day, so we make z
 Build only this:
 
 1. Single-page web app with chat interface
-2. Claude agent with **3 tools**: `classify_hazard`, `lookup_statute`, `draft_letter`
-3. User uploads up to 3 photos; each runs through Claude vision → structured defect record
-4. Agent generates one pre-action protocol letter + one environmental health complaint
-5. Both downloadable as PDF
-6. Runs on localhost. No auth, no DB, no deploy.
+2. Claude agent with **4 tools**: `assess_prospects`, `classify_hazard`, `lookup_statute`, `draft_letter`. `assess_prospects` is the one that can return **"this is not (yet) an actionable claim"** with reasons — it is the heart of the product, not an afterthought.
+3. **Document + photo ingestion.** User can paste/upload the evidence they already have — tenancy agreement, the landlord email chain, and up to 3 photos. Photos run through vision → structured defect record; documents are parsed for the facts that change the legal answer (start of tenancy, what was reported and when, the landlord's response). Build this against the **provided synthetic case files** so any of them can flow through, not just one script.
+4. Agent produces, *when the case warrants it*, one pre-action protocol letter + one environmental-health complaint — **every legal claim footnoted to a corpus source.** When the case does *not* warrant it, the agent says so and explains the cheaper/faster non-legal step.
+5. Both documents downloadable as PDF. **Build the PDF render path first (Day 1), not last** — it's the deceptively hard bit (fonts, page breaks, headless render).
+6. Runs on localhost for the prep sprint. (Hack day: deploy into the provided GCP environment — see §2.)
 
-**One disrepair sub-type only: damp and mould.** Other types get "not yet supported." Non-negotiable.
+**One disrepair sub-type only: damp and mould.** Other types get an honest "not yet supported." Non-negotiable for the *build*. (Note: of the 10 provided cases only one — Case 07 — is disrepair, and it's a **council** tenancy, so the Section 21 / Renters' Rights "why now" hook doesn't map cleanly onto it. Whether to widen scope, and which two cases to demo, is the subject of a dedicated council review — see `council-report` for cases.)
 
 ### Definition of done for v1
 
 - [ ] Tenant can describe a damp/mould problem in chat
+- [ ] Agent ingests at least one **provided case file** (documents + photos), not just a hand-typed script
 - [ ] Upload 2–3 photos, agent analyses them
 - [ ] Agent classifies hazard with HHSRS category + reasoning
-- [ ] Agent produces a pre-action protocol letter referencing statute
+- [ ] **Agent correctly recalibrates a weak/borderline case — tells the tenant, with reasons and citations, that it is *not* an actionable claim (or that prospects are poor), and what to do instead.** *This is the make-or-break capability.*
+- [ ] Agent produces a pre-action protocol letter referencing statute, **with visible source citations**
 - [ ] Agent produces an environmental health complaint
 - [ ] Both downloadable as PDF
 - [ ] **Lawyer hands-on test completed; case file marked up**
-- [ ] **Lawyer answered: "would you want to receive this case file as a Lawhive solicitor and would you pay for the warm lead?"** (Route 1 GTM validation)
+- [ ] **Lawyer answered both:** (a) "would you want to receive this case file as a Lawhive solicitor?" and (b) "does an agent that honestly filters out weak cases *help or hurt* you commercially?" (Route 1 GTM validation, incl. the recalibration-vs-leads tension)
 
 ---
 
@@ -146,9 +155,10 @@ Build only this:
 
 ### Week 1 — infrastructure familiarity
 
-**Day 1 (2 hrs)**
+**Day 1 (3 hrs)**
 - [ ] Scaffold Next.js + Tailwind, deploy hello-world to Vercel
 - [ ] Wire `ANTHROPIC_API_KEY`, ship one Claude API call from a Next.js API route
+- [ ] **Render a real PDF end-to-end today** (Claude text → Markdown → styled PDF download). This is the deceptively hard bit — fonts, page breaks, headless render. De-risk it first, not on Day 6.
 
 **Day 2 (3 hrs)**
 - [ ] Chat UI with streaming responses from Claude
@@ -156,13 +166,13 @@ Build only this:
 - [ ] Outcome: streaming works, `messages` API understood
 
 **Day 3 (3 hrs)**
-- [ ] Photo upload + Claude vision
-- [ ] Prompt: "Analyse this photo for residential property defects. Return JSON: `{defect_type, severity, estimated_area, visible_features, confidence}`"
-- [ ] **Calibrate the prompt on 20 real defect photos.** This is the single most important pre-work.
-- [ ] Outcome: multimodal messages + structured output understood
+- [ ] **Ingest a provided case file** (the synthetic disrepair scenario's documents — tenancy agreement, email chain — plus photos). Parse out the facts that change the legal answer.
+- [ ] Photo upload + Claude vision. Prompt: "Analyse this photo for residential property defects. Return JSON: `{defect_type, severity, estimated_area, visible_features, confidence}`"
+- [ ] Calibrate the vision prompt on real defect photos — but treat vision as an **add-on, not the spine.** The spine is documents-in → prospects verdict → letter-out.
+- [ ] Outcome: multimodal messages + document ingestion + structured output understood
 
 **Day 4 (3 hrs)**
-- [ ] Tool use with the 3 tools. Stubs fine — `classify_hazard` returns hardcoded JSON.
+- [ ] Tool use with the 4 tools (`assess_prospects`, `classify_hazard`, `lookup_statute`, `draft_letter`). Stubs fine to start.
 - [ ] Outcome: tool-use loop understood. Spine of v2.
 
 **Day 5 (2 hrs)**
@@ -171,9 +181,10 @@ Build only this:
 - [ ] Outcome: corpus is real, accessible, costed.
 
 **Day 6 (4 hrs)**
+- [ ] First real `assess_prospects`: case facts + evidence + corpus → traffic-light verdict (red/amber/green) with reasons. **Make it able to return RED** — test it on a deliberately weak scenario.
 - [ ] First real `classify_hazard`: user description + photo analysis + relevant corpus → HHSRS category + reasoning
-- [ ] First real `draft_letter`: case file → structured pre-action letter
-- [ ] Outcome: end of week 1, legal reasoning core works on one scenario
+- [ ] First real `draft_letter`: case file → protocol-compliant pre-action letter, every claim footnoted to the corpus
+- [ ] Outcome: end of week 1, legal reasoning core works on one **strong AND one weak** scenario
 
 **Day 7 — rest OR practice hack**
 - [ ] Optional: 4-hour throwaway practice hack with the team. Tests dynamics, not output.
@@ -181,13 +192,14 @@ Build only this:
 ### Week 2 — depth, lawyer validation, hack-day prep
 
 **Day 8 (3 hrs)**
-- [ ] Run system on 5 real disrepair scenarios. Log failures. List "weak spots" for v2.
+- [ ] Run system on 5 scenarios — **at least 2 of them weak/borderline.** Verify it correctly says "not a claim" / "poor prospects" and doesn't manufacture one. Log failures. List "weak spots" for v2.
 
 **Day 9 (2 hrs) — Lawyer Session #1 (highest-stakes meeting of the prep period)**
 - [ ] Sit a housing lawyer friend in front of v1 with **3 printed scenarios**
 - [ ] Watch them use it. Don't talk.
 - [ ] Print the letters. Get them red-penned.
-- [ ] **Ask the Route 1 GTM validation question:** "Would you want this case file as a Lawhive solicitor, and would you pay for the warm lead?"
+- [ ] **Ask the Route 1 GTM validation questions:** (a) "Would you want this case file as a Lawhive solicitor?" and (b) "Does an agent that honestly filters out weak cases *help or hurt* Lawhive commercially?" (resolve the recalibration-vs-leads tension with a real lawyer)
+- [ ] **Pressure-test the "no":** give the lawyer a weak/borderline case and check the agent's refusal is *correct* — a wrong "no" (turning away a real claim) is the worst failure mode.
 - [ ] Marked-up letter + notes = the v2 spec.
 
 **Day 10 (3 hrs)**
@@ -197,11 +209,10 @@ Build only this:
 **Day 11 (2 hrs) — Lawyer Session #2 (different lawyer if possible)**
 - [ ] Compare reactions. Disagreements reveal contested vs settled law. Settled gets baked in; contested becomes "agent flags judgment call, recommends solicitor."
 
-**Day 12 (4 hrs) — RoomPlan smoke test (engineer)**
-- [ ] Clone Apple WWDC '22 RoomPlan sample
-- [ ] Scan a real room → USDZ → GLB → load in `<model-viewer>`
-- [ ] Implement click-to-log-coordinates
-- [ ] **Do NOT integrate into v1.** Smoke test only — confirms v2 pipeline is buildable.
+**Day 12 (OPTIONAL — only if the core is solid and rehearsed) — RoomPlan smoke test (engineer)**
+- [ ] The 3D layer is a roadmap coda, not a pillar (see §0.7). Spend time here **only** if the two-case flow, PDF output, and the recalibration path are all bulletproof. If anything core is shaky, skip this entirely and rehearse instead.
+- [ ] If proceeding: clone Apple WWDC '22 RoomPlan sample; scan a real room → USDZ → GLB → load in `<model-viewer>`; click-to-log-coordinates.
+- [ ] **Do NOT integrate into the core flow.** Smoke test only — confirms the v2 pipeline exists for the ≤20s coda.
 
 **Day 13 — assemble hack-day plan**
 - [ ] Hour-by-hour plan for 30 May
@@ -220,29 +231,44 @@ System prompt skeleton (refine with lawyer on Day 9):
 
 ```
 You are a legal assistant for tenants in England dealing with housing disrepair.
-You are NOT a solicitor. You give grounded, citation-backed information about a
-tenant's rights and draft pre-action documents on their behalf. You escalate to
-a human solicitor when the case warrants it.
+You are NOT a solicitor. Your job is to give an honest, grounded, citation-backed
+picture of a tenant's situation — including, when it is true, that they do NOT
+have an actionable claim, or that their prospects are poor. You draft pre-action
+documents only when the case warrants them, and you escalate to a human solicitor
+when it warrants that. Your most valuable output is sometimes "don't pursue this —
+here's why, and here's the faster fix." Recalibration over encouragement.
 
 Tools available:
+- assess_prospects(case_facts, evidence_summary): a prospects verdict — a traffic
+    light (RED / AMBER / GREEN), the reasons, and what would change it.
+    RED = not an actionable claim; AMBER = needs a missing fact or better evidence;
+    GREEN = a real claim worth acting on.
 - classify_hazard(description, evidence_summary): HHSRS category + reasoning
 - lookup_statute(query): relevant sections from the corpus
 - draft_letter(template_type, case_file): renders a letter or complaint
 
 Reasoning loop:
 1. Understand the situation. Ask only the questions that change the legal answer.
-2. Analyse uploaded evidence (photos, messages).
-3. Classify the hazard.
-4. Look up the relevant statutory basis.
-5. When you have enough information, draft the appropriate documents.
-6. Recommend next steps including whether a solicitor is needed.
+2. Analyse all evidence provided — photos, the tenancy agreement, the email chain.
+3. Run assess_prospects FIRST. If RED: explain plainly, give the practical
+   non-legal next step, and STOP — do not draft a claim letter.
+4. If AMBER: name exactly what's missing and how to get it.
+5. If GREEN: classify the hazard, look up the statutory basis, draft the documents.
+6. Recommend next steps, including whether a solicitor is needed.
 
 Hard rules:
-- Never invent a statute. Every legal claim must come from a corpus citation.
-- When confidence is low, say so. Don't bluff.
-- Letters follow the pre-action protocol format exactly.
+- Never invent a statute. Every legal claim must cite a corpus source, and that
+  citation must be VISIBLE to the user — no hidden reasoning.
+- Use CURRENT law only. Section 21 was abolished (Renters' Rights Act 2025, in
+  force 1 May 2026). Flag explicitly where the law is new and largely untested.
+- Speak plain English. Explain any legal term the first time you use it; assume
+  the user has never heard "pre-action protocol" or "HHSRS."
+- When confidence is low, say so. Don't bluff. A wrong "you have a claim" is bad;
+  a wrong "you don't" is worse — when unsure, route to a human, don't turn away.
+- Letters follow the pre-action protocol format EXACTLY. A non-compliant Letter
+  Before Action looks fine on the day and becomes a problem months later.
 - Escalate to solicitor when: possession proceedings, vulnerable household,
-  personal injury, claim value > £10,000.
+  personal injury, claim value > £10,000, or genuine legal ambiguity.
 ```
 
 Tool schemas in `/agent/tools.ts`. Use Anthropic's tool-use API as documented; no orchestration framework.
@@ -264,23 +290,28 @@ When running this plan in Claude Code or a project chat:
 
 ## 7. Risks tracked
 
-- **Vision API accuracy on mould photos** — biggest unknown. Day 3 calibration buys 80% of v2's quality. Allocate extra time if needed.
+- **Recalibration accuracy** — the "say no" verdict is now the hero of the demo, so a *wrong* "no" (telling someone with a real claim to stand down) is the worst failure mode. Test `assess_prospects` hard on borderline cases with the lawyer. A wrong "yes" is bad; a wrong "no" is worse.
+- **Pre-action protocol compliance** — a non-compliant Letter Before Action looks fine on the day and becomes "a wound that surfaces months later." Getting the protocol exactly right is a primary Day 9/11 lawyer check, not a nicety.
 - **Letter quality** — Day 9 lawyer test is make-or-break. If letter is far off, Day 10 = full template rewrite, not incremental tweaks.
-- **RoomPlan smoke test (Day 12)** — if USDZ→GLB is messy, fall back to pre-prepared GLB on hack day. Don't let this block v1.
-- **Team coordination** — engineer, lawyer, thinker have never built together. 30-min sync at end of each build day.
-- **Dev API spend** — without caching, debugging the agent could burn $100+. With caching enabled day 1, expect $20–40 across two weeks.
+- **Document ingestion robustness** — the demo runs on the *provided* case files chosen live by a judge. If ingestion only works on one rehearsed script, the interactivity claim collapses. Test against several provided scenarios.
+- **Stack / infra mismatch** — building all-Anthropic + localhost when the host provides a GCP environment and Gemini is on the panel reads as ignoring the brief. Deploy on GCP; route at least one task to Gemini; have a crisp "right model for each job" answer (see §2, §0.6).
+- **Vision API accuracy on mould photos** — a real unknown, but vision is now an *add-on*, not the spine. Calibrate it; don't let it block the core.
+- **RoomPlan coda (optional)** — if USDZ→GLB is messy, drop the coda entirely. It must never block the core flow.
+- **Team coordination** — engineer, lawyer, thinker have never built together. 30-min sync at end of each build day. Define each person's role *during the live demo* (driver, narrator, failsafe operator) — don't leave the third person idle.
+- **Demo time budget** — confirm the actual per-team slot; rehearse a 5-min cut and an 8-min cut. Overrunning is an easy, avoidable loss.
+- **Dev API spend** — with prompt caching enabled day 1, expect $20–40 across two weeks (without caching, $100+).
 
 ---
 
 ## 8. Slides we need ready for hack day
 
 1. Title slide + team
-2. The problem (one stat: "6.2M renters experienced disrepair last year. The law changed three weeks ago. The tools didn't.")
-3. The product (one screenshot of the chat + letter)
-4. Live demo (8 min — see §0.5)
-5. TAM + Renters' Rights effect numbers (see §0.2)
-6. GTM — three routes, lead with Lawhive (see §0.4)
-7. What we built today vs what's next
+2. The problem (one line: "6.2M renters experienced disrepair last year. The law changed weeks ago. The tools didn't — and the AI they'll reach for is confidently wrong.")
+3. The product (one screenshot of the chat + a sourced letter — *and* the honest "no")
+4. Live demo (fit the actual slot — see §0.5; have 5-min and 8-min cuts ready)
+5. Why it moves access to justice (the honest-triage point) — *lead with this*, with TAM + Renters' Rights-effect numbers as support, not as the headline (see §0.2)
+6. GTM — three routes, lead with Lawhive; address the "doesn't 'no' kill your leads?" question head-on (see §0.4)
+7. What we built today vs what's next (the 3D spatial layer lives here, as roadmap)
 8. Team + thanks
 
-Total slides outside the live demo: ~6. Total speaking time including demo: 10 minutes.
+Total slides outside the live demo: ~6. Keep total speaking time inside the actual per-team slot.
