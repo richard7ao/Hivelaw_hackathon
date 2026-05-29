@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Council Verdict — Lawhive Hackathon Plan</title>
+<style>
+  :root{
+    --ink:#16181d; --muted:#5b6270; --line:#e6e8ec; --bg:#fbfbfa;
+    --lime:#c6f23f; --lime-deep:#9bc400;
+    --contrarian:#e5484d; --firstp:#2f6fed; --expand:#1aa86b; --outsider:#8b5cf6; --executor:#e8820c;
+    --good:#1aa86b; --bad:#e5484d; --warn:#e8820c; --neutral:#aab0bb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px 96px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+  /* Header */
+  header{background:var(--ink);color:#fff;margin-bottom:40px;
+    background-image:repeating-linear-gradient(135deg,rgba(198,242,63,.07) 0 2px,transparent 2px 11px)}
+  .head-inner{max-width:880px;margin:0 auto;padding:48px 24px 44px}
+  .tag{display:inline-block;background:var(--lime);color:#000;font-weight:700;font-size:11px;
+    letter-spacing:.18em;text-transform:uppercase;padding:6px 12px;border-radius:3px}
+  header h1{font-size:34px;line-height:1.15;margin:20px 0 8px;letter-spacing:-.01em}
+  header .sub{color:#b9c0cc;font-size:15px;margin:0}
+  .qbox{margin-top:26px;border-left:3px solid var(--lime);padding:6px 0 6px 18px}
+  .qbox .qlabel{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);font-weight:700}
+  .qbox p{margin:6px 0 0;color:#e9ecf1;font-size:15.5px}
+
+  /* Section scaffolding */
+  section{margin:46px 0}
+  h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    border-bottom:2px solid var(--ink);padding-bottom:8px;margin:0 0 22px}
+  h2 .n{color:var(--lime-deep);margin-right:10px;font-weight:800}
+
+  /* Verdict cards */
+  .vcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin:14px 0;
+    box-shadow:0 1px 2px rgba(20,24,30,.03)}
+  .vcard h3{margin:0 0 8px;font-size:17px;display:flex;align-items:center;gap:9px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .vcard p{margin:0 0 10px}
+  .vcard ul{margin:6px 0 0;padding-left:20px}
+  .vcard li{margin:7px 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 9px;
+    border-radius:20px;vertical-align:middle}
+  .pill.agree{background:#e7f7ee;color:#11774d}
+  .pill.clash{background:#fdeaea;color:#b42318}
+  .pill.blind{background:#efeafe;color:#5b34d6}
+
+  .reco{background:linear-gradient(180deg,#1f2228,#16181d);color:#fff;border:none}
+  .reco h3{color:#fff}
+  .reco p{color:#e7eaef}
+  .reco strong{color:var(--lime)}
+  .verdict-line{font-size:18px;font-weight:600;border-left:3px solid var(--lime);padding-left:16px;margin:0 0 16px}
+
+  .first{background:#101216;color:#fff;border:none;text-align:center;padding:30px 22px}
+  .first .lab{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);font-weight:700}
+  .first h3{display:block;font-size:21px;margin:12px 0 6px;justify-content:center}
+  .first p{color:#dfe3e9;max-width:620px;margin:0 auto}
+
+  /* Position matrix */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;
+    border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{padding:11px 10px;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:#f4f5f7;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  td:first-child,th:first-child{text-align:left;font-weight:600;width:34%}
+  tr:last-child td{border-bottom:none}
+  .mk{font-weight:800;font-size:15px}
+  .mk.cut{color:var(--bad)} .mk.keep{color:var(--good)} .mk.flag{color:var(--warn)} .mk.na{color:var(--neutral)}
+  .legend{font-size:12px;color:var(--muted);margin-top:10px;display:flex;gap:18px;flex-wrap:wrap}
+  .legend span b{font-size:14px}
+
+  /* Clash spectrum */
+  .spectrum{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-top:16px}
+  .spectrum h4{margin:0 0 4px;font-size:15px}
+  .spectrum .cap{font-size:13px;color:var(--muted);margin:0 0 16px}
+  .bar{position:relative;height:6px;background:linear-gradient(90deg,var(--bad),#f0d24a,var(--good));
+    border-radius:3px;margin:30px 8px 8px}
+  .node{position:absolute;top:-7px;transform:translateX(-50%);text-align:center}
+  .node .b{width:14px;height:14px;border-radius:50%;border:3px solid #fff;margin:0 auto;
+    box-shadow:0 0 0 1px var(--line)}
+  .node .t{font-size:11px;color:var(--muted);margin-top:6px;white-space:nowrap}
+  .ends{display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--muted);margin:0 8px}
+
+  /* Collapsibles */
+  details{background:#fff;border:1px solid var(--line);border-radius:10px;margin:11px 0;overflow:hidden}
+  summary{cursor:pointer;padding:16px 20px;font-weight:600;list-style:none;display:flex;
+    align-items:center;gap:11px;font-size:15.5px}
+  summary::-webkit-details-marker{display:none}
+  summary .chev{margin-left:auto;color:var(--muted);transition:transform .2s;font-size:13px}
+  details[open] summary .chev{transform:rotate(90deg)}
+  details[open] summary{border-bottom:1px solid var(--line)}
+  .body{padding:18px 22px 22px}
+  .body p{margin:0 0 12px}
+  .role{font-size:12px;color:var(--muted);font-weight:500}
+  .badge{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    padding:3px 8px;border-radius:5px;color:#fff}
+
+  .rev{border-left:3px solid var(--line);padding:4px 0 4px 16px;margin:16px 0}
+  .rev .q{font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px}
+  .consensus{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 18px}
+  .cbox{flex:1;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+  .cbox .big{font-size:26px;font-weight:800;letter-spacing:-.01em}
+  .cbox .big small{font-size:14px;color:var(--muted);font-weight:600}
+  .cbox .lab{font-size:12px;color:var(--muted);margin-top:2px}
+
+  footer{border-top:1px solid var(--line);margin-top:60px;padding-top:22px;color:var(--muted);font-size:13px}
+  footer .mono{font-size:12px}
+  .disc{font-size:12px;color:var(--neutral);margin-top:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <span class="tag">⚖ LLM Council · Verdict</span>
+    <h1>Should this plan win the Lawhive Hackathon?</h1>
+    <p class="sub">Five advisors · independent peer review · chairman synthesis — run against <span class="mono">brief.md</span> + the official problem pack</p>
+    <div class="qbox">
+      <div class="qlabel">The question put to the council</div>
+      <p>A 3-person team (thinker + engineer + lawyer) has a detailed plan to win the Lawhive Hackathon (London, 30 May 2026 — £5k first prize; judges include Anthropic, Google/Gemini, GV, Balderton &amp; host Lawhive). Pressure-test the whole plan — track choice, demo design, scope, GTM — <em>specifically against what the judges said they want</em>. Is it a winner? Where is it weak, wrong, or risky? What must change before hack day?</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- VERDICT -->
+  <section>
+    <h2><span class="n">★</span> Council Verdict</h2>
+
+    <div class="vcard reco">
+      <p class="verdict-line">As designed, this plan is <strong>beautifully executed but aimed at the wrong target</strong> — it would lose to a rougher build that actually answers the brief. Re-aimed, it has the strongest raw material in the room and can win.</p>
+      <p>The plan is a polished <em>claim-accelerator</em> that always says “yes, here’s your letter.” But Lawhive’s Track B explicitly asks for the opposite: <strong>recalibration</strong> — an agent whose most valuable act may be telling someone “you don’t have a case.” The team built a conversion funnel; the judges asked for triage. Fix that one inversion and most of the other problems dissolve.</p>
+    </div>
+
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--good)"></span> Where the council agrees <span class="pill agree">high confidence</span></h3>
+      <ul>
+        <li><strong>The “no judge interaction” rule is the clearest mistake.</strong> 4 of 5 advisors flagged it independently. Criterion 2 is literally “a working prototype — something we can actually interact with.” Refusing input “isn’t a failsafe — it’s a confession that it breaks.”</li>
+        <li><strong>The product answers the wrong question.</strong> It only ever says <em>yes, escalate</em>. It cannot demonstrate the “talk someone out of a weak claim” capability the panel explicitly cares most about. “Someone on that panel wrote that question on purpose.”</li>
+        <li><strong>De-emphasise the 3D scan.</strong> 4 of 5 say cut it from the spine: it’s polish at a “we don’t judge polish” panel, off the critical path, and the most likely thing to eat hack day.</li>
+        <li><strong>Drop the hundreds-of-millions TAM close.</strong> It answers “is this venture-scale,” not “does this move access to justice.” Close on the access-to-justice / “intake brain” note instead.</li>
+        <li><strong>The ChatGPT/Section-21 foil is double-edged.</strong> Strong hook, but it invites “does <em>your</em> system actually know the law, or did you hardcode it?” — and you must be bulletproof on a 29-day-old Act in front of housing solicitors.</li>
+      </ul>
+    </div>
+
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--bad)"></span> Where the council clashes <span class="pill clash">genuine disagreement</span></h3>
+      <p><strong>1. The 3D scan — moat or distraction?</strong> The Expansionist argues it’s the actual prize: the unforgettable image, a brand-new primitive for access-to-justice — pull it forward, make it the spine. Everyone else says cut it. Both are right about something: hackathons <em>are</em> won on what judges remember (Expansionist), but this panel explicitly disclaimed polish and demanded interactivity (everyone else). <em>Resolution: the unforgettable moment should be the agent saying “no” with dignity — not the scan. Keep 3D only as a 20-second “here’s where this goes” coda, if it’s already bulletproof.</em></p>
+      <p><strong>2. Leading GTM with “be Lawhive’s front door” — brilliant or naive?</strong> Either it speaks directly to the funnel of the firm on the panel, or it reads as “building their roadmap for them” with their distribution as your only moat. Deeper tension surfaced in review: recalibration (“you have no claim”) <em>cannibalises</em> Lawhive’s lead volume. <em>Resolution: frame “saying no” as a feature Lawhive wants — filtering non-cases lowers their cost-to-serve — not a bug that kills leads.</em></p>
+    </div>
+
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--outsider)"></span> Blind spots the council caught in peer review <span class="pill blind">emerged in round 2</span></h3>
+      <ul>
+        <li><strong>The GCP / Gemini platform snub.</strong> All 5 reviewers flagged it: judges <em>provide</em> a GCP environment and Google/Gemini are on the panel — yet the stack is all-Anthropic and the demo runs local-only. Even with Anthropic also judging, ignoring the provided infra reads as “did you even open what we gave you?”</li>
+        <li><strong>Use the provided case documents — live.</strong> The elegant fix nobody fully articulated: let a judge <em>pick</em> one of the supplied synthetic scenarios and run it live. Vetted input + genuine interactivity + proof you understood the real problem — it sidesteps the “won’t let judges type” risk entirely.</li>
+        <li><strong>Recalibration vs. revenue.</strong> The “say no” demo that delights judges directly undercuts the warm-lead GTM pitched to Lawhive. Reconcile it explicitly.</li>
+        <li><strong>Resourcing reality.</strong> 3 people / one day; an 8-min demo likely overruns the real slot; the third teammate has no defined role in a fully-scripted run.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- RECOMMENDATION -->
+  <section>
+    <h2><span class="n">→</span> The Recommendation</h2>
+    <div class="vcard reco">
+      <p><strong>Re-aim the same craft at the real target.</strong> Keep the genuinely strong assets — the real statutory corpus, the protocol-compliant letter, the lawyer red-pen validation, the “why now” timing — but subordinate all of it to one thesis: <strong>an agent that tells you the truth, even when the truth is “you don’t have a case.”</strong></p>
+      <ul style="color:#e7eaef;padding-left:20px">
+        <li>Demo <strong>two cases live on the judges’ own provided documents</strong>: one strong (escalates with a prepared file) and one weak/borderline (the agent honestly talks it down — “this is condensation, not actionable disrepair; here’s the £40 fix”). Make the <em>“no”</em> the hero beat.</li>
+        <li>Let <strong>one judge pick which provided case to run.</strong> That single change converts you from “scripted reel” to “working prototype” under the actual rubric.</li>
+        <li><strong>Cut the 3D scan from the spine</strong> (optional short coda only). <strong>Reframe the foil</strong> from a gag into the category argument: “general models go stale silently — in law, stale is malpractice.”</li>
+        <li><strong>Reconcile the stack with the provided GCP/Gemini infra</strong> enough to not look like you ignored it. <strong>Replace the TAM close</strong> with the access-to-justice + “intake brain for every case type” frame.</li>
+      </ul>
+      <p style="margin-bottom:0"><strong>Is it a winner?</strong> Not as currently designed — it fights the rubric. Re-aimed as above: yes. “The agent that’s honest enough to turn you away” is exactly the access-to-justice story that wins <em>this</em> panel.</p>
+    </div>
+  </section>
+
+  <!-- ONE THING -->
+  <section>
+    <div class="vcard first">
+      <div class="lab">The one thing to do first</div>
+      <h3>Rewrite the demo script around two cases — and make the agent’s honest “no” the centrepiece.</h3>
+      <p>Before another line of code: script the strong case <em>and</em> a weak case the agent talks down with dignity, both runnable on the provided case files. This one decision is the keystone — once the hero moment is “the agent tells the truth,” the 3D scan drops, the build points at triage instead of letter-generation, the foil demotes itself, and the GTM reframes automatically.</p>
+    </div>
+  </section>
+
+  <!-- POSITION MATRIX -->
+  <section>
+    <h2><span class="n">▦</span> How the advisors lined up</h2>
+    <table>
+      <thead>
+        <tr><th>Contested decision</th><th>Contrarian</th><th>First Principles</th><th>Expansionist</th><th>Outsider</th><th>Executor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Let judges interact / type</td><td class="mk cut">✕</td><td class="mk cut">✕</td><td class="mk na">–</td><td class="mk cut">✕</td><td class="mk cut">✕</td></tr>
+        <tr><td>Add a “say no” / recalibration case</td><td class="mk cut">✓</td><td class="mk cut">✓</td><td class="mk cut">✓</td><td class="mk cut">✓</td><td class="mk na">–</td></tr>
+        <tr><td>The 3D RoomPlan scan</td><td class="mk cut">CUT</td><td class="mk cut">CUT</td><td class="mk keep">KEEP★</td><td class="mk cut">CUT</td><td class="mk cut">CUT</td></tr>
+        <tr><td>ChatGPT / Section-21 foil</td><td class="mk flag">RISK</td><td class="mk flag">DEMOTE</td><td class="mk keep">REFRAME</td><td class="mk flag">RISK</td><td class="mk na">–</td></tr>
+        <tr><td>Hundreds-of-millions TAM close</td><td class="mk cut">CUT</td><td class="mk cut">CUT</td><td class="mk cut">CUT</td><td class="mk na">–</td><td class="mk na">–</td></tr>
+      </tbody>
+    </table>
+    <div class="legend">
+      <span><b class="mk cut" style="font-style:normal">✕ / CUT</b> &nbsp;remove or reverse</span>
+      <span><b class="mk cut" style="font-style:normal">✓</b> &nbsp;add / agree</span>
+      <span><b class="mk flag" style="font-style:normal">RISK</b> &nbsp;flagged as dangerous</span>
+      <span><b class="mk keep" style="font-style:normal">KEEP★</b> &nbsp;lone dissent</span>
+      <span><b class="mk na" style="font-style:normal">–</b> &nbsp;didn’t address</span>
+    </div>
+
+    <div class="spectrum">
+      <h4>The one real clash: the 3D scan</h4>
+      <p class="cap">Peer review was decisive — all 5 reviewers named the “3D = moat” stance the council’s biggest blind spot.</p>
+      <div class="bar">
+        <div class="node" style="left:8%"><div class="b" style="background:var(--expand)"></div><div class="t">Expansionist — “the moat, make it the spine”</div></div>
+        <div class="node" style="left:88%"><div class="b" style="background:var(--ink)"></div><div class="t">Contrarian · First P. · Outsider · Executor — “cut it”</div></div>
+      </div>
+      <div class="ends"><span>Make it the hero</span><span>Cut it entirely</span></div>
+    </div>
+  </section>
+
+  <!-- ADVISORS -->
+  <section>
+    <h2><span class="n">✎</span> The five advisors — full responses</h2>
+
+    <details>
+      <summary><span class="badge" style="background:var(--contrarian)">Contrarian</span> The Act is your single point of failure — and you optimised against the rubric <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <p class="role">Hunts for the fatal flaw — the question you're avoiding.</p>
+        <p>The Renters' Rights Act 2025 is your single point of failure, and you've built the demo around it. You're betting £5k and two weeks on a statute that came into force 29 days before hack day — with no caselaw, possibly incomplete commencement regulations, and details your housing-lawyer friend may not have nailed. If a Lawhive solicitor in the room knows the Act better than you (they will), your “ChatGPT cites Section 21” foil flips: the moment your agent misstates one provision of a month-old Act, you're the stale one. High-wire act, no net.</p>
+        <p>Now the criteria. Read criterion 2 again: “something we can actually interact with.” You've explicitly decided judges will NOT type anything and will NOT ask questions during the demo. You've optimized directly against the one thing they named. A fully-scripted, no-touch, “runs locally” reel is a pitch, not a prototype — and these judges (Anthropic, GV, Balderton) sit through scripted demos for a living. The 3D RoomPlan scan is the tell: it's the flashiest thing in the deck, it's explicitly NOT in v1, and it screams “polish” at the one panel that opened by saying they don't judge polish. Cut it.</p>
+        <p>The track question is a trap you're walking past. Track B's own prompt says success may be “talking someone out of pursuing the wrong claim.” Your entire flow assumes Sarah has a winner and rushes her to a Letter Before Action and a solicitor handoff. You've built the opposite of what they asked — a claim-maximizer, not a recalibrator. That's not a weak answer to the brief; it's an answer to a different brief.</p>
+        <p>GTM: leading with “be Lawhive's front door” to a panel that includes Lawhive is either brilliant or reads as building their roadmap for them — and it implies your moat is their distribution. The TAM slide (6.2M × £3k) is the kind of hand-wave that makes Balderton stop listening.</p>
+        <p><strong>Fix list:</strong> let a judge type one live query. Make recalibration the hero — show a near-miss case the agent honestly downgrades. Drop the 3D. Hedge every RRA claim with a visible source. Win on substance, not stagecraft.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge" style="background:var(--firstp)">First Principles</span> You answered a question the brief didn’t ask <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <p class="role">Strips to what's actually being solved — and whether it's the right thing. <em>Judged strongest by all 5 peer reviewers.</em></p>
+        <p>Most of this analysis won't matter, because the plan answers a question the brief didn't ask.</p>
+        <p>Strip Track B to its core. The judges told you the #1 friction is recalibration — people carry “a wildly distorted picture.” Their literal sit-with question: “If the most useful thing an agent could do is talk someone out of pursuing the wrong claim, what does success look like?” That is the problem. The job is <em>calibration</em>: making someone with a weak case stand down, and someone with a strong case proceed with accurate expectations.</p>
+        <p>Now look at what the plan actually builds. It builds an <em>escalation engine</em>. Every demo beat points one direction: classify hazard → name statute → render letter → 3D evidence → handoff to solicitor. Sarah always wins. The plan has no path for “your damp is condensation from drying laundry, you have no claim, here's how to fix it yourself for £40.” It cannot demonstrate the one capability the judges explicitly said they care most about. They will notice. Someone on that panel wrote that question on purpose.</p>
+        <p>The brief reads like a <em>triage</em> problem; the team built a <em>conversion funnel</em>. The “messy housing case where self-help has derailed” in the materials is a tell — they want to see you handle the person who shouldn't have started, not manufacture another claimant.</p>
+        <p>So reframe before reskinning. The product is a <strong>prospects assessment that can say no</strong>. Success = the right people stop, the right people proceed calibrated. Demo two cases: a strong one (Sarah) AND a weak/borderline one the agent talks down with dignity. That weak case IS Wow 1 — not the ChatGPT foil, which proves a competitor is wrong, not that <em>you</em> are right.</p>
+        <p>Two more first-principles cuts. (1) “We won't take questions, won't let judges type” — for a “working prototype we can interact with,” refusing interaction reads as hiding. The product's whole value is the conversation; script the happy path, but let one judge type. (2) The 3D scan and the TAM-in-hundreds-of-millions are answering “is this impressive / is this venture-scale” — not “does this move access to justice.” Cut the 3D; redirect that energy into the “say no” path. Build the thing that's allowed to be irrelevant.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge" style="background:var(--expand)">Expansionist</span> You’re sitting on three assets you’re treating as garnish <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <p class="role">Hunts for the bigger swing and the undervalued asset. <em>The council's lone dissenter on the 3D scan.</em></p>
+        <p>The team is sitting on three assets they're treating as garnish. They're the actual prize.</p>
+        <p><strong>The 3D scan is your moat, not your v2.</strong> Every team will demo a chatbot that cites the right statute. Nobody else loads a navigable 3D model of the actual flat with hazards pre-pinned, click-to-evidence. That is the image the judges describe to each other afterward. Burying it as “smoke-tested, not in v1” is the single biggest unforced error here. Spatial evidence is a genuinely new primitive for access-to-justice — disrepair, dilapidations, boundary disputes, personal injury, even crime scenes. Pull it forward. Make it the spine of Wow 3 and rehearse it until it's bulletproof.</p>
+        <p><strong>The stale-data foil is a wedge into a category, not a gag.</strong> “Vanilla ChatGPT confidently gives illegal advice the day the law changes” isn't a one-flat joke — it's the argument that general models are <em>actively dangerous</em> in regulated domains, and that a law-current, jurisdiction-pinned agent is a defensible product. Anthropic and Lawhive both want exactly this story. Name it: “legal models go stale silently, and in law, stale is malpractice.” That reframes the whole product from “renter helper” to “the correctness layer for AI law.”</p>
+        <p><strong>The talk-them-out-of-it brief is the moonshot they skipped.</strong> Lawhive's own sharpest question — success as talking someone <em>out</em> of a bad claim — is the highest-status thing a legal agent can do, and it's adjacent to their whole funnel. A confidence-calibrated “your case is weak, here's why, here's the £200 you'd waste” verdict is the demo moment that makes Lawhive see an <em>acquisition</em>, not a hackathon toy.</p>
+        <p>Bigger frame for the close: don't end on TAM. End on “this is Lawhive's intake brain for every case type — disrepair is just the wedge.” Six months isn't a bigger app; it's the front door to the entire firm.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge" style="background:var(--outsider)">Outsider</span> Refusing interaction is a confession that it breaks <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <p class="role">Zero context, fresh eyes — catches the curse of knowledge.</p>
+        <p>The “foil” is your single best idea and your single biggest unexamined assumption. You're betting the demo's opening on ChatGPT confidently citing a dead law. But you're presenting to Anthropic, who make a competitor to ChatGPT, plus Google/Gemini. “Look how dumb the other AI is” might read as a cheap shot to the exact people scoring you — and worse, it invites the obvious question you've refused to take: “does YOUR system know the new law, or did you just hardcode it?” If a renter asks Sarah's question on 30 May, your tool only looks smart because someone typed the right answer in two weeks ago. That's not AI being trustworthy; that's you being recently updated. The judges will see this instantly.</p>
+        <p>What confuses me as an outsider: the whole thing hinges on a law that changed 29 days ago, but nothing explains how your product STAYS right when the next law changes. That's the actual hard problem and it's invisible here.</p>
+        <p>Jargon that means nothing to me: “pre-action protocol letter,” “Section 21,” “environmental-health complaint,” “housing disrepair.” You use these like everyone knows them. The judges might — but the renter texting “my flat has mould, am I allowed to be angry about this” does not. If your product speaks in this language, you've recreated the wall you claim to tear down.</p>
+        <p>The thing that genuinely doesn't add up: you refuse to let a judge type anything in. You're entering a “working prototype” contest where the brief literally says “something we can actually interact with.” Refusing interaction isn't a failsafe — it's a confession that it breaks. That choice alone could lose it.</p>
+        <p>Also: the judges asked what success looks like when the right answer is “don't pursue this claim.” Your demo only ever says yes, escalate, here's a letter. You answered a different question than the one they asked.</p>
+        <p>The 3D flat scan is a magic trick at a job interview. Impressive, irrelevant, and it eats the time you should spend proving the hard part works.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="badge" style="background:var(--executor)">Executor</span> You spent two weeks de-risking the wrong things <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <p class="role">Only cares whether it can be built — and what to do Monday morning.</p>
+        <p>The build is achievable. The plan's biggest execution flaw is that it spends two weeks de-risking the wrong things and almost nothing on the thing that actually breaks.</p>
+        <p>Critical path on hack day, in order: data ingestion of the provided synthetic case → classify → draft → render PDF → display. That's the spine. Everything else is garnish. Notice what the plan front-loads: vision prompt calibration (“most important pre-work”) and a RoomPlan 3D scan. Both are off the critical path. The 3D scan is pure demo theater with zero bearing on the judging criteria, and it's the single most likely thing to eat your afternoon.</p>
+        <p>The hidden time-sink: PDF rendering. “Renders a pre-action letter as PDF” sounds trivial and never is — fonts, page breaks, headless Chrome on serverless, cold starts. Build that Day 1, not Day 6. If your letter renders end-to-end on Monday, you've de-risked 80% of the demo.</p>
+        <p>The thing that breaks at 4pm: they ignore the provided case documents. Judges hand you a messy housing case WITH a tenancy agreement and email chain, then watch a demo hardcoded around “Sarah.” If the day's case doesn't match your script, you're either re-shooting the fallback video at 4pm or demoing fiction. Build the ingestion path for arbitrary provided documents — that IS criterion 2.</p>
+        <p>The interactivity contradiction is the real risk. “Working prototype we can interact with” vs. “judges may NOT type input.” You're optimizing against the rubric. You don't need open input — you need ONE judge-supplied case to flow through live.</p>
+        <p><strong>Monday morning, in this order:</strong></p>
+        <p>1. Next.js route → Claude call → render a real PDF letter. End to end. Today.<br>
+        2. Paste in one synthetic case, classify, draft from it.<br>
+        3. Wire vision as an add-on, not the spine.</p>
+        <p>Cut RoomPlan entirely. Cut Lawyer Session #2. Move both freed days onto ingesting the day's real case file. That's the fastest path to a prototype that survives contact with the judges.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- PEER REVIEW -->
+  <section>
+    <h2><span class="n">⇄</span> Peer review — what the round-2 cross-examination found</h2>
+    <div class="consensus">
+      <div class="cbox"><div class="big">5<small> / 5</small></div><div class="lab">reviewers named <strong>First Principles</strong> the strongest response</div></div>
+      <div class="cbox"><div class="big">5<small> / 5</small></div><div class="lab">named the <strong>“3D = moat”</strong> stance the biggest blind spot</div></div>
+      <div class="cbox"><div class="big">5<small> / 5</small></div><div class="lab">flagged the unaddressed <strong>GCP / Gemini</strong> platform snub</div></div>
+    </div>
+
+    <details open>
+      <summary>Read the peer-review highlights <span class="chev mono">▸</span></summary>
+      <div class="body">
+        <div class="rev"><p class="q">Strongest response</p><p>Unanimous: <strong>First Principles.</strong> “It isolates the load-bearing error — the team answered a conversion-funnel question when the brief asked a triage/recalibration question — and gives the highest-leverage fix: two cases, with the weak case talked down ‘with dignity’ as Wow 1.” Reviewers noted the Contrarian and Outsider land the same point but “bury it among scattershot hits,” while First Principles “fuses it into one coherent reframe.”</p></div>
+        <div class="rev"><p class="q">Biggest blind spot</p><p>Unanimous: <strong>the Expansionist's 3D-as-moat stance.</strong> “It doubles down on the exact polish the panel said it won't reward and that everyone else flags as the thing to cut. It mistakes a memorable image for a justice argument — optimizing for ‘impressive,’ the one axis judges explicitly disclaimed.”</p></div>
+        <div class="rev"><p class="q">What ALL FIVE advisors missed</p><p><strong>1. The provided infrastructure is a scoring signal.</strong> “They were handed a GCP environment and chose all-Anthropic Claude — with Google/Gemini judging. Nobody flagged the platform snub or the missed credibility of using provided infra.”<br><br>
+        <strong>2. The cleanest fix for the interactivity problem.</strong> “A crowd-favourite move is letting a judge pick from the <em>provided</em> scenarios live — sidestepping the ‘won't let judges type’ risk while still using vetted inputs.”<br><br>
+        <strong>3. Recalibration cannibalises the GTM.</strong> “The ‘you have no claim’ demo may delight judges yet undercut the warm-lead revenue pitched to Lawhive itself. That tension goes unexamined.”<br><br>
+        <strong>4. Resourcing &amp; timing.</strong> “3 people / single day; an 8-minute demo no one checked against the real slot; the third teammate's role during a scripted run is undefined.”</p></div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <p><strong>LLM Council</strong> · 5 advisors → anonymised peer review → chairman synthesis. Methodology by Andrej Karpathy.</p>
+    <p class="mono">Counciled: brief.md + problem-tracks.pdf (official Lawhive problem pack) · Generated 2026-05-29 18:14 · Full transcript: council-transcript-20260529-181432.md</p>
+    <p class="disc">Advisor letters were randomised before peer review to remove positional bias (A=Expansionist, B=Executor, C=Contrarian, D=First Principles, E=Outsider).</p>
+  </footer>
+
+</div>
+</body>
+</html>
