@@ -1,0 +1,17 @@
+{
+  "name": "hivelaw-steelman",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "The Steelman — runs Lawhive synthetic cases through Claude and produces a Case Reality Report per case.",
+  "scripts": {
+    "cases": "tsx scripts/run-cases.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.69.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
