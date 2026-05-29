@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Council — Brief Rating</title>
+<style>
+  :root{
+    --ink:#16181d; --muted:#5b6270; --line:#e6e8ec; --bg:#fbfbfa;
+    --lime:#c6f23f; --lime-deep:#9bc400;
+    --contrarian:#e5484d; --firstp:#2f6fed; --expand:#1aa86b; --outsider:#8b5cf6; --executor:#e8820c;
+    --good:#1aa86b; --bad:#e5484d; --warn:#e8820c; --neutral:#aab0bb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px 96px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  header{background:var(--ink);color:#fff;background-image:repeating-linear-gradient(135deg,rgba(198,242,63,.07) 0 2px,transparent 2px 11px)}
+  .head-inner{max-width:860px;margin:0 auto;padding:44px 24px 40px}
+  .tag{display:inline-block;background:var(--lime);color:#000;font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;padding:6px 12px;border-radius:3px}
+  header h1{font-size:30px;line-height:1.15;margin:18px 0 4px;letter-spacing:-.01em}
+  header .sub{color:#b9c0cc;font-size:14.5px;margin:0}
+
+  /* Score hero */
+  .scorehero{display:flex;gap:30px;align-items:center;flex-wrap:wrap;margin-top:30px}
+  .gauge{flex:0 0 auto;width:180px;height:180px;border-radius:50%;display:grid;place-items:center;
+    background:conic-gradient(var(--lime) 0 84%, #2b2f36 84% 100%);position:relative}
+  .gauge::before{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--ink)}
+  .gauge .num{position:relative;text-align:center;color:#fff}
+  .gauge .num b{font-size:52px;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .gauge .num span{font-size:15px;color:#aab0bb}
+  .verdict{flex:1;min-width:280px;color:#e9ecf1}
+  .verdict .band{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--lime);font-weight:700}
+  .verdict p{margin:6px 0 0;font-size:15.5px}
+
+  section{margin:44px 0}
+  h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--ink);padding-bottom:8px;margin:0 0 20px}
+  h2 .n{color:var(--lime-deep);margin-right:10px;font-weight:800}
+  .vcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin:14px 0;box-shadow:0 1px 2px rgba(20,24,30,.03)}
+  .vcard h3{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:9px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .vcard p{margin:0 0 10px}.vcard ul{margin:6px 0 0;padding-left:20px}.vcard li{margin:7px 0}
+
+  /* two-score split */
+  .split{display:flex;gap:14px;flex-wrap:wrap}
+  .sbox{flex:1;min-width:230px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 20px;text-align:center}
+  .sbox .big{font-size:38px;font-weight:800;letter-spacing:-.02em}
+  .sbox.plan .big{color:var(--firstp)} .sbox.win .big{color:var(--executor)}
+  .sbox .lab{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .sbox .desc{font-size:13px;color:var(--ink);margin-top:8px}
+
+  /* distribution */
+  .dist{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 22px}
+  .row{display:flex;align-items:center;gap:12px;margin:9px 0;font-size:13.5px}
+  .row .who{width:120px;flex:0 0 auto;font-weight:600}
+  .row .who small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+  .track{flex:1;height:22px;background:#f1f3f5;border-radius:5px;position:relative}
+  .fill{position:absolute;top:0;left:0;height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;color:#fff;font-weight:800;font-size:12px}
+  .scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--neutral);margin:4px 0 0 132px}
+  .legend2{font-size:12px;color:var(--muted);margin-top:12px}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{padding:10px;border-bottom:1px solid var(--line)}
+  th{background:#f4f5f7;font-size:11px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:left}
+  td.s{text-align:center;font-weight:800;width:64px}
+  tr:last-child td{border-bottom:none}
+  .bar{height:7px;background:#eef0f2;border-radius:4px;overflow:hidden;margin-top:5px}
+  .bar i{display:block;height:100%;border-radius:4px}
+
+  details{background:#fff;border:1px solid var(--line);border-radius:10px;margin:11px 0;overflow:hidden}
+  summary{cursor:pointer;padding:15px 20px;font-weight:600;list-style:none;display:flex;align-items:center;gap:11px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .chev{margin-left:auto;color:var(--muted);transition:transform .2s;font-size:13px}
+  details[open] summary .chev{transform:rotate(90deg)}
+  details[open] summary{border-bottom:1px solid var(--line)}
+  .body{padding:16px 22px 20px}.body p{margin:0 0 10px}
+  .sc{font-size:13px;font-weight:800;padding:2px 9px;border-radius:20px;color:#fff}
+  footer{border-top:1px solid var(--line);margin-top:54px;padding-top:20px;color:var(--muted);font-size:13px}
+  .disc{font-size:12px;color:var(--neutral);margin-top:8px}
+  .pathrow{display:flex;gap:10px;align-items:baseline;margin:9px 0}
+  .pathrow .delta{font-weight:800;color:var(--lime-deep);flex:0 0 auto;width:46px}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <span class="tag">⚖ LLM Council · Rating</span>
+    <h1>Your brief, scored</h1>
+    <p class="sub">5 advisors scored it · 5 auditors re-checked the calibration · chairman's final number — on the current revised <span class="mono">brief.md</span></p>
+    <div class="scorehero">
+      <div class="gauge"><div class="num"><b>84</b><span>/ 100</span></div></div>
+      <div class="verdict">
+        <div class="band">Strong contender — top quartile</div>
+        <p>An <strong>exceptional plan</strong> built on a genuinely top-tier thesis (the honest "no"), held out of the 90s by three specific gaps that separate a great <em>plan</em> from a near-certain <em>winner</em> — all of them fixable before hack day.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2><span class="n">★</span> The verdict</h2>
+    <div class="split">
+      <div class="sbox plan"><div class="big">~90</div><div class="lab">as a strategic plan / pitch document</div><div class="desc">The thinking is top-tier. It reverse-engineers the judges' rubric almost exactly.</div></div>
+      <div class="sbox win"><div class="big">~80</div><div class="lab">as an unbuilt thing that must become a winning live demo</div><div class="desc">Execution is unproven; the central capability is asserted, not measured.</div></div>
+    </div>
+    <p style="text-align:center;font-size:14px;color:var(--muted);margin-top:14px">The most useful thing the council surfaced: those are <em>two different scores</em>, and the advisors kept blending them. Blended, calibrated: <strong style="color:var(--ink)">84</strong>.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">⟁</span> How the score was reached</h2>
+    <div class="dist">
+      <div class="row"><div class="who">Expansionist</div><div class="track"><div class="fill" style="width:99%;background:var(--expand)">99</div></div></div>
+      <div class="row"><div class="who">First Principles</div><div class="track"><div class="fill" style="width:94%;background:var(--firstp)">94</div></div></div>
+      <div class="row"><div class="who">Outsider</div><div class="track"><div class="fill" style="width:88%;background:var(--outsider)">88</div></div></div>
+      <div class="row"><div class="who">Executor</div><div class="track"><div class="fill" style="width:87%;background:var(--executor)">87</div></div></div>
+      <div class="row"><div class="who">Contrarian</div><div class="track"><div class="fill" style="width:71%;background:var(--contrarian)">71</div></div></div>
+      <div class="row" style="margin-top:14px;border-top:1px dashed var(--line);padding-top:12px"><div class="who">Auditors<small>re-scored after review</small></div><div class="track"><div class="fill" style="width:79%;background:#6b7280">68 · 78 · 82 · 82 · 84</div></div></div>
+      <div class="row"><div class="who" style="font-weight:800">▶ Chairman</div><div class="track"><div class="fill" style="width:84%;background:#16181d">84</div></div></div>
+      <div class="scale"><span>60</span><span>70</span><span>80</span><span>90</span><span>100</span></div>
+    </div>
+    <p class="legend2">The five advisors scored 71–99 (mean 88). The peer-review round, auditing <em>calibration</em>, pulled it down to a 68–84 cluster (median 82): <strong>unanimous that 99 was inflated</strong> (it scored the narrated upside, not the unbuilt plan), and <strong>4 of 5 named the Contrarian's 71 the best-reasoned</strong> for catching a falsifiable structural crack. The final 84 sits at the top of the auditors' cluster — respecting both the genuinely excellent strategy and the real, unresolved gaps.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">▦</span> Rubric breakdown</h2>
+    <table>
+      <thead><tr><th>Dimension</th><th class="s">/10</th><th style="width:42%">Note</th></tr></thead>
+      <tbody>
+        <tr><td>Strategic thesis &amp; access-to-justice argument<div class="bar"><i style="width:96%;background:var(--good)"></i></div></td><td class="s" style="color:var(--good)">9.5</td><td>The "honest no / recalibration" — the standout. Collapses 3 of 4 judging criteria into one move.</td></tr>
+        <tr><td>Problem clarity &amp; "why now"<div class="bar"><i style="width:88%;background:var(--good)"></i></div></td><td class="s" style="color:var(--good)">8.8</td><td>Strong stats + timing. Minor: the Section-21 hook doesn't map to the provided disrepair case.</td></tr>
+        <tr><td>GTM / business case<div class="bar"><i style="width:89%;background:var(--good)"></i></div></td><td class="s" style="color:var(--good)">8.9</td><td>Sharp — pre-empts its own hardest objection (does "no" cannibalise leads?).</td></tr>
+        <tr><td>Demo design<div class="bar"><i style="width:76%;background:var(--warn)"></i></div></td><td class="s" style="color:var(--warn)">7.6</td><td>Interactive, honest-no-first, good failsafes — but live-ingestion architecture undecided + case-supply crack.</td></tr>
+        <tr><td>Build plan / execution realism<div class="bar"><i style="width:73%;background:var(--warn)"></i></div></td><td class="s" style="color:var(--warn)">7.3</td><td>Disciplined sequencing (PDF Day 1, ruthless scope) — but unbuilt; GCP/Gemini integrated late.</td></tr>
+        <tr><td>Proof / de-risking<div class="bar"><i style="width:64%;background:var(--bad)"></i></div></td><td class="s" style="color:var(--bad)">6.4</td><td>The weakest. The "no" is the whole thesis, yet its accuracy is asserted, not measured. Correctness rests on one lawyer.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="n">✓</span> What earns the score</h2>
+    <div class="vcard">
+      <ul style="margin:0;padding-left:20px">
+        <li><strong>The thesis is top-tier.</strong> "An agent honest enough to tell you that you don't have a case" reverse-engineers the rubric — it <em>is</em> Track B's "recalibration," it <em>is</em> the access-to-justice argument, and it's the most memorable beat any team can run.</li>
+        <li><strong>It's built for the criteria, not for flash.</strong> Judge-picks-a-case interactivity, the honest-no as Wow 1, the reframed (not gimmicky) foil, 3D demoted to an optional coda — all aimed at "a working prototype we can interact with," away from the polish the judges disclaimed.</li>
+        <li><strong>The GTM answers its own hardest question</strong> ("doesn't 'no' cannibalise Lawhive's leads?") before a judge can ask it.</li>
+        <li><strong>The sequencing front-loads real risk</strong> (PDF end-to-end Day 1; weak-case test by Day 8; two lawyer validations).</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">▲</span> What holds it back (the 16 points)</h2>
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--bad)"></span> 1 · The "no" is unproven — and that's the whole thesis</h3>
+      <p>No calibration set, no false-"no" rate — just "test on a weak case." A wrong "no" (turning away a real claim) on stage in front of solicitors is the worst, and currently unpriced, failure mode. <em>The auditors added: it's not just a demo bug — it's a liability/UPL exposure in front of a regulated host.</em></p>
+    </div>
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--warn)"></span> 2 · The highest-variance demo beat is architecturally undecided</h3>
+      <p>"Judge picks → agent ingests REAL docs live" with heavy email chains and photo folders can stall, blow context, or hallucinate — in front of Anthropic and Google. The brief names the risk but doesn't choose pre-ingest vs live-ingest.</p>
+    </div>
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--warn)"></span> 3 · A flagged-but-unresolved contradiction in the demo spine</h3>
+      <p>Damp-only build + "judge picks a provided <em>disrepair</em> case" + "run a weak provided case" — yet only 1 of 10 provided cases is disrepair (and it's social housing). To the brief's credit it flags this and defers to a dedicated cases-council (now answered) — but the brief as written hasn't yet absorbed that fix.</p>
+    </div>
+    <div class="vcard">
+      <h3><span class="dot" style="background:var(--neutral)"></span> Two quieter risks the auditors raised</h3>
+      <p>The "honest no" is <strong>trivially copyable</strong> once demoed — a one-day narrative edge, not a moat. And a brief this council-polished risks reading as <strong>over-produced</strong> to judges who explicitly reward rough working prototypes — your build must look as real as your plan reads.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">→</span> Path to 90+</h2>
+    <div class="vcard">
+      <div class="pathrow"><span class="delta">+4</span><span><strong>Measure the "no."</strong> A labelled, lawyer-scored calibration set (RED/AMBER/GREEN) with a reported false-"no" rate. Turns the thesis from asserted to proven — the single highest-leverage fix.</span></div>
+      <div class="pathrow"><span class="delta">+2</span><span><strong>Resolve live-ingestion:</strong> pre-ingest at selection time into a cached, validated summary — still judge-chosen, but the live beat renders a known-good artifact.</span></div>
+      <div class="pathrow"><span class="delta">+2</span><span><strong>Absorb the cases-council answer:</strong> curated shortlist; Case 7 (damp) escalate + a clean non-disrepair "no"; deep-on-damp + shallow-assessment elsewhere.</span></div>
+      <div class="pathrow"><span class="delta">+1</span><span><strong>Cut 3D from the live run entirely</strong>, and show "reviewed by a practising housing solicitor" on screen — proof, not claim.</span></div>
+      <div class="pathrow"><span class="delta">ceiling</span><span><strong>Show one live generalization</strong> to a non-disrepair problem + <strong>quantify the stand-down</strong> ("saved you ~£X and 9 months") — turns the venture-scale claim from narrated to demonstrated.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">✎</span> The five advisor scores in full</h2>
+    <details><summary><span class="sc" style="background:var(--expand)">99</span> Expansionist — "highest ceiling in the room" <span class="chev mono">▸</span></summary><div class="body">
+      <p>The rare brief where ceiling is the point, and it finds the highest one in the room. The "honest no / recalibration" framing is a genuine reframe — it converts the judges' verbatim Track-B language into the single most memorable demo beat, and "the most valuable thing it can do is tell you to stand down" is a line judges repeat to each other. The acquisition story is tight: an honest intake brain that lowers cost-to-serve is exactly what Lawhive needs, so the host is also the natural acquirer, with GV/Balderton seeing a horizontal "intake brain for every consumer legal problem" wedge. The stale-AI foil is a kill-shot of timing.</p>
+      <p>Held off 100 only because the upside is narrated more than demonstrated. Raise the ceiling: (1) one live 10-second "watch it recalibrate a non-disrepair problem" so judges SEE the engine generalize; (2) quantify the stand-down ("saved you ~£X and 9 months") — turning a refusal into visible value.</p>
+    </div></details>
+    <details><summary><span class="sc" style="background:var(--firstp)">94</span> First Principles — "reverse-engineers the rubric almost exactly" <span class="chev mono">▸</span></summary><div class="body">
+      <p>What's actually being judged: a real problem clearly understood, something interactable, an access-to-justice argument that moves the needle, room to grow — explicitly NOT polish. This brief reverse-engineers that rubric almost exactly. The core insight — the highest-value act is an honest "no," demoed on the judges' own cases — is not a feature, it's a thesis about what trustworthy legal AI is. Sequencing PDF-render Day 1, gating 3D, and two lawyer validations on the GTM question show optimizing for interactable-and-defensible over impressive-and-fragile. Top-3 as written.</p>
+      <p>Why not higher: the whole edifice rests on the agent reliably returning RED on a genuinely ambiguous case live — "wrong no is worse than wrong yes" is asserted, not proven. Fixes: (1) a labelled calibration set with a quantitative Day-8 bar (zero false REDs; AMBER when uncertain); (2) pre-stage a borderline case showing AMBER→route-to-human — converting the worst failure mode into proof the system knows its own limits.</p>
+    </div></details>
+    <details><summary><span class="sc" style="background:var(--outsider)">88</span> Outsider — "the story lands hard" <span class="chev mono">▸</span></summary><div class="body">
+      <p>As a normal person, this story lands hard. The "honest intake brain that talks you OUT of a weak case" is genuinely surprising and instantly trustworthy — it reframes an AI lawyer from "robot that sues everyone" into something on your side, and doubles as a business pitch. The Section-21 angle is the strongest move: ChatGPT confidently citing a law that died this month, beside their tool citing the real source, is a "wow" any judge can feel. The ruthless scoping reads as discipline.</p>
+      <p>Pause: "honest read on whether you have a case" is a big promise, and a wrong legal call on stage in front of lawyers is the one thing that could sink them. The 3D scan is the only false note — it smells of the "polish" the judges said they don't want. Fixes: (1) cut the 3D scan from the live run entirely; (2) put the housing-lawyer validation FIRST and show "reviewed by a practising housing solicitor" on screen.</p>
+    </div></details>
+    <details><summary><span class="sc" style="background:var(--executor)">87</span> Executor — "engineered against the failure modes that sink demos" <span class="chev mono">▸</span></summary><div class="body">
+      <p>From the execution lens, this brief is engineered against the exact failure modes that sink hackathon demos, and that discipline is rare. The single best decision is D1: "render a real PDF end-to-end" on day one — output-path risk is the classic hidden time-sink, front-loaded instead of discovered at hour 9. The curated-shortlist-instead-of-text-box call kills the worst live-input variance; the 5/8-min cuts hedge slot uncertainty; the failsafe video + static URL means a stall isn't a faceplant; explicit driver/narrator/failsafe roles matter for a team that's never built together. The "honest no" as Wow 1 is demo-safe — a negative verdict can't be fact-checked into embarrassment the way a fabricated statute can.</p>
+      <p>What keeps it out of the 90s: the "judge picks → agent ingests REAL docs live" beat is unresolved and the highest-variance moment in the run. Fixes: (1) pre-ingest at selection time into a cached, pre-validated structured summary; (2) stand up the GCP+Gemini path by D11, not D13, behind a Claude fallback.</p>
+    </div></details>
+    <details><summary><span class="sc" style="background:var(--contrarian)">71</span> Contrarian — "a load-bearing crack, documented and walked past" <span class="chev mono">▸</span></summary><div class="body">
+      <p>A genuinely sharp plan — the "honest no" wedge maps 1:1 onto Track B's recalibration and the "moves the needle on access to justice" criterion, and letting a judge pick a case live on <em>their</em> files serves "something we can actually interact with."</p>
+      <p>But a load-bearing crack the team has documented and then walked past: their own §3 admits <strong>only 1 of 10 provided cases is disrepair, and it's a council tenancy</strong> where the Section-21 hook doesn't map. The demo spine — "judge picks a strong provided disrepair case," "run a weak provided case live" — assumes a supply of provided cases that may not exist. That's a potential demo-killer flagged in their own document and left unresolved. Second crack: the pitch rests on recalibration <em>accuracy</em>, yet there's no calibration target, no confusion-matrix check — just "test on a weak case."</p>
+      <p>Fixes: (1) build a pre-vetted bank of 3–4 disrepair fact patterns the team controls, so the live demo never depends on the provided-case lottery; (2) add one quantified calibration pass (lawyer-scored, report the false-"no" rate). Do those and this is an 84.</p>
+    </div></details>
+  </section>
+
+  <section>
+    <h2><span class="n">⇄</span> Peer review — the calibration audit</h2>
+    <details open><summary>What the auditors concluded <span class="chev mono">▸</span></summary><div class="body">
+      <p><strong>Best-calibrated score:</strong> 4 of 5 auditors named the <strong>Contrarian (71)</strong> — "the only one that traces its deduction to a falsifiable structural fact (§3's 1-of-10) and shows how it breaks the demo spine." One named the Executor (87) for pricing the live-ingestion mechanism risk most concretely.</p>
+      <p><strong>Most mis-calibrated:</strong> unanimous — the <strong>Expansionist (99)</strong>. "It rewards a narrated ceiling it admits is 'narrated, not demonstrated,' then docks a single point. A 99 on an unbuilt plan is grade inflation — the 28-point gap between it and the Contrarian on the same document exposes the anchoring on rhetoric."</p>
+      <p><strong>What all five advisors missed:</strong></p>
+      <ul>
+        <li><strong>Plan ≠ win probability.</strong> "Nobody separated quality-of-the-plan from likelihood-of-winning — they're different scores, and everyone scored a blend, so the 71–99 spread is partly an artifact of undefined units."</li>
+        <li><strong>An unbuilt plan should cap below ~90 on principle</strong> — execution is the dominant unproven variable.</li>
+        <li><strong>The "honest no" is trivially copyable</strong> once demoed — a narrative edge, not a moat.</li>
+        <li><strong>Wrong-"no" is an asymmetric liability</strong> (UPL / safeguarding) in front of a regulated host, not just a demo glitch.</li>
+        <li><strong>Double-counting:</strong> calibration + live-ingestion drive nearly every deduction — the real spread is narrower than 71–99 looks.</li>
+      </ul>
+      <p>Auditors' own scores: <strong>68, 78, 82, 82, 84</strong> (median 82).</p>
+    </div></details>
+  </section>
+
+  <footer>
+    <p><strong>LLM Council</strong> · 5 advisors score → anonymised calibration audit → chairman's final number. Methodology by Andrej Karpathy.</p>
+    <p class="mono">Rated: brief.md (current revision) · Generated 2026-05-29 19:02 · Transcript: council-transcript-rating-20260529-190213.md</p>
+    <p class="disc">Advisor letters were randomised before the audit (A=Expansionist, B=Contrarian, C=Executor, D=First Principles, E=Outsider).</p>
+  </footer>
+
+</div>
+</body>
+</html>

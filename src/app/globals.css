@@ -1,26 +1,182 @@
 @import "tailwindcss";
 
+/*
+  Hivelaw landing — design system.
+  Lane: editorial "manifesto microsite" (ref: background-agents.com).
+  Warm light-grey canvas, near-black warm ink, ONE committed crimson accent.
+  Red/amber/green are reserved as the product's prospects-verdict semantics,
+  kept perceptually distinct from the brand crimson.
+*/
+
+@theme {
+  /* Canvas + ink (warm, tinted toward the brand hue, never pure #fff/#000) */
+  --color-canvas: oklch(0.949 0.004 70);
+  --color-canvas-deep: oklch(0.927 0.005 70);
+  --color-paper: oklch(0.987 0.003 70);
+  --color-ink: oklch(0.235 0.013 55);
+  --color-ink-soft: oklch(0.445 0.012 55);
+  --color-ink-faint: oklch(0.6 0.01 55);
+  --color-line: oklch(0.235 0.013 55 / 0.14);
+  --color-line-soft: oklch(0.235 0.013 55 / 0.07);
+
+  /* Brand accent — cardinal crimson (faithful to the reference) */
+  --color-accent: oklch(0.53 0.207 24);
+  --color-accent-deep: oklch(0.455 0.193 24);
+  --color-accent-tint: oklch(0.53 0.207 24 / 0.1);
+
+  /* Prospects verdict (traffic light) — distinct from brand crimson */
+  --color-verdict-red: oklch(0.565 0.2 27);
+  --color-verdict-amber: oklch(0.76 0.15 78);
+  --color-verdict-green: oklch(0.585 0.13 150);
+
+  /* Type — wired from next/font in layout.tsx */
+  --font-serif: var(--font-spectral), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion */
+  --ease-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* Headings default to the serif voice */
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+/* Smooth anchor jumps clear the fixed nav */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+/* --- Deck feel: gentle proximity scroll-snap on larger viewports --- */
+@media (min-width: 768px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+  .snap {
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+  }
+}
+
+/* --- Engineering dot-grid (faint, like graph paper) --- */
+.dot-grid {
+  background-image: radial-gradient(
+    var(--color-line-soft) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+  background-position: -14px -14px;
+}
+.dot-grid-fade {
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 40%,
+    #000 55%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 40%,
+    #000 55%,
+    transparent 100%
+  );
+}
+
+/* --- Hero orbital field: concentric rings with crimson particles --- */
+.orbit-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 1px solid var(--color-line-soft);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.orbit-spin {
+  animation: orbit-rotate var(--orbit-dur, 32s) linear infinite;
+  animation-delay: var(--orbit-delay, 0s);
+}
+.orbit-particle {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow:
+    0 0 0 1px oklch(0.53 0.207 24 / 0.25),
+    0 0 14px 3px oklch(0.53 0.207 24 / 0.55);
+}
+@keyframes orbit-rotate {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* --- Reveal-on-scroll (driven by components/Reveal.tsx) --- */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s var(--ease-quint),
+    transform 0.7s var(--ease-quint);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+/* No-JS fallback: never hide content if scripting is unavailable */
+@media (scripting: none) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Respect reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  html {
+    scroll-snap-type: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
