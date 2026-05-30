@@ -128,6 +128,7 @@ export default function ReportPage() {
   const [filesLoaded, setFilesLoaded] = useState(false);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [userFiles, setUserFiles] = useState<{ name: string; url: string }[]>([]);
+  const [contactedLawyers, setContactedLawyers] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const caseRefs = activeCase?.references ?? MOCK_EXTENDED_REFERENCES;
@@ -248,14 +249,16 @@ export default function ReportPage() {
           <div>
             <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Recommended solicitors — housing disrepair</span>
             <div className="mt-4 space-y-4">
-              {MOCK_LAWYERS.map((lawyer) => (
-                <div key={lawyer.id} className="rounded-2xl border border-line bg-paper p-5 transition-colors hover:border-accent/30">
+              {MOCK_LAWYERS.map((lawyer) => {
+                const contacted = contactedLawyers.has(lawyer.id);
+                return (
+                <div key={lawyer.id} className={`rounded-2xl border bg-paper p-5 transition-colors ${contacted ? "border-verdict-green/30" : "border-line hover:border-accent/30"}`}>
                   <div className="flex gap-4">
                     <img src={lawyer.imageUrl} alt={lawyer.name} className="h-16 w-16 rounded-full border border-line bg-canvas-deep" />
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="text-sm font-medium text-ink">{lawyer.name}</h4>
+                          <a href={lawyer.profileUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-ink hover:text-accent">{lawyer.name}</a>
                           <p className="text-xs text-ink-soft">{lawyer.firm}</p>
                         </div>
                         <div className="flex items-center gap-1 text-xs">
@@ -272,14 +275,25 @@ export default function ReportPage() {
                       </div>
                       <div className="mt-3 flex items-center justify-between">
                         <span className="text-xs text-ink-faint">{lawyer.casesWon} cases won</span>
-                        <button className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep">
-                          Request consultation <span>&rarr;</span>
-                        </button>
+                        {contacted ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-verdict-green/40 bg-verdict-green/10 px-3 py-1.5 text-xs font-medium text-verdict-green">
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            Consultation requested
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => setContactedLawyers((prev) => new Set([...prev, lawyer.id]))}
+                            className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep"
+                          >
+                            Request consultation <span>&rarr;</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -469,12 +483,23 @@ export default function ReportPage() {
 
               {!previewFile && (
                 <>
+                  {!filesLoaded && (
+                    <button
+                      onClick={handleUpload}
+                      className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint"
+                    >
+                      <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                      <span className="text-sm font-medium text-ink-soft">Click to load case files</span>
+                      <span className="text-xs text-ink-faint">Loads documents from the case folder</span>
+                    </button>
+                  )}
+
                   <button
-                    onClick={() => { if (filesLoaded) { fileInputRef.current?.click(); } else { handleUpload(); } }}
-                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint"
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`flex w-full cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-6 transition-colors hover:border-accent/40 hover:bg-accent-tint ${filesLoaded ? "" : "mt-0"}`}
                   >
-                    <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                    <span className="text-sm font-medium text-ink-soft">{filesLoaded ? "Upload additional files" : "Click to upload case files"}</span>
+                    <svg className="h-6 w-6 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    <span className="text-sm font-medium text-ink-soft">Upload your own files</span>
                     <span className="text-xs text-ink-faint">PDF, images, or text files</span>
                   </button>
                   <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleRealUpload} />
