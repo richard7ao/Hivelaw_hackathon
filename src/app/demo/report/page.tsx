@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useDemoContext } from "@/lib/demo-context";
 import Spinner from "@/components/Spinner";
@@ -150,7 +150,7 @@ export default function ReportPage() {
   const [fileResults, setFileResults] = useState(MOCK_FILE_RESULTS.map((f) => ({ ...f })));
   const [expandedRef, setExpandedRef] = useState<string | null>(null);
   const [previewFile, setPreviewFile] = useState<string | null>(null);
-  const [filesLoaded, setFilesLoaded] = useState(false);
+  const [filesLoaded, setFilesLoaded] = useState(true);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   // The Steelman tab: one chain expanded at a time (hero chain open by default)
   const [openChain, setOpenChain] = useState<string | null>(STEELMAN_CHAINS[0]?.id ?? null);
@@ -170,11 +170,14 @@ export default function ReportPage() {
 
   const toggleFileResult = (id: string) => setFileResults((prev) => prev.map((f) => (f.id === id ? { ...f, selected: !f.selected } : f)));
 
-  const handleUpload = () => {
-    if (!filesLoaded) {
-      setFilesLoaded(true);
+  useEffect(() => {
+    if (uploadedFiles.length === 0) {
       CASE_07_FILES.forEach((f) => addFile({ name: f.name, size: f.size }));
     }
+  }, []);
+
+  const handleUpload = () => {
+    fileInputRef.current?.click();
   };
 
   const handleRealUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -501,11 +504,11 @@ export default function ReportPage() {
               {!previewFile && (
                 <>
                   <button
-                    onClick={() => { if (!filesLoaded) { handleUpload(); } else { fileInputRef.current?.click(); } }}
-                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-6 transition-colors hover:border-accent/40 hover:bg-accent-tint"
                   >
-                    <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                    <span className="text-sm font-medium text-ink-soft">{filesLoaded ? "Upload additional files" : "Click to upload case files"}</span>
+                    <svg className="h-6 w-6 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    <span className="text-sm font-medium text-ink-soft">Upload additional files</span>
                     <span className="text-xs text-ink-faint">PDF, images, or text files</span>
                   </button>
                   <input ref={fileInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.txt,.doc,.docx" className="hidden" onChange={handleRealUpload} />
