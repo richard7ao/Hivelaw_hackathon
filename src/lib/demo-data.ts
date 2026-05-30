@@ -210,3 +210,87 @@ export const MOCK_EXTENDED_REFERENCES: ExtendedReference[] = [
     application: "If the landlord's repair obligation is established via s.11, this section extends the duty of care to all occupants. Relevant if children or vulnerable persons are affected by the mould.",
   },
 ];
+
+export type CounterReference = {
+  id: string;
+  argument: string;
+  basis: string;
+  detail: string;
+  highlightLinks: string[];
+};
+
+export const MOCK_COUNTER_REFERENCES: CounterReference[] = [
+  {
+    id: "cr1",
+    argument: "Tenant signed a satisfaction form after prior works",
+    basis: "Contractual estoppel / waiver argument",
+    detail: "The landlord will rely on the signed contractor works form dated March 2026 in which the tenant confirmed previous remedial works were 'carried out to my satisfaction.' This creates an evidential hurdle: the tenant acknowledged the problem was fixed, weakening the argument of continuous disrepair. However, this does not prevent a fresh claim if the damp recurred after the form was signed — the form only evidences the state at that date, not a waiver of future rights.",
+    highlightLinks: ["signed satisfaction form dated March 2026"],
+  },
+  {
+    id: "cr2",
+    argument: "No independent survey to rule out condensation damp",
+    basis: "Causation defence — lifestyle vs. structural",
+    detail: "The landlord's most likely defence is that the damp is caused by condensation from the tenant's lifestyle (inadequate ventilation, drying clothes indoors) rather than a structural defect. Without an independent damp survey establishing the cause, the tenant cannot rebut this defence. The burden of proving the defect is structural falls on the tenant. A Type III survey (destructive investigation) may be needed if the cause is disputed.",
+    highlightLinks: ["obtain an independent damp survey", "landlord's defence that the issue is lifestyle-related"],
+  },
+  {
+    id: "cr3",
+    argument: "Photographic evidence alone may be insufficient",
+    basis: "Evidential weight — expert evidence preferred",
+    detail: "Photographs show the visible presence of mould but do not establish its cause, severity under HHSRS, or the landlord's knowledge of a structural defect. A court would expect expert evidence (e.g., a chartered surveyor's report) to establish the hazard category and causation. Photographs are supporting evidence, not primary proof.",
+    highlightLinks: ["failed to carry out meaningful inspection or repair"],
+  },
+];
+
+export type LawyerProfile = {
+  id: string;
+  name: string;
+  firm: string;
+  specialisation: string;
+  experience: string;
+  qualifications: string[];
+  rating: number;
+  casesWon: number;
+  imageUrl: string;
+  profileUrl: string;
+};
+
+export const MOCK_LAWYERS: LawyerProfile[] = [
+  {
+    id: "l1",
+    name: "Katherine Jackson",
+    firm: "Lawhive",
+    specialisation: "Housing disrepair & tenant claims",
+    experience: "Experienced in damp & mould disrepair claims against local authorities and private landlords. Specialises in pre-action protocol compliance and tenant representation.",
+    qualifications: ["SQE qualified", "Housing Law Practitioners Association", "Legal Aid accredited"],
+    rating: 4.9,
+    casesWon: 312,
+    imageUrl: "/lawyers/katherine-jackson.png",
+    profileUrl: "https://lawhive.co.uk/our-lawyers",
+  },
+  {
+    id: "l2",
+    name: "Daniel Tang",
+    firm: "Lawhive",
+    specialisation: "HHSRS enforcement & fitness for habitation",
+    experience: "Specialises in Category 1 hazard enforcement and s.9A fitness claims. Expert in housing conditions litigation and single joint expert instructions.",
+    qualifications: ["LLB (Hons)", "SQE qualified", "CILEX Fellow"],
+    rating: 4.8,
+    casesWon: 245,
+    imageUrl: "/lawyers/daniel-tang.png",
+    profileUrl: "https://lawhive.co.uk/our-lawyers",
+  },
+  {
+    id: "l3",
+    name: "Rachelle Man Hiu Lam",
+    firm: "Lawhive",
+    specialisation: "Pre-action protocol & deposit disputes",
+    experience: "Expert in housing conditions protocol compliance, letter of claim drafting, and tenancy deposit penalty claims under the Housing Act 2004.",
+    qualifications: ["LLM Housing Law", "SQE qualified", "Legal Aid accredited"],
+    rating: 4.7,
+    casesWon: 158,
+    imageUrl: "/lawyers/rachelle-lam.png",
+    profileUrl: "https://lawhive.co.uk/our-lawyers",
+  },
+];
