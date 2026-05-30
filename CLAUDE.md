@@ -37,7 +37,7 @@ is sometimes talk someone out of a claim") into a memorable, visceral moment.
 - **Hackathon:** Lawhive HQ (WeWork, 145 City Road), Hoxton, London — **30 May 2026**.
 - **Track:** A (Open Brief) — a recalibration agent spanning every case type, with
   B's "know your rights" question as its anchor.
-- **Team:** Thinker + Engineer + Lawyer.
+- **Team:** 3 engineers (no lawyer). Stage roles: Opener + Driver + Closer.
 - **Judges/sponsors:** Anthropic, Google Cloud, Gemini, Lovable, GV, Balderton, Lawhive.
 - **Prizes:** £5,000 / £2,500 / £1,000.
 - **Hackathon site:** https://hackathon.lhv.tools/ (access email: lsmwallfacer@gmail.com).
@@ -100,7 +100,7 @@ the single-point-of-failure that sank the prior plan.
    is "it quotes your own evidence" — a fabricated quote inverts the demo live.
 4. Case Reality Report view: render the JSON cleanly. The evidence-gap checklist is
    the hero artifact. HTML on localhost.
-5. Live-pick flow: dropdown of **only lawyer-validated cases** + optional file-upload
+5. Live-pick flow: dropdown of **only validated (engineer hand-checked) cases** + optional file-upload
    fallback (runs, but carries no soundness guarantee).
 6. **Pre-cache the JSON for every validated case;** render from cache live (responses
    are real, just pre-generated), with the live API as the "run it fresh?" backup.
@@ -124,19 +124,24 @@ text-grounded). Cut anything off the critical path.
 
 ## Demo spine (3-minute slot, 3 speakers — HARD constraint)
 
-One pre-loaded case, one hero beat, ~1 min each. Featured case: **Case 07 (Crystal,
-damp)** — the signed *"I confirm the works have been carried out to my satisfaction"*
-form is the killer steelman quote.
+**Canonical script + screen contract: `PITCH.md` (repo root).** Format is locked as a
+**pre-recorded screen capture with live stage voice-over by all three engineers** —
+the table below is the skeleton; PITCH.md wins for exact wording, timing, and the
+beat-by-beat build contract. One pre-loaded case, one hero beat, ~1 min each. Featured
+case: **Case 07 (Crystal, damp)** — the signed *"I confirm that the above works have
+been carried out to my satisfaction"* form is the killer steelman quote.
 
 | Time | Speaker | Says / shows |
 |---|---|---|
-| 0:00–0:40 | **Thinker** | Cold open + category argument. Pulls up Crystal's case. |
-| 0:40–1:50 | **Engineer** | Act 1 strongest case (~10s) → **Act 2 the Steelman: agent quotes her own signed satisfaction form back at her** (~40s, the moment) → Act 3 the Case Reality Report renders. |
-| 1:50–3:00 | **Lawyer** | "I'm a housing lawyer. That steelman is exactly what I'd warn Crystal about." Validates live + access-to-justice close. |
+| 0:00–0:40 | **Opener** | Cold open + category argument. Pulls up Crystal's case. |
+| 0:40–1:50 | **Driver** | Act 1 strongest case (~10s) → **Act 2 the Steelman: agent quotes her own signed satisfaction form back at her** (~40s, the moment) → Act 3 the Case Reality Report renders. |
+| 1:50–3:00 | **Closer** | Trust mechanic ("we're engineers, not lawyers — the agent can't claim what it can't ground") + the honest "no" as a feature Lawhive wants + the live app as the dare ("pick any case and check the quotes") + access-to-justice close. |
 
-The interactivity sacrifice (no judge-picks-a-case in 3 min) is bought back by the
-team's own **lawyer validating the steelman live** — the one thing no other team can
-fake. Renders from pre-cached real responses (instant, deterministic). **If the slot
+The team has **no lawyer**, so the credibility moat is not "our lawyer validates
+live" but (1) the **verifiable trust mechanic** (every quote string-matched to the
+file, citations only from a closed corpus, ungrounded claims stripped) and (2) the
+**live app** judges can pick any case in afterwards. Nobody on stage claims to be a
+lawyer. Renders from pre-cached real responses (instant, deterministic). **If the slot
 is ~5 min:** add a genuinely weak case as a 30-second "honest no" contrast and
 optionally re-introduce judge-picks-from-dropdown. Rehearse the 3-min core either way.
 
@@ -147,7 +152,8 @@ optionally re-introduce judge-picks-from-dropdown. Rehearse the 3-min core eithe
 3. Be honest about what doesn't work (redesign early beats discovering late).
 4. Optimise for the team *learning the stack*, not code elegance — v1 is throwaway.
    Comments > DRY.
-5. **Flag every legal-correctness assumption** so the lawyer can spot-check.
+5. **Flag every legal-correctness assumption explicitly** — the team has no lawyer,
+   so keep featured claims in evidence/procedure and never assert "this is the law."
 6. Keep the corpus real — actual statute text, not paraphrase.
 
 ## Current state
@@ -156,10 +162,12 @@ optionally re-introduce judge-picks-from-dropdown. Rehearse the 3-min core eithe
 - **Working:** batch runner `scripts/run-cases.ts` (`npm run cases`) sends every
   file in `/cases` (10 synthetic cases) through the three-act prompt and writes a
   per-case report to `/reports` plus `/reports/INDEX.md`. This is the artifact the
-  lawyer red-pens to decide which cases are demo-safe.
+  engineers self-review (grounding + plausibility, NOT legal sign-off) to decide which
+  cases are demo-safe.
 - **Reports generated:** all 10 cases ran clean; Case 07 → arguable / escalate.
 - **Not built yet:** `/corpus` (statute grounding + the legal-quote hard-fail guard),
   the Next.js chat UI + Case Reality Report viewer, the live-pick dropdown, and the
   pre-cached render path.
 - **Next likely actions:** assemble `/corpus`; scaffold the Next.js app + report
-  viewer; lawyer hand-run sign-off table; lock + rehearse the 3-minute script.
+  viewer; engineer case self-review table; lock + rehearse the 3-minute script;
+  record the master demo video.

@@ -38,7 +38,8 @@ them in real time on documents nobody rehearsed.
 
 ## Constraints
 
-- ~18 hours to build, demo, and rehearse. 3 people (thinker, engineer, lawyer).
+- ~18 hours to build, demo, and rehearse. **3 engineers (no lawyer on the team).**
+  See "Legal-soundness posture" below — this changes who validates and how we pitch.
 - Working prototype a judge can interact with > polish (their stated rubric).
 - 10 synthetic cases already in `/cases` as markdown (ingestion is trivial).
 - No 3D, no PDF, no multi-agent, no agentic tool loop. v1 is a **single prompt,
@@ -76,8 +77,28 @@ them in real time on documents nobody rehearsed.
 Note on legal-correctness risk: steelmanning lives mostly in **evidence and
 procedure** (burden of proof, what a judge needs to see, limitation periods,
 pre-action conduct). That is domain-general and far safer than citing a 29-day-old
-statute — it sidesteps the single-point-of-failure that sank the prior plan.
-Every legal assertion still gets lawyer red-pen (see Assignment).
+statute — it sidesteps the single-point-of-failure that sank the prior plan. This is
+doubly important because **the team has no lawyer** (see "Legal-soundness posture").
+
+## Legal-soundness posture (the team has no lawyer)
+
+The team is **3 engineers, no legal professional.** Earlier drafts assumed a lawyer
+teammate who would hand-run the cases, red-pen the steelman, and validate live on
+stage. None of that happens. Two operating rules follow:
+
+1. **No professional sign-off — so don't claim one, and minimise exposure.** Case QA
+   is engineer self-review (grounding + plausibility), not legal validation. The
+   `reports/*.report.md` "Lawyer red-pen" tables stay empty. Keep every featured claim
+   in **evidence/procedure** (burden of proof, what a judge needs to see, pre-action
+   conduct), where the agent is safe and self-review is trustworthy. Default the
+   recorded demo to **Case 07 only**.
+2. **Never overclaim legal certainty.** Nobody on stage claims to be a lawyer (the
+   room is full of real ones). The team never asserts "this is the law" — the agent
+   surfaces the *opponent's* argument and the *evidence gaps* and routes to a
+   solicitor; the closed statute corpus does any citing, and ungrounded citations are
+   stripped. Credibility comes from the verifiable trust mechanic + the live app, not
+   from a person's credential. Frame "we'd value a Lawhive lawyer pressure-testing the
+   outputs" as the v2 loop. Canonical pitch wording: `PITCH.md`.
 
 ## Approaches Considered (idea-level alternatives)
 
@@ -104,10 +125,17 @@ you how you'll lose is the one that actually protects you."*
 ## The demo: 3-minute slot, 3 speakers (HARD constraint)
 
 Three minutes with all three teammates speaking means **one pre-loaded case, one
-hero beat, ~1 minute each**. No judge-picks-a-case here (no time). The
-interactivity sacrifice is bought back by credibility: the team's own **lawyer
-validates the steelman live** — the one thing no other team can fake. Everything
-renders from pre-cached real responses so it's instant and deterministic.
+hero beat, ~1 minute each**. No judge-picks-a-case *inside* the slot (no time). The
+team has no lawyer, so credibility is bought back two other ways: (1) the
+**verifiable trust mechanic** — every quote string-matched to the user's file, every
+citation from a closed corpus, ungrounded claims stripped; and (2) the **live app as
+the dare** — "this isn't a sizzle reel, pick any case after and check the quotes
+yourself." Everything in the recording renders from pre-cached real responses so it's
+instant and deterministic.
+
+**Canonical script + screen contract: `PITCH.md` (repo root).** Format is locked as a
+**pre-recorded screen capture with live stage voice-over by all three engineers** —
+the table below is the older skeleton; PITCH.md wins for exact wording and timing.
 
 Featured case: **Case 07 (Crystal, damp)** — the signed "works carried out to my
 satisfaction" form is the killer steelman quote.
@@ -116,19 +144,19 @@ satisfaction" form is the killer steelman quote.
 |---|---|---|
 | 0:00–0:40 | **Thinker** | Cold open + category argument: "Every legal AI tells you you're right. We built the one that tells you how you'll lose — because that's what protects you. Lawhive's own lawyers said the most valuable thing an agent can do is sometimes talk you out of a claim." Pulls up Crystal's pre-loaded case. |
 | 0:40–1:50 | **Engineer** | Runs it. Act 1 "her strongest case" (~10s) → **Act 2 the Steelman: agent quotes her own signed satisfaction form back at her** — "here's exactly what the council will hit you with" (~40s, the moment) → Act 3 the Case Reality Report renders: prospects, the evidence-gap checklist, recommendation. |
-| 1:50–3:00 | **Lawyer** | "I'm a housing lawyer. That steelman is exactly the argument I'd warn Crystal about in a first meeting — it's real. This is recalibration, and the honest 'no' is a feature Lawhive *wants*: fewer dead-end intakes, and when it does escalate, the solicitor gets a prepared file." Access-to-justice close. |
+| 1:50–3:00 | **Closer (engineer)** | "We're three engineers, not lawyers — that's exactly why the agent can't make a claim it can't back up: every quote matched to her file, every legal point from a closed statute corpus, anything ungrounded stripped. This is recalibration, and the honest 'no' is a feature Lawhive *wants*: fewer dead-end intakes; when it escalates, the solicitor gets a prepared file. And this isn't a sizzle reel — the app is live, pick any case and watch it argue against you." Access-to-justice close. |
 
 **If the slot is actually ~5 min (3 demo + 2 pitch/Q&A):** add a second case — a
 genuinely weak one where the verdict is an honest "don't pursue this" — as a
-30-second contrast before the lawyer's close, and let the Thinker narrate it.
+30-second contrast before the Closer's close, and let the Opener narrate it.
 Optionally re-introduce the judge-picks-from-dropdown moment here. Decide based on
 the real slot; rehearse the 3-min core either way.
 
 ## The v0 three-act prompt (KEYSTONE — write this first, before anything else)
 
-The lawyer cannot validate a prompt that doesn't exist, and the engineer and
-lawyer must test the *same* artifact. So this gets written before the hand-run
-and before any UI code. Draft v0:
+You cannot QA a prompt that doesn't exist, and the whole team must test the *same*
+artifact. So this gets written before the case hand-run and before any UI code.
+Draft v0:
 
 ```
 You are an honest case-assessment assistant for a person in England with a
@@ -207,7 +235,7 @@ enforces this. Demo only features housing cases, so this is fine.
    output. No tool loop. Add the `source_quote` string-match guard.
 4. Case Reality Report view: render the JSON cleanly. The evidence-gap checklist
    is the hero artifact. HTML page on localhost — PDF is out of scope.
-5. Live-pick flow: dropdown of **only the lawyer-validated cases** (not all 10 if
+5. Live-pick flow: dropdown of **only the validated (hand-checked) cases** (not all 10 if
    some fail the hand-test) + an optional file-upload fallback that runs but
    carries no soundness guarantee. Rehearse the dropdown path.
 6. **Pre-cache the JSON for every validated case.** Render from cache live (the
@@ -215,34 +243,36 @@ enforces this. Demo only features housing cases, so this is fine.
    run it fresh?" backup. Removes venue-network / latency / rate-limit risk from
    the highest-attention moment without faking anything.
 
-**Lawyer (tonight — this is the spec):**
+**Case QA (engineer-run, since there is no lawyer):**
 - Hand-run all 10 cases through Claude using the v0 prompt above.
-- **Output a sign-off table per case** committed to the repo
-  (`case_NN | steelman point | sound? Y/N | corrected wording`). The engineer
-  hardens prompts from this; it's what makes "every assertion gets lawyer
-  red-pen" verifiable.
-- Any case that fails → excluded from the live-pick dropdown.
-- Keep the framing on evidence/procedure, not fiddly statute.
+- **Output a self-review table per case** committed to the repo
+  (`case_NN | steelman point | grounded in file? Y/N | reads as plausible? Y/N`).
+  This is engineer judgement, **not** legal sign-off — be honest about that limit.
+- Any case where a steelman point isn't cleanly grounded, or reads as a shaky legal
+  assertion → excluded from the live-pick dropdown.
+- **Keep every featured claim in evidence/procedure, not fiddly statute** — this is
+  where the agent is on safe ground and where engineer self-review is trustworthy.
 - Pick the 2–3 featured cases (strong → escalate; messy → gap; weak → honest no).
+  **Default to Case 07 only for the recorded demo** to minimise exposure.
 
 **Thinker:**
-- Lock the 3-minute, 3-speaker script (table above): Thinker opens, Engineer
-  drives the live beat, Lawyer validates + closes. Each has ~1 min — cut every
-  word that isn't load-bearing.
+- Lock the 3-minute, 3-speaker script (canonical in `PITCH.md`): Opener opens,
+  Driver runs the live beat, Closer does the trust mechanic + close. Each has ~1 min
+  — cut every word that isn't load-bearing.
 - Run the demo 10× to a stopwatch; 3:00 is a hard ceiling. Record a fallback video.
 - Confirm the slot length (3 vs 5 min) with organizers and pick the variant.
 
 ## Open Questions
 
 - Which single case is the weakest of the 10 (for the optional "honest no")?
-  Lawyer decides tonight.
+  Engineers decide during case QA.
 - Live file-upload by a judge: offer it (with no soundness guarantee) or restrict
   the demo to the validated dropdown only? Default: restrict to dropdown, frame as
   "pick any of these real cases." Revisit only if the build is ahead of schedule.
 
 ## Success Criteria (definition of done)
 
-- [ ] A judge can pick any lawyer-validated case; agent produces its report live (from cache, real API as backup).
+- [ ] A judge can pick any validated case; agent produces its report live (from cache, real API as backup).
 - [ ] Agent produces all three acts, each grounded with a verified verbatim quote from the docs.
 - [ ] Case Reality Report renders: prospects + evidence-gap checklist + recommendation.
 - [ ] 3-minute, 3-speaker demo rehearsed to a stopwatch; all three teammates speak; 3:00 hard ceiling.
@@ -257,16 +287,21 @@ for hack day.
 ## Next Steps
 
 1. Engineer: ingestion + three-act prompt → Case Reality Report, tonight.
-2. Lawyer: hand-run all 10 cases, red-pen the steelman, pick featured cases.
-3. Thinker: lock the 8-min script around the three acts, rehearse, record fallback.
+2. Engineers (case QA): hand-run all 10 cases, self-review for grounding + plausibility,
+   pick the featured case(s) — default Case 07 only. Not legal sign-off; see posture note.
+3. Thinker/Opener: lock the 3-min script (canonical in `PITCH.md`), rehearse, record
+   the master video.
 
 ## The Assignment
 
-**Tonight, before any code: the lawyer hand-runs all 10 provided cases through
-Claude** — just paste the case documents plus the three-act prompt — and red-pens
-which steelman arguments are legally sound. That hand-test IS the build spec, it
-de-risks the entire prototype, and it tells you which 2–3 cases to feature. If the
-steelman is sound on paper tonight, you've de-risked 80% of tomorrow.
+**Tonight, before any code: hand-run all 10 provided cases through Claude** — just
+paste the case documents plus the three-act prompt — and self-review which steelman
+arguments are cleanly grounded in the file and read as plausible. **The team has no
+lawyer, so this is engineer judgement, not legal sign-off** — keep every featured
+claim in evidence/procedure, where self-review is trustworthy, and default the
+recorded demo to Case 07 only. That hand-test IS the build spec, it de-risks the
+prototype, and it tells you which case(s) to feature. If the steelman holds up on
+paper tonight, you've de-risked 80% of tomorrow.
 
 ## What I noticed about how you think
 
