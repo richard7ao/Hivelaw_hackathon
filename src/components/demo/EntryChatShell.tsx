@@ -293,15 +293,20 @@ export default function EntryChatShell() {
             {/* Composer */}
             <div className="border-t border-line bg-paper px-4 py-4 sm:px-6">
               {reportReady ? (
-                <button
-                  type="button"
-                  onClick={() => router.push("/demo/report")}
-                  className="report-cta-in mb-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-medium text-paper shadow-[0_8px_24px_-10px_rgba(150,20,20,0.7)] transition-colors hover:bg-accent-deep"
-                >
-                  <SteelmanLogo className="h-4 w-4" />
-                  Your case report is ready — view it
-                  <span aria-hidden>&rarr;</span>
-                </button>
+                <div className="mb-3 rounded-2xl border border-accent/20 bg-accent-tint p-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/demo/report")}
+                    className="report-cta-in flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-medium text-paper shadow-[0_8px_24px_-10px_rgba(150,20,20,0.7)] transition-colors hover:bg-accent-deep"
+                  >
+                    <SteelmanLogo className="h-4 w-4" />
+                    Your first-pass report is ready — view it
+                    <span aria-hidden>&rarr;</span>
+                  </button>
+                  <p className="mt-2 px-1 text-xs leading-relaxed text-accent">
+                    You can still add more context or upload more evidence below, and I&apos;ll update the report.
+                  </p>
+                </div>
               ) : userTurnCount >= MAX_INTAKE_USER_TURNS - 1 ? (
                 <button
                   type="button"

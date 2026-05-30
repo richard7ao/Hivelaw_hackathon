@@ -19,6 +19,7 @@ const PAGE_TABS = ["Overview", "Documents", "References", "The Steelman"] as con
 type PageTab = (typeof PAGE_TABS)[number];
 const ANALYSIS_TABS = ["Arguments for", "Counterarguments", "Summary"] as const;
 type AnalysisTab = (typeof ANALYSIS_TABS)[number];
+const EMPTY_CASE_FILES: typeof CASE_07_FILES = [];
 
 const RECOMMENDATION_STYLE = {
   "escalate-to-solicitor": { label: "Escalate to solicitor", bg: "bg-verdict-amber/10", border: "border-verdict-amber/40", text: "text-verdict-amber" },
@@ -142,6 +143,9 @@ function FloatingChat({ messages, addMessage, addFile, addUserFile, onExpand, on
 export default function ReportPage() {
   const router = useRouter();
   const { messages, addMessage, reportData, analysisData, researchItems, toggleResearch, uploadedFiles, addFile, userFiles, addUserFile, activeCase } = useDemoContext();
+  const isLiveIntake = activeCase?.id === "live-intake";
+  const seededCaseFiles = activeCase?.id === "case-07" ? CASE_07_FILES : EMPTY_CASE_FILES;
+  const visibleDocumentCount = seededCaseFiles.length + userFiles.length;
   const [activeTab, setActiveTab] = useState<PageTab>("Overview");
   const [analysisTab, setAnalysisTab] = useState<AnalysisTab>("Arguments for");
   const [decision, setDecision] = useState<"submit" | "escalate" | null>(null);
@@ -156,7 +160,7 @@ export default function ReportPage() {
   const [emailSent, setEmailSent] = useState(false);
   const [emailTo, setEmailTo] = useState("");
   const [letterBody, setLetterBody] = useState(MOCK_SUBMISSION_PREVIEW);
-  const [emailAttachments, setEmailAttachments] = useState<string[]>(["Pre-Action Letter.pdf", ...CASE_07_FILES.map((f) => f.name)]);
+  const [emailAttachments, setEmailAttachments] = useState<string[]>(["Pre-Action Letter.pdf"]);
   const removeAttachment = (name: string) => setEmailAttachments((prev) => prev.filter((a) => a !== name));
   // The Steelman tab: one chain expanded at a time (hero chain open by default)
   const [openChain, setOpenChain] = useState<string | null>(STEELMAN_CHAINS[0]?.id ?? null);
@@ -180,10 +184,11 @@ export default function ReportPage() {
   const toggleFileResult = (id: string) => setFileResults((prev) => prev.map((f) => (f.id === id ? { ...f, selected: !f.selected } : f)));
 
   useEffect(() => {
-    if (uploadedFiles.length === 0) {
-      CASE_07_FILES.forEach((f) => addFile({ name: f.name, size: f.size }));
-    }
-  }, []);
+    setEmailAttachments([
+      "Pre-Action Letter.pdf",
+      ...new Set([...seededCaseFiles.map((file) => file.name), ...userFiles.map((file) => file.name)]),
+    ]);
+  }, [seededCaseFiles, userFiles]);
 
   const handleUpload = () => {
     fileInputRef.current?.click();
@@ -339,7 +344,7 @@ export default function ReportPage() {
               <svg className="h-8 w-8 text-verdict-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
             </div>
             <h2 className="mt-5 text-3xl text-ink">Letter sent</h2>
-            <p className="mt-2 text-[15px] text-ink-soft">Pre-action letter with {CASE_07_FILES.length} attached documents sent to {emailTo || "the recipient"}.</p>
+            <p className="mt-2 text-[15px] text-ink-soft">Pre-action letter with {Math.max(emailAttachments.length - 1, 0)} attached documents sent to {emailTo || "the recipient"}.</p>
             <div className="mt-6 flex items-center justify-center gap-4">
               <button onClick={() => router.push("/demo")} className="inline-flex items-center gap-2 rounded-full border border-line px-6 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-canvas-deep">Back to dashboard</button>
               <button onClick={() => { setSubmitted(false); setDecision(null); setEmailSent(false); setShowEmailCompose(false); }} className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-accent-deep">View report</button>
@@ -638,10 +643,10 @@ export default function ReportPage() {
                   </button>
                   <input ref={fileInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.txt,.doc,.docx" className="hidden" onChange={handleRealUpload} />
 
-                  {(uploadedFiles.length > 0 || userFiles.length > 0) && (
+                  {(seededCaseFiles.length > 0 || userFiles.length > 0) && (
                     <div className="space-y-2">
-                      <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Case files ({uploadedFiles.length + userFiles.length})</span>
-                      {uploadedFiles.length > 0 && CASE_07_FILES.map((f) => (
+                      <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Case files ({visibleDocumentCount})</span>
+                      {seededCaseFiles.map((f) => (
                         <button key={f.path} onClick={() => setPreviewFile({ url: f.path, name: f.name, type: f.type === "text" ? "other" : f.type })} className="flex w-full items-center gap-3 rounded-xl border border-line bg-paper px-4 py-3 text-left transition-colors hover:border-accent/30 hover:bg-accent-tint">
                           {f.type === "pdf" ? (
                             <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
@@ -664,7 +669,7 @@ export default function ReportPage() {
                     </div>
                   )}
 
-                  {uploadedFiles.length > 0 && (
+                  {!isLiveIntake && uploadedFiles.length > 0 && (
                     <div>
                       <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Extracted evidence</span>
                       <div className="mt-3 space-y-2">
