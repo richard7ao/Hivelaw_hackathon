@@ -267,7 +267,7 @@ export const MOCK_LAWYERS: LawyerProfile[] = [
     rating: 4.9,
     casesWon: 312,
     imageUrl: "/lawyers/katherine-jackson.png",
-    profileUrl: "https://lawhive.co.uk/our-lawyers",
+    profileUrl: "https://lawhive.co.uk/our-lawyers/katherine-jackson",
   },
   {
     id: "l2",
@@ -279,7 +279,7 @@ export const MOCK_LAWYERS: LawyerProfile[] = [
     rating: 4.8,
     casesWon: 245,
     imageUrl: "/lawyers/daniel-tang.png",
-    profileUrl: "https://lawhive.co.uk/our-lawyers",
+    profileUrl: "https://lawhive.co.uk/our-lawyers/daniel-tang",
   },
   {
     id: "l3",
@@ -291,6 +291,6 @@ export const MOCK_LAWYERS: LawyerProfile[] = [
     rating: 4.7,
     casesWon: 158,
     imageUrl: "/lawyers/rachelle-lam.png",
-    profileUrl: "https://lawhive.co.uk/our-lawyers",
+    profileUrl: "https://lawhive.co.uk/our-lawyers/rachelle-man-hiu-lam",
   },
 ];
