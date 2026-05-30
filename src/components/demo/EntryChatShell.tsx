@@ -144,7 +144,7 @@ export default function EntryChatShell() {
   }
 
   return (
-    <section className="dot-grid h-full overflow-hidden bg-canvas">
+    <section className="dot-grid h-[calc(100dvh-4rem)] overflow-hidden bg-canvas">
       <div className="mx-auto flex h-full max-w-[80rem] flex-col px-4 py-4 sm:px-6 sm:py-6">
         <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-6">
           {/* ── Chat column ───────────────────────────────────────────── */}
