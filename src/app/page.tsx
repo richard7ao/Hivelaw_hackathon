@@ -41,7 +41,7 @@ const THREE_ACTS = [
   {
     step: "02",
     title: "The Steelman",
-    body: "The hero. The agent argues the other side's best case against you -quoting your own documents back at you as weapons. Every quote string-matched against the real file.",
+    body: "The hero. The agent argues the other side's best case against you — quoting your own documents back at you as weapons. Every quote string-matched against the real file.",
     color: "text-accent",
   },
   {
@@ -64,7 +64,7 @@ const ROUTES = [
   {
     tag: "Route 1 · lead with this",
     title: "Lawhive's honest intake front door",
-    body: "Fewer dead-end intakes, lower cost-to-serve. Self-serve cases stay self-served; escalations arrive with a prepared file. Not a competitor -a moat extension.",
+    body: "Fewer dead-end intakes, lower cost-to-serve. Self-serve cases stay self-served; escalations arrive with a prepared file. Not a competitor — a moat extension.",
     note: "\"Doesn't talking people out of claims kill leads?\" No. It kills the ones you lose money on, and sharpens the ones you don't.",
   },
   {
@@ -95,7 +95,7 @@ export default function Home() {
     <>
       <Nav />
 
-      {/* 1 -HERO */}
+      {/* 1 — HERO */}
       <section className="snap relative flex min-h-dvh flex-col overflow-hidden pt-16">
         <div className="dot-grid dot-grid-fade absolute inset-0" aria-hidden />
         <div className="orbit-field" aria-hidden>
@@ -116,13 +116,15 @@ export default function Home() {
           <div>
             <Kicker>Access to justice · for everyone</Kicker>
             <h1 className="mt-6 max-w-2xl text-5xl leading-[1.04] text-ink sm:text-6xl lg:text-[4.25rem]">
-              Every legal AI tells you you're right.
+              Everyone has a right to good legal advice.
+              <br />
+              <span className="text-ink-soft">Every legal AI tells you you're right.</span>
               <br />
               <span className="italic text-accent">We tell you how you'll lose.</span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-ink-soft sm:text-xl">
-              The Steelman argues the opponent's best case against you -using your
-              own documents -so you know where you really stand before you spend
+              The Steelman argues the opponent's best case against you — using your
+              own documents — so you know where you really stand before you spend
               time and money you can't get back.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
@@ -143,7 +145,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero card -the Steelman quote punch */}
+          {/* Hero card — the Steelman quote punch */}
           <Reveal delay={120} className="lg:w-full lg:max-w-md lg:justify-self-end">
             <div className="rounded-2xl border border-line bg-paper p-6 shadow-[0_1px_0_rgba(0,0,0,0.02),0_30px_60px_-40px_rgba(40,20,20,0.45)]">
               <div className="flex items-center justify-between">
@@ -183,7 +185,7 @@ export default function Home() {
         </a>
       </section>
 
-      {/* 2 -THE PROBLEM */}
+      {/* 2 — THE PROBLEM */}
       <section id="problem" className="snap border-t border-line bg-canvas-deep">
         <div className="mx-auto max-w-[88rem] px-6 py-24 sm:py-28">
           <Reveal>
@@ -210,7 +212,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3 -THE GAP */}
+      {/* 3 — THE GAP */}
       <section className="snap border-t border-line">
         <div className="mx-auto grid max-w-[88rem] grid-cols-1 gap-12 px-6 py-24 sm:py-28 lg:grid-cols-[0.9fr_1.1fr]">
           <Reveal>
@@ -228,7 +230,7 @@ export default function Home() {
                 telling you what you want to hear.
               </p>
               <p>
-                The Steelman closes it. We don't discourage people -we arm
+                The Steelman closes it. We don't discourage people — we arm
                 them. Better to take the other side's hardest punch from us, in
                 private, than from a judge when it's too late to fix.
               </p>
@@ -237,7 +239,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4 -HOW IT WORKS (Three Acts) */}
+      {/* 4 — HOW IT WORKS (Three Acts) */}
       <section id="how" className="snap border-t border-line bg-canvas-deep">
         <div className="mx-auto max-w-[88rem] px-6 py-24 sm:py-28">
           <Reveal>
@@ -265,7 +267,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 5 -THE FOIL (comparison) */}
+      {/* 5 — THE FOIL (comparison) */}
       <section id="foil" className="snap border-t border-line">
         <div className="mx-auto max-w-[88rem] px-6 py-24 sm:py-28">
           <Reveal>
@@ -315,7 +317,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6 -THE TRUST MECHANIC */}
+      {/* 6 — THE TRUST MECHANIC */}
       <section id="trust" className="snap border-t border-line bg-ink text-canvas">
         <div className="mx-auto grid max-w-[88rem] grid-cols-1 gap-14 px-6 py-24 sm:py-28 lg:grid-cols-[1fr_0.85fr] lg:items-center">
           <Reveal>
@@ -324,7 +326,7 @@ export default function Home() {
               The trust mechanic
             </span>
             <h2 className="mt-6 text-4xl leading-[1.1] text-canvas sm:text-5xl">
-              We're three engineers -not lawyers.{" "}
+              We're three engineers — not lawyers.{" "}
               <span className="italic text-accent">That's exactly why we built it this way.</span>
             </h2>
             <div className="mt-7 max-w-xl space-y-5 text-lg leading-relaxed text-canvas/70">
@@ -336,11 +338,11 @@ export default function Home() {
               <p>
                 Legal citations come only from a closed library of actual statute
                 text we control. If the model can't find a basis there, it says
-                so -it doesn't guess. A wrong statute is worse than no statute.
+                so — it doesn't guess. A wrong statute is worse than no statute.
               </p>
               <p>
                 The honest "no" is the most useful thing an agent can do. A wrong
-                "yes" wastes a filing fee. A wrong "no" is worse -so when it's
+                "yes" wastes a filing fee. A wrong "no" is worse — so when it's
                 genuinely unsure, it routes to a human.
               </p>
             </div>
@@ -377,7 +379,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7 -GO TO MARKET */}
+      {/* 7 — GO TO MARKET */}
       <section id="gtm" className="snap border-t border-line bg-canvas-deep">
         <div className="mx-auto max-w-[88rem] px-6 py-24 sm:py-28">
           <Reveal>
@@ -407,7 +409,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 8 -SOURCES */}
+      {/* 8 — SOURCES */}
       <section id="sources" className="snap border-t border-line">
         <div className="mx-auto grid max-w-[88rem] grid-cols-1 gap-12 px-6 py-24 sm:py-28 lg:grid-cols-[0.8fr_1.2fr]">
           <Reveal>
@@ -441,19 +443,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 9 -FINAL CTA + FOOTER */}
+      {/* 9 — FINAL CTA + FOOTER */}
       <section className="snap relative overflow-hidden border-t border-line bg-ink text-canvas">
         <div className="dot-grid dot-grid-fade absolute inset-0 opacity-30" aria-hidden />
         <div className="relative mx-auto max-w-3xl px-6 py-28 text-center sm:py-32">
           <Reveal>
             <SteelmanLogo className="mx-auto h-16 w-16 text-accent" />
-            <Kicker>Punchline</Kicker>
             <h2 className="mt-6 text-4xl leading-[1.08] text-canvas sm:text-6xl">
-              Everyone has a right to good legal advice.
+              The tool that tells you how you'll lose is the one that finally gives
+              people a fair shot.
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-canvas/65">
-              The tool that tells you how you'll lose is the one that finally
-              gives people a fair shot. Pick any case and watch it argue against you.
+              Everyone has a right to know where they stand. Pick any case and
+              watch it argue against you.
             </p>
             <Link
               href="/demo"
