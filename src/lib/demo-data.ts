@@ -271,14 +271,14 @@ export const MOCK_LAWYERS: LawyerProfile[] = [
   },
   {
     id: "l2",
-    name: "Margarita Ivanova",
+    name: "Daniel Tang",
     firm: "Lawhive",
     specialisation: "HHSRS enforcement & fitness for habitation",
     experience: "Specialises in Category 1 hazard enforcement and s.9A fitness claims. Expert in housing conditions litigation and single joint expert instructions.",
     qualifications: ["LLB (Hons)", "SQE qualified", "CILEX Fellow"],
     rating: 4.8,
     casesWon: 245,
-    imageUrl: "/lawyers/margarita-ivanova.png",
+    imageUrl: "/lawyers/daniel-tang.png",
     profileUrl: "https://lawhive.co.uk/our-lawyers",
   },
   {
