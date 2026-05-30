@@ -12,9 +12,10 @@ import {
   MOCK_COUNTER_REFERENCES,
   MOCK_LAWYERS,
   CASE_07_FILES,
+  STEELMAN_CHAINS,
 } from "@/lib/demo-data";
 
-const PAGE_TABS = ["Overview", "Documents", "References"] as const;
+const PAGE_TABS = ["Overview", "Documents", "References", "The Steelman"] as const;
 type PageTab = (typeof PAGE_TABS)[number];
 const ANALYSIS_TABS = ["Arguments for", "Counterarguments", "Summary"] as const;
 type AnalysisTab = (typeof ANALYSIS_TABS)[number];
@@ -127,6 +128,8 @@ export default function ReportPage() {
   const [previewFile, setPreviewFile] = useState<string | null>(null);
   const [filesLoaded, setFilesLoaded] = useState(false);
   const [pdfGenerating, setPdfGenerating] = useState(false);
+  // The Steelman tab: one chain expanded at a time (hero chain open by default)
+  const [openChain, setOpenChain] = useState<string | null>(STEELMAN_CHAINS[0]?.id ?? null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeHighlights = expandedRef
@@ -586,6 +589,112 @@ export default function ReportPage() {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* ==================== THE STEELMAN ==================== */}
+          {activeTab === "The Steelman" && (
+            <div className="space-y-6">
+              {/* Intro — frame the tab honestly */}
+              <div>
+                <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">The Steelman — the strongest arguments the other side will make</span>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">
+                  Each argument below is one a court would hear from the other side, grounded in a quote from your own case file. We give you the strongest honest reply to each &mdash; and show you where it stays contested, rather than pretending you&rsquo;ve won.
+                </p>
+              </div>
+
+              {/* Summary strip — the honest overview at a glance (the billboard test) */}
+              <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-canvas-deep px-4 py-3">
+                <span className="font-serif text-lg text-ink">{STEELMAN_CHAINS.length} arguments</span>
+                <span className="text-sm text-ink-soft">they will run against you</span>
+                {STEELMAN_CHAINS.filter((c) => c.verdict === "arguable").length > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-verdict-amber/40 bg-verdict-amber/10 px-2.5 py-1 text-xs font-semibold text-verdict-amber">
+                    <span className="h-1.5 w-1.5 rounded-full bg-verdict-amber" />
+                    {STEELMAN_CHAINS.filter((c) => c.verdict === "arguable").length} arguable
+                  </span>
+                )}
+                {STEELMAN_CHAINS.filter((c) => c.verdict === "strong-for-them").length > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-verdict-red/40 bg-verdict-red/10 px-2.5 py-1 text-xs font-semibold text-verdict-red">
+                    {STEELMAN_CHAINS.filter((c) => c.verdict === "strong-for-them").length} strong for them
+                  </span>
+                )}
+                <span className="ml-auto text-xs text-ink-faint">Tap any argument to see the chain</span>
+              </div>
+
+              {/* Accordion of chains — the collapsed list IS the overview; one open at a time */}
+              <div className="space-y-3">
+                {STEELMAN_CHAINS.map((chain, i) => {
+                  const open = openChain === chain.id;
+                  const isArguable = chain.verdict === "arguable";
+                  return (
+                    <div key={chain.id} className={`overflow-hidden rounded-2xl border bg-paper transition-colors ${open ? "border-accent" : "border-line"}`}>
+                      {/* Header — node 1 (the opponent's argument) doubles as the toggle */}
+                      <button onClick={() => setOpenChain(open ? null : chain.id)} className="flex w-full items-center gap-4 p-5 text-left">
+                        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${open ? "bg-accent text-paper" : "bg-canvas-deep text-ink-soft"}`}>{i + 1}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-verdict-red">The opponent will argue</span>
+                          <span className="mt-1 block font-serif text-[15px] leading-snug text-ink">{chain.opponentArgument}</span>
+                        </span>
+                        <span className={`hidden shrink-0 rounded-md border px-2.5 py-1 text-xs font-semibold sm:inline ${isArguable ? "border-verdict-amber/40 bg-verdict-amber/10 text-verdict-amber" : "border-verdict-red/40 bg-verdict-red/10 text-verdict-red"}`}>
+                          {isArguable ? "ARGUABLE" : "STRONG FOR THEM"}
+                        </span>
+                        <svg className={`h-5 w-5 shrink-0 text-ink-faint transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                      </button>
+
+                      {/* Body — the threaded chain, revealed on expand. Spine = left border; the final node is an open dashed circle that refuses to close. */}
+                      {open && (
+                        <div className="border-t border-line-soft px-5 pt-4 pb-6">
+                          <div className="relative ml-2 space-y-6 border-l border-line pl-8">
+                            {/* Node 2 — they quote your own evidence (the gut-punch) */}
+                            <div className="relative">
+                              <span className="absolute top-0 -left-[44px] flex h-6 w-6 items-center justify-center rounded-full bg-accent text-paper">
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+                              </span>
+                              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-verdict-red">They quote your own evidence</span>
+                              <div className="mt-2 rounded-xl border border-verdict-red/20 bg-verdict-red/5 p-4">
+                                <p className="font-serif text-[15px] italic leading-relaxed text-ink">&ldquo;{chain.sourceQuote}&rdquo;</p>
+                                <p className="mt-2 text-xs font-medium text-verdict-red">{chain.quoteCaption}</p>
+                              </div>
+                            </div>
+
+                            {/* Node 3 — your strongest honest reply, grounded in statute */}
+                            <div className="relative">
+                              <span className="absolute top-0 -left-[44px] flex h-6 w-6 items-center justify-center rounded-full bg-accent text-paper">
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>
+                              </span>
+                              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-accent">Your strongest reply</span>
+                              <p className="mt-2 text-sm leading-relaxed text-ink">{chain.reply}</p>
+                              <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-line bg-canvas-deep px-3 py-1.5 text-xs text-ink-soft">
+                                <span className="font-bold text-accent">&#167;</span>{chain.statute}
+                              </div>
+                            </div>
+
+                            {/* Node 4 — still unresolved: an open, dashed node, never a checkmark */}
+                            <div className="relative">
+                              <span className="absolute top-0 -left-[44px] h-6 w-6 rounded-full border-2 border-dashed border-verdict-amber bg-paper" />
+                              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-verdict-amber">Still unresolved</span>
+                              <div className="mt-2 rounded-xl border border-dashed border-verdict-amber/50 bg-verdict-amber/5 p-4">
+                                <span className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${isArguable ? "border-verdict-amber/40 bg-verdict-amber/10 text-verdict-amber" : "border-verdict-red/40 bg-verdict-red/10 text-verdict-red"}`}>
+                                  {isArguable ? "ARGUABLE" : "STRONG FOR THEM"}
+                                </span>
+                                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{chain.unresolvedNote}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Tie the per-chain "unresolved" to the page-level verdict */}
+              <div className="rounded-xl border border-line bg-paper p-5">
+                <p className="text-sm leading-relaxed text-ink-soft">
+                  Every exchange above stays <span className="font-medium text-ink">contested</span>. Taken together, this is an <span className="font-medium text-verdict-amber">arguable</span> case &mdash; strong enough to pursue, but only with the file prepared. See the{" "}
+                  <button onClick={() => setActiveTab("Overview")} className="font-medium text-accent hover:text-accent-deep">verdict &amp; next steps &rarr;</button>
+                </p>
               </div>
             </div>
           )}
