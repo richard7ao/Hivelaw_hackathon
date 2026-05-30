@@ -14,14 +14,21 @@ export async function POST(request: Request) {
     const files = formData.getAll("files").filter((value): value is File => value instanceof File);
     const attachments = await Promise.all(files.map(mapFormFileToAttachment));
     const cases = await getCasesManifest();
+    const forceEvaluate = formData.get("forceEvaluate") === "true";
 
-    const anthropicResult = await runAnthropicIntake(files, attachments, messages, cases);
+    const anthropicResult = await runAnthropicIntake(
+      files,
+      attachments,
+      messages,
+      cases,
+      forceEvaluate,
+    );
 
     if (anthropicResult) {
       return NextResponse.json(anthropicResult);
     }
 
-    return NextResponse.json(runLocalIntakeDemo(messages, attachments, cases));
+    return NextResponse.json(runLocalIntakeDemo(messages, attachments, cases, forceEvaluate));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown intake error";
     return NextResponse.json({ error: message }, { status: 500 });

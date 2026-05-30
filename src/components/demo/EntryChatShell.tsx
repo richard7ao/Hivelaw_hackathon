@@ -35,6 +35,12 @@ export default function EntryChatShell() {
   const stageLabel = formatStage(result?.currentStage ?? "understanding-problem");
   const allEvidence = useMemo(() => sessionFiles, [sessionFiles]);
 
+  const suggestions = [
+    "My landlord won't fix the damp and mould in my flat.",
+    "I paid a deposit and never got the protection details.",
+    "A builder did poor work and won't refund me.",
+  ];
+
   function queueFiles(fileList: FileList | null) {
     if (!fileList) return;
 
@@ -55,15 +61,24 @@ export default function EntryChatShell() {
     setSessionFiles((current) => current.filter((file) => file.id !== id));
   }
 
-  function sendTurn() {
-    if ((!draft.trim() && pendingFiles.length === 0) || isPending) {
+  function sendTurn(options?: { force?: boolean }) {
+    const force = options?.force ?? false;
+
+    if (isPending) {
+      return;
+    }
+    if (!force && !draft.trim() && pendingFiles.length === 0) {
       return;
     }
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: draft.trim() || "Uploaded supporting evidence.",
+      content:
+        draft.trim() ||
+        (force
+          ? "Go ahead and run my assessment now with what I've shared so far."
+          : "Uploaded supporting evidence."),
       attachments: pendingFiles.map((file) => ({ name: file.file.name, kind: file.kind })),
     };
 
@@ -92,6 +107,10 @@ export default function EntryChatShell() {
         nextSessionFiles.forEach((sessionFile) => {
           formData.append("files", sessionFile.file);
         });
+
+        if (force) {
+          formData.append("forceEvaluate", "true");
+        }
 
         const response = await fetch("/api/intake", {
           method: "POST",
@@ -126,63 +145,51 @@ export default function EntryChatShell() {
 
   return (
     <section className="dot-grid h-full overflow-hidden bg-canvas">
-      <div className="mx-auto flex h-full max-w-[88rem] flex-col overflow-hidden px-6 py-6 sm:py-8">
-        <div className="border-b border-line pb-6">
-          <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-ink-faint">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
-            </span>
-            Live intake
-          </span>
-        </div>
-
-        <div className="mt-6 grid min-h-0 flex-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
-          <div className="flex h-full min-h-0 flex-col rounded-[1.75rem] border border-line bg-paper shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_48px_-32px_rgba(40,20,20,0.38)]">
-            <div className="border-b border-line px-6 py-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">
-                    Entry chat
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                    Upload is always available. The larger evidence prompt only appears when the
-                    intake can explain why a document would materially help.
-                  </p>
-                </div>
-                <EngineBadge engine={result?.engine ?? "local-demo"} />
-              </div>
-              <div className="mt-4">
-                <ProgressCard
-                  progress={visibleProgress}
-                  stageLabel={stageLabel}
-                  result={result}
-                  embedded
-                />
+      <div className="mx-auto flex h-full max-w-[80rem] flex-col px-4 py-4 sm:px-6 sm:py-6">
+        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-6">
+          {/* ── Chat column ───────────────────────────────────────────── */}
+          <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-line bg-paper shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_48px_-32px_rgba(40,20,20,0.38)]">
+            <div className="flex items-center gap-3 border-b border-line px-5 py-4">
+              <BrandMark />
+              <div>
+                <p className="text-sm font-semibold text-ink">Steelman intake</p>
+                <p className="text-xs text-ink-faint">Honest case assessment — not legal advice</p>
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+            {/* Scrollable transcript */}
+            <div className="scroll-thin min-h-0 flex-1 overflow-y-auto bg-canvas px-4 py-6 sm:px-6">
               {messages.length === 0 ? (
-                <EmptyState />
+                <EmptyState
+                  suggestions={suggestions}
+                  onPick={(text) => setDraft(text)}
+                />
               ) : (
-                <div className="space-y-4">
+                <div className="mx-auto flex max-w-2xl flex-col gap-5">
                   {messages.map((message) => (
                     <MessageBubble key={message.id} message={message} />
                   ))}
+                  {isPending ? <TypingBubble /> : null}
                 </div>
               )}
             </div>
 
-            {result?.fileRequests.length ? (
-              <div className="border-t border-line px-6 py-4 lg:hidden">
-                <EvidenceRequestCard requests={result.fileRequests} />
-              </div>
-            ) : null}
+            {/* Composer */}
+            <div className="border-t border-line bg-paper px-4 py-4 sm:px-6">
+              {messages.length >= 3 && !result?.reportScaffold ? (
+                <button
+                  type="button"
+                  onClick={() => sendTurn({ force: true })}
+                  disabled={isPending}
+                  className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-accent/30 bg-accent-tint px-4 py-2.5 text-sm font-medium text-accent transition-colors hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <span aria-hidden>&#9889;</span>
+                  Skip the questions — run my assessment now
+                </button>
+              ) : null}
 
-            <div className="border-t border-line px-6 py-5">
               {pendingFiles.length > 0 ? (
-                <div className="mb-4 flex flex-wrap gap-2">
+                <div className="mb-3 flex flex-wrap gap-2">
                   {pendingFiles.map((pendingFile) => (
                     <button
                       key={pendingFile.id}
@@ -190,62 +197,74 @@ export default function EntryChatShell() {
                       onClick={() => removePendingFile(pendingFile.id)}
                       className="inline-flex items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 text-xs text-ink-soft transition-colors hover:border-accent/30 hover:text-ink"
                     >
+                      <span aria-hidden>📎</span>
                       <span>{pendingFile.file.name}</span>
-                      <span aria-hidden>&times;</span>
+                      <span aria-hidden className="text-ink-faint">&times;</span>
                     </button>
                   ))}
                 </div>
               ) : null}
 
-              <div className="rounded-3xl border border-line bg-canvas px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+              <div className="flex items-end gap-2 rounded-3xl border border-line bg-canvas px-2 py-2 transition-colors focus-within:border-accent/40">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(event) => queueFiles(event.target.files)}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Attach files (PDF, image, text)"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-lg text-ink-soft transition-colors hover:bg-canvas-deep hover:text-ink"
+                >
+                  <span aria-hidden>+</span>
+                  <span className="sr-only">Attach files</span>
+                </button>
+
                 <textarea
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
-                  placeholder="Tell us what happened, what outcome you want, and upload anything important."
-                  rows={4}
-                  className="min-h-28 w-full resize-none bg-transparent text-[15px] leading-relaxed text-ink outline-none placeholder:text-ink-faint"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      sendTurn();
+                    }
+                  }}
+                  placeholder="Tell us what happened, and what outcome you want…"
+                  rows={1}
+                  className="max-h-40 min-h-10 flex-1 resize-none self-center bg-transparent py-2 text-[15px] leading-relaxed text-ink outline-none placeholder:text-ink-faint"
                   disabled={isPending}
                 />
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      className="hidden"
-                      onChange={(event) => queueFiles(event.target.files)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex h-10 items-center gap-2 rounded-full border border-line bg-paper px-4 text-sm font-medium text-ink transition-colors hover:bg-canvas-deep"
-                    >
-                      <span aria-hidden>+</span>
-                      Attach files
-                    </button>
-                    <span className="text-xs text-ink-faint">
-                      PDFs, images, and text files supported.
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={sendTurn}
-                    disabled={isPending || (!draft.trim() && pendingFiles.length === 0)}
-                    className="inline-flex h-11 items-center gap-2 rounded-full bg-accent px-5 text-sm font-medium text-paper transition-colors hover:bg-accent-deep disabled:cursor-not-allowed disabled:bg-ink/15 disabled:text-ink-faint"
-                  >
-                    {isPending ? "Thinking..." : "Send"}
-                    <span aria-hidden>&rarr;</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => sendTurn()}
+                  disabled={isPending || (!draft.trim() && pendingFiles.length === 0)}
+                  title="Send"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-lg text-paper transition-colors hover:bg-accent-deep disabled:cursor-not-allowed disabled:bg-ink/15 disabled:text-ink-faint"
+                >
+                  <span aria-hidden>{isPending ? "…" : "↑"}</span>
+                  <span className="sr-only">Send</span>
+                </button>
               </div>
 
-              {error ? <p className="mt-3 text-sm text-verdict-red">{error}</p> : null}
+              <p className="mt-2 px-2 text-xs text-ink-faint">
+                PDFs, images, and text files supported. Press Enter to send, Shift+Enter for a new line.
+              </p>
+              {error ? <p className="mt-2 px-2 text-sm text-verdict-red">{error}</p> : null}
             </div>
           </div>
 
-          <aside className="min-h-0 space-y-4 overflow-y-auto pr-1">
+          {/* ── Sidebar ───────────────────────────────────────────────── */}
+          <aside className="scroll-thin min-h-0 space-y-4 overflow-y-auto pb-2 lg:pr-1">
+            <ProgressCard progress={visibleProgress} stageLabel={stageLabel} result={result} />
+
+            {result?.fileRequests.length ? (
+              <EvidenceRequestCard requests={result.fileRequests} />
+            ) : null}
+
             {allEvidence.length > 0 ? (
               <div className="rounded-2xl border border-line bg-paper p-5">
                 <p className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">
@@ -257,26 +276,20 @@ export default function EntryChatShell() {
                       key={entry.id}
                       className="flex items-center gap-3 rounded-xl border border-line-soft bg-canvas px-3 py-2"
                     >
-                      <div className="flex-1">
-                        <p className="text-sm text-ink">{entry.file.name}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="truncate text-sm text-ink">{entry.file.name}</p>
                         <p className="text-xs text-ink-faint">{formatKind(entry.kind)}</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => removeSessionFile(entry.id)}
-                        className="text-xs text-ink-faint transition-colors hover:text-ink"
+                        className="shrink-0 text-xs text-ink-faint transition-colors hover:text-ink"
                       >
                         Remove
                       </button>
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : null}
-
-            {result?.fileRequests.length ? (
-              <div className="hidden lg:block">
-                <EvidenceRequestCard requests={result.fileRequests} />
               </div>
             ) : null}
 
@@ -288,37 +301,111 @@ export default function EntryChatShell() {
   );
 }
 
-function EmptyState() {
-  return <div className="h-full min-h-[24rem]" />;
+function BrandMark() {
+  return (
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent shadow-[0_6px_16px_-8px_rgba(150,20,20,0.7)]">
+      <span className="block h-3 w-3 rotate-45 rounded-[2px] bg-paper" />
+    </span>
+  );
+}
+
+function EmptyState({
+  suggestions,
+  onPick,
+}: {
+  suggestions: string[];
+  onPick: (text: string) => void;
+}) {
+  return (
+    <div className="mx-auto flex h-full max-w-2xl flex-col justify-center">
+      <div className="flex items-start gap-3">
+        <BrandMark />
+        <div className="rounded-[1.25rem] rounded-tl-md border border-line bg-paper px-5 py-4 shadow-sm">
+          <p className="text-[15px] leading-relaxed text-ink">
+            Hi — I&apos;m the Steelman intake assistant. Tell me what happened in your own words,
+            and upload anything important (letters, photos, contracts).
+          </p>
+          <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
+            I&apos;ll find your strongest position — then show you exactly how the other side will
+            argue back, using your own evidence. That&apos;s what actually protects you.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 pl-12">
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">
+          Try one of these
+        </p>
+        <div className="mt-3 flex flex-col gap-2">
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => onPick(suggestion)}
+              className="group flex items-center gap-2 rounded-2xl border border-line bg-paper px-4 py-3 text-left text-sm text-ink-soft transition-colors hover:border-accent/30 hover:text-ink"
+            >
+              <span aria-hidden className="text-ink-faint transition-colors group-hover:text-accent">
+                &rarr;
+              </span>
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex items-start gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
+      {isUser ? (
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-sm font-medium text-ink-soft">
+          You
+        </span>
+      ) : (
+        <BrandMark />
+      )}
       <div
-        className={`max-w-[85%] rounded-[1.5rem] px-5 py-4 text-[15px] leading-relaxed ${
-          isUser ? "bg-accent text-paper" : "border border-line bg-canvas text-ink"
+        className={`max-w-[85%] px-5 py-4 text-[15px] leading-relaxed shadow-sm ${
+          isUser
+            ? "rounded-[1.25rem] rounded-tr-md bg-accent text-paper"
+            : "rounded-[1.25rem] rounded-tl-md border border-line bg-paper text-ink"
         }`}
       >
-        <p>{message.content}</p>
+        <p className="whitespace-pre-wrap">{message.content}</p>
         {message.attachments.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
             {message.attachments.map((attachment) => (
               <span
                 key={`${message.id}-${attachment.name}`}
-                className={`rounded-full px-3 py-1 text-xs ${
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${
                   isUser
-                    ? "bg-paper/15 text-paper"
-                    : "border border-line bg-paper text-ink-soft"
+                    ? "bg-paper/20 text-paper"
+                    : "border border-line bg-canvas text-ink-soft"
                 }`}
               >
+                <span aria-hidden>📎</span>
                 {attachment.name}
               </span>
             ))}
           </div>
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+function TypingBubble() {
+  return (
+    <div className="flex items-start gap-3">
+      <BrandMark />
+      <div className="flex items-center gap-1.5 rounded-[1.25rem] rounded-tl-md border border-line bg-paper px-5 py-4 shadow-sm">
+        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint [animation-delay:-0.3s]" />
+        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint [animation-delay:-0.15s]" />
+        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint" />
       </div>
     </div>
   );
@@ -450,20 +537,6 @@ function ReportHandoffCard({ result }: { result: IntakeTurnResult }) {
         </p>
       </div>
     </div>
-  );
-}
-
-function EngineBadge({ engine }: { engine: IntakeTurnResult["engine"] }) {
-  return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-medium ${
-        engine === "anthropic"
-          ? "border border-verdict-green/30 bg-verdict-green/10 text-verdict-green"
-          : "border border-line bg-canvas text-ink-faint"
-      }`}
-    >
-      {engine === "anthropic" ? "Anthropic live" : "Local demo reasoning"}
-    </span>
   );
 }
 

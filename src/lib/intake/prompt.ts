@@ -1,6 +1,10 @@
 import type { CaseManifestEntry } from "@/lib/cases/manifest";
 
-export function buildIntakePrompt(cases: CaseManifestEntry[], conversation: string) {
+export function buildIntakePrompt(
+  cases: CaseManifestEntry[],
+  conversation: string,
+  forceEvaluate = false,
+) {
   const caseLayer = cases
     .map(
       (entry) =>
@@ -29,7 +33,15 @@ the wording, date, or image in that file is likely to change the assessment.
 Return JSON only. Keep the assistant message plain-English, short, and direct.
 If the user already gave enough information, set canEvaluateNow=true and move
 them into final evaluation with a report scaffold.
-
+${
+  forceEvaluate
+    ? `\nIMPORTANT — the user has explicitly chosen to skip further questions and
+proceed to a first-pass assessment NOW. You MUST set canEvaluateNow=true and
+return a complete reportScaffold built from whatever information is available.
+Do not ask more questions. Be honest: keep the evidenceGaps list prominent and
+specific so the user can see exactly what would still strengthen the case.\n`
+    : ""
+}
 Cases layer:
 ${caseLayer}
 

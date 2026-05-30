@@ -24,6 +24,7 @@ export function runLocalIntakeDemo(
   messages: IntakeMessageInput[],
   attachments: IntakeAttachmentInput[],
   cases: CaseManifestEntry[],
+  forceEvaluate = false,
 ): IntakeTurnResult {
   const userTranscript = messages
     .filter((message) => message.role === "user")
@@ -37,8 +38,12 @@ export function runLocalIntakeDemo(
   const missingFacts = buildMissingFacts(userTranscript, primaryCase, buckets);
   const fileRequests = buildFileRequests(userTranscript, attachments, primaryCase);
   const followUpQuestions = buildFollowUpQuestions(primaryCase, missingFacts);
+  // The user can choose to skip ahead at any point ("run the analysis now").
+  // We still surface the evidence gaps, so a forced early assessment is honest
+  // about what is missing rather than pretending the file is complete.
   const canEvaluateNow =
-    readinessScore >= 78 && buckets.problemSummary && buckets.timeline && buckets.desiredOutcome;
+    forceEvaluate ||
+    (readinessScore >= 78 && buckets.problemSummary && buckets.timeline && buckets.desiredOutcome);
   const currentStage = canEvaluateNow
     ? "ready-for-evaluation"
     : fileRequests.length > 0
@@ -51,7 +56,9 @@ export function runLocalIntakeDemo(
     : undefined;
 
   const assistantMessage = canEvaluateNow
-    ? "I have enough for a first-pass assessment. I'm moving into final evaluation now, and you can still add more context or files if you want me to tighten the report."
+    ? forceEvaluate
+      ? "Understood — I'm running a first-pass assessment now with what you've shared. It's below. I've kept the evidence-gap list prominent so you can see exactly what would still strengthen the case."
+      : "I have enough for a first-pass assessment. I'm moving into final evaluation now, and you can still add more context or files if you want me to tighten the report."
     : buildAssistantPrompt(followUpQuestions, fileRequests);
 
   return normalizeIntakeResult(

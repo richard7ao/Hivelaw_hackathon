@@ -16,6 +16,7 @@ export async function runAnthropicIntake(
   attachments: IntakeAttachmentInput[],
   messages: IntakeMessageInput[],
   cases: CaseManifestEntry[],
+  forceEvaluate = false,
 ) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -75,7 +76,7 @@ export async function runAnthropicIntake(
   const response = await client.messages.create({
     model: process.env.HIVELAW_INTAKE_MODEL ?? "claude-sonnet-4-5",
     max_tokens: 2200,
-    system: buildIntakePrompt(cases, conversation),
+    system: buildIntakePrompt(cases, conversation, forceEvaluate),
     messages: [{ role: "user", content: contentBlocks }],
     output_config: {
       format: {
