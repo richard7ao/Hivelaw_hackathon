@@ -14,6 +14,7 @@ export type ResearchItem = {
 };
 
 export type UploadedFile = { name: string; size: string };
+export type UserFile = { name: string; url: string; type: "pdf" | "image" | "other" };
 
 export type ReportHighlight = { text: string; type: "support" | "flag" };
 
@@ -41,6 +42,8 @@ type DemoState = {
   toggleResearch: (id: string) => void;
   uploadedFiles: UploadedFile[];
   addFile: (f: UploadedFile) => void;
+  userFiles: UserFile[];
+  addUserFile: (f: UserFile) => void;
   reportData: ReportData;
   analysisData: AnalysisData;
   activeCase: CaseData | null;
@@ -61,6 +64,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [researchItems, setResearchItems] = useState<ResearchItem[]>(MOCK_RESEARCH);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [userFiles, setUserFiles] = useState<UserFile[]>([]);
   const [activeCase, setActiveCaseState] = useState<CaseData | null>(null);
 
   const addMessage = (msg: Message) => setMessages((prev) => [...prev, msg]);
@@ -74,6 +78,9 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   const addFile = (f: UploadedFile) =>
     setUploadedFiles((prev) => [...prev, f]);
+
+  const addUserFile = (f: UserFile) =>
+    setUserFiles((prev) => [...prev, f]);
 
   const setActiveCase = (c: CaseData) => setActiveCaseState(c);
 
@@ -89,6 +96,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         toggleResearch,
         uploadedFiles,
         addFile,
+        userFiles,
+        addUserFile,
         reportData,
         analysisData,
         activeCase,

@@ -54,9 +54,10 @@ const RELEVANCE_STYLE = {
   low: "border-line bg-canvas-deep text-ink-faint",
 } as const;
 
-function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: string; content: string }[]; addMessage: (msg: { role: "user" | "assistant"; content: string }) => void; onExpand: () => void }) {
+function FloatingChat({ messages, addMessage, addFile, addUserFile, onExpand, onRegenerate }: { messages: { role: string; content: string }[]; addMessage: (msg: { role: "user" | "assistant"; content: string }) => void; addFile: (f: { name: string; size: string }) => void; addUserFile: (f: { name: string; url: string; type: "pdf" | "image" | "other" }) => void; onExpand: () => void; onRegenerate: () => void }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const chatFileRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
     const text = input.trim();
@@ -65,7 +66,25 @@ function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: st
     setInput("");
     setTimeout(() => {
       addMessage({ role: "assistant", content: "I've noted that additional detail. Let me update the case assessment to reflect this new information." });
+      setTimeout(onRegenerate, 500);
     }, 800);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).forEach((f) => {
+      addFile({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` });
+      const url = URL.createObjectURL(f);
+      const type = f.type.startsWith("image/") ? "image" as const : f.type === "application/pdf" ? "pdf" as const : "other" as const;
+      addUserFile({ name: f.name, url, type });
+      addMessage({ role: "user", content: `[Uploaded: ${f.name}]` });
+    });
+    e.target.value = "";
+    setTimeout(() => {
+      addMessage({ role: "assistant", content: "Document received. I'll incorporate this into the case assessment." });
+      setTimeout(onRegenerate, 500);
+    }, 600);
   };
 
   if (!open) {
@@ -106,6 +125,10 @@ function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: st
       </div>
       <div className="border-t border-line px-3 py-2">
         <div className="flex items-center gap-2">
+          <button onClick={() => chatFileRef.current?.click()} className="rounded-lg p-1.5 text-ink-faint hover:bg-canvas-deep hover:text-ink" title="Upload file">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" /></svg>
+          </button>
+          <input ref={chatFileRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" className="hidden" onChange={handleFileUpload} />
           <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSend()} placeholder="Add details or evidence..." className="flex-1 bg-transparent text-xs text-ink outline-none placeholder:text-ink-faint" />
           <button onClick={handleSend} disabled={!input.trim()} className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-paper disabled:bg-ink/15 disabled:text-ink-faint">Send</button>
         </div>
@@ -116,7 +139,7 @@ function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: st
 
 export default function ReportPage() {
   const router = useRouter();
-  const { messages, addMessage, reportData, analysisData, researchItems, toggleResearch, uploadedFiles, addFile, activeCase } = useDemoContext();
+  const { messages, addMessage, reportData, analysisData, researchItems, toggleResearch, uploadedFiles, addFile, userFiles, addUserFile, activeCase } = useDemoContext();
   const [activeTab, setActiveTab] = useState<PageTab>("Overview");
   const [analysisTab, setAnalysisTab] = useState<AnalysisTab>("Arguments for");
   const [decision, setDecision] = useState<"submit" | "escalate" | null>(null);
@@ -127,7 +150,6 @@ export default function ReportPage() {
   const [previewFile, setPreviewFile] = useState<string | null>(null);
   const [filesLoaded, setFilesLoaded] = useState(false);
   const [pdfGenerating, setPdfGenerating] = useState(false);
-  const [userFiles, setUserFiles] = useState<{ name: string; url: string }[]>([]);
   const [contactedLawyers, setContactedLawyers] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -156,8 +178,10 @@ export default function ReportPage() {
     Array.from(files).forEach((f) => {
       addFile({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` });
       const url = URL.createObjectURL(f);
-      setUserFiles((prev) => [...prev, { name: f.name, url }]);
+      const type = f.type.startsWith("image/") ? "image" as const : f.type === "application/pdf" ? "pdf" as const : "other" as const;
+      addUserFile({ name: f.name, url, type });
     });
+    e.target.value = "";
   };
 
   const handleDownloadPdf = async () => {
@@ -483,26 +507,15 @@ export default function ReportPage() {
 
               {!previewFile && (
                 <>
-                  {!filesLoaded && (
-                    <button
-                      onClick={handleUpload}
-                      className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint"
-                    >
-                      <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                      <span className="text-sm font-medium text-ink-soft">Click to load case files</span>
-                      <span className="text-xs text-ink-faint">Loads documents from the case folder</span>
-                    </button>
-                  )}
-
                   <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`flex w-full cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-6 transition-colors hover:border-accent/40 hover:bg-accent-tint ${filesLoaded ? "" : "mt-0"}`}
+                    onClick={() => { if (!filesLoaded) { handleUpload(); } else { fileInputRef.current?.click(); } }}
+                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint"
                   >
-                    <svg className="h-6 w-6 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                    <span className="text-sm font-medium text-ink-soft">Upload your own files</span>
+                    <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                    <span className="text-sm font-medium text-ink-soft">{filesLoaded ? "Upload additional files" : "Click to upload case files"}</span>
                     <span className="text-xs text-ink-faint">PDF, images, or text files</span>
                   </button>
-                  <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleRealUpload} />
+                  <input ref={fileInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.txt,.doc,.docx" className="hidden" onChange={handleRealUpload} />
 
                   {uploadedFiles.length > 0 && (
                     <div className="space-y-2">
@@ -635,7 +648,7 @@ export default function ReportPage() {
         </div>
       </div>
 
-      <FloatingChat messages={messages} addMessage={addMessage} onExpand={() => router.push("/demo/chat")} />
+      <FloatingChat messages={messages} addMessage={addMessage} addFile={addFile} addUserFile={addUserFile} onExpand={() => router.push("/demo/chat")} onRegenerate={() => { setLoading(true); setTimeout(() => setLoading(false), 3000); }} />
     </>
   );
 }
