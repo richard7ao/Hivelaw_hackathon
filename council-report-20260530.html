@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Council Report — Steelman Project</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f5f0eb; color: #3a2f28; line-height: 1.6; }
+.container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; }
+h2 { font-size: 22px; font-weight: 600; margin-top: 40px; margin-bottom: 16px; letter-spacing: -0.01em; }
+h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.subtitle { color: #7a6f66; font-size: 15px; margin-top: 8px; }
+.score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
+.score-card { background: #fff; border: 1px solid rgba(58,47,40,0.1); border-radius: 12px; padding: 20px; text-align: center; }
+.score-card .number { font-size: 42px; font-weight: 700; letter-spacing: -0.03em; }
+.score-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7a6f66; margin-top: 4px; }
+.score-card.overall { grid-column: 1 / -1; background: #3a2f28; color: #f5f0eb; }
+.score-card.overall .number { color: #c53030; font-size: 64px; }
+.score-card.overall .label { color: rgba(245,240,235,0.6); }
+.section { background: #fff; border: 1px solid rgba(58,47,40,0.1); border-radius: 16px; padding: 28px; margin-top: 20px; }
+.section p { margin-top: 12px; font-size: 15px; color: #5a4f46; }
+.section strong { color: #3a2f28; }
+.advisor-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px 0; }
+.advisor-chip { text-align: center; padding: 12px 8px; border-radius: 10px; border: 1px solid rgba(58,47,40,0.1); background: #fff; }
+.advisor-chip .name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #7a6f66; }
+.advisor-chip .score { font-size: 28px; font-weight: 700; margin-top: 4px; }
+.red { color: #c53030; }
+.amber { color: #b8860b; }
+.green { color: #2d6a30; }
+details { margin-top: 16px; }
+summary { cursor: pointer; font-weight: 600; font-size: 14px; color: #c53030; padding: 8px 0; }
+summary:hover { opacity: 0.8; }
+details .content { padding: 16px; background: #faf8f5; border-radius: 8px; margin-top: 8px; font-size: 14px; color: #5a4f46; line-height: 1.7; }
+.action-box { background: #c53030; color: #fff; border-radius: 12px; padding: 24px; margin-top: 20px; }
+.action-box h3 { color: #fff; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; }
+.action-box p { color: rgba(255,255,255,0.9); margin-top: 8px; font-size: 15px; }
+.footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(58,47,40,0.1); font-size: 12px; color: #7a6f66; text-align: center; }
+ul { margin-top: 8px; padding-left: 20px; }
+li { margin-top: 6px; font-size: 15px; color: #5a4f46; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LLM Council Verdict</h1>
+<p class="subtitle">Steelman — Legal AI Hackathon Project &middot; 30 May 2026</p>
+
+<div class="score-grid">
+  <div class="score-card overall">
+    <div class="number">80</div>
+    <div class="label">Overall Score</div>
+  </div>
+  <div class="score-card"><div class="number green">89</div><div class="label">Pitch Clarity</div></div>
+  <div class="score-card"><div class="number amber">79</div><div class="label">Technical Execution</div></div>
+  <div class="score-card"><div class="number green">82</div><div class="label">Design / UX</div></div>
+  <div class="score-card"><div class="number amber">72</div><div class="label">Demo-Readiness</div></div>
+  <div class="score-card"><div class="number green">86</div><div class="label">Access to Justice</div></div>
+  <div class="score-card"><div class="number amber">80</div><div class="label">Winner Potential</div></div>
+</div>
+
+<div class="advisor-grid">
+  <div class="advisor-chip"><div class="name">Contrarian</div><div class="score red">61</div></div>
+  <div class="advisor-chip"><div class="name">Outsider</div><div class="score amber">78</div></div>
+  <div class="advisor-chip"><div class="name">Executor</div><div class="score amber">79</div></div>
+  <div class="advisor-chip"><div class="name">1st Principles</div><div class="score green">82</div></div>
+  <div class="advisor-chip"><div class="name">Expansionist</div><div class="score green">84</div></div>
+</div>
+
+<h2>Where the Council Agrees</h2>
+<div class="section">
+  <p><strong>1. The pitch concept is the strongest asset.</strong> "Every legal AI tells you you're right. We built the one that tells you how you'll lose" passes the ten-second test. The three-act structure is clean, the access-to-justice framing with sourced statistics is rigorous, and the Crystal case is well-chosen.</p>
+  <p><strong>2. The anti-hallucination architecture is real.</strong> Two-tier guard: soft-fail for steelman quotes (flag but keep), hard-fail for legal citations (strip entirely if not in corpus). This is genuine engineering, not vaporware.</p>
+  <p><strong>3. Demo-readiness is the weakest dimension.</strong> Every advisor flags seams: dead-end dashboard cases, hardcoded floating chat, window.print() PDF, no "reconsider-pursuing" case to prove the honest "no."</p>
+</div>
+
+<h2>Where the Council Clashes</h2>
+<div class="section">
+  <p><strong>The mock data question.</strong> The Contrarian calls the pre-cached reports a "structural lie" (61/100). The First Principles Thinker and Expansionist see it as a sound design decision for demo reliability (82-84/100). The Chairman sides with the latter — PITCH.md explicitly documents this as deliberate, and pre-cached responses from real Claude runs are not fake data.</p>
+  <p><strong>Technical depth.</strong> Scores range 52 to 85. The Contrarian under-credits the actual engineering (PDF ingestion, structured output, prompt caching, local fallback engine). The Executor correctly identifies this as substantial for a one-day build.</p>
+</div>
+
+<h2>Blind Spots the Council Caught</h2>
+<div class="section">
+  <ul>
+    <li><strong>Dead-end dashboard cases</strong> (Outsider): 2 of 4 cards go nowhere. A judge who clicks wrong hits a dead end.</li>
+    <li><strong>No "reconsider-pursuing" case</strong> (Executor): The pitch's central claim ("the honest no") has no demo proof.</li>
+    <li><strong>Floating chat is hardcoded</strong> (Contrarian): Canned responses in the report page chatbot vs. live API in the intake chat — a curious judge will find the seam.</li>
+    <li><strong>Nobody caught:</strong> The intake prompt engineering is sophisticated — progressive report building, readiness scoring across 8 buckets, 2-turn convergence ceiling. The corpus files are real verbatim statute text. These are under-marketed strengths.</li>
+  </ul>
+</div>
+
+<h2>The Recommendation</h2>
+<div class="section">
+  <p>This is a <strong>top-2 project</strong> at a hackathon of this caliber. The concept is genuinely differentiated — no other team in the room will have an agent that argues against the user using their own documents, verifiably. The risk profile is asymmetric in the team's favor: the 3-minute recorded demo path is solid, and vulnerabilities only surface in post-pitch exploration.</p>
+  <p>The project's ceiling is high 80s. The gap between 80 and 88+ is entirely demo polish — all fixable in under an hour.</p>
+</div>
+
+<div class="action-box">
+  <h3>The One Thing to Do First</h3>
+  <p><strong>Remove the two dead-end dashboard cases</strong> (heating failure, noise complaint). A dashboard with two fully-functioning cases is more impressive than four where half are broken. This is a 5-minute change and eliminates the highest-probability post-pitch failure mode.</p>
+</div>
+
+<details>
+<summary>Contrarian — Full Response (61/100)</summary>
+<div class="content">
+The concept is sharp but there's a critical gap between claims and build. The UI serves mock data from demo-data.ts. The pitch claims "pick any case and check the quotes" but the live app is serving hardcoded content. The anti-hallucination guard is unverified on live runs. Feature sprawl (3D logo, PDF viewer, floating chat, lawyer profiles) dilutes focus. The "no lawyer" answer is oversold. Pitch 78, Tech 52, Demo-readiness 45, A2J 74.
+</div>
+</details>
+
+<details>
+<summary>First Principles Thinker — Full Response (82/100)</summary>
+<div class="content">
+The core insight is epistemically correct: confident validation from AI is actively harmful in legal contexts. The anti-hallucination guard is genuinely clever architecture. Weak spots: "Send letter" button is non-functional, live intake doesn't enforce closed-corpus rule. Fix those two things and this wins. Pitch 91, Tech 78, Design 85, Demo-readiness 82, A2J 88.
+</div>
+</details>
+
+<details>
+<summary>Expansionist — Full Response (84/100)</summary>
+<div class="content">
+Genuinely underselling itself. Multi-modal document ingestion, JSON-schema structured output, stateful intake with readiness scoring, cross-document quote highlighting — all in one day. The Anthropic judge sees prompt engineering done correctly. The Lawhive judge sees their intake problem solved. Two most important judges aligned. Pitch 91, Tech 78, Design 82, Demo-readiness 88, A2J 89, Winner potential 86.
+</div>
+</details>
+
+<details>
+<summary>Outsider — Full Response (78/100)</summary>
+<div class="content">
+The concept cuts through in under ten seconds. The References cross-highlighting and Steelman chain accordion are interactions judges remember. But: two dashboard cases go nowhere, floating chat is hardcoded while intake is live, PDF download prints the whole page. Demo-readiness 68 is the weakest link. Pitch 90, Tech 78, Design 82, A2J 85.
+</div>
+</details>
+
+<details>
+<summary>Executor — Full Response (79/100)</summary>
+<div class="content">
+The code is real — PDF base64 encoding, structured JSON output, verbatim quote matching, cross-document highlight linking. Pre-cached path is solid. Main risk: no "reconsider-pursuing" case to prove the honest "no" claim. This is a top-3 project. Pitch 76, Tech 85, Design 82, Demo-readiness 88, A2J 74.
+</div>
+</details>
+
+<div class="footer">
+LLM Council Report &middot; Generated 30 May 2026 &middot; 5 advisors, peer review, chairman synthesis &middot; Methodology: Andrej Karpathy
+</div>
+</div>
+</body>
+</html>
