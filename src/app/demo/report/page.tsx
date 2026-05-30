@@ -514,46 +514,21 @@ export default function ReportPage() {
           {/* ==================== OVERVIEW ==================== */}
           {activeTab === "Overview" && (
             <div className="space-y-8">
-              {/* Verdict + Recommended action — top of page */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="rounded-2xl border border-line bg-paper p-6">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Verdict</span>
-                    <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${RECOMMENDATION_STYLE[caseRecommendation]?.bg ?? ""} ${RECOMMENDATION_STYLE[caseRecommendation]?.border ?? ""} ${RECOMMENDATION_STYLE[caseRecommendation]?.text ?? ""}`}>
-                      {RECOMMENDATION_STYLE[caseRecommendation]?.label ?? caseRecommendation}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <span className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink-faint">WEAK</span>
-                    <span className="rounded-md border border-verdict-amber/40 bg-verdict-amber/10 px-2.5 py-1 text-xs font-semibold text-verdict-amber">ARGUABLE</span>
-                    <span className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink-faint">STRONG</span>
-                  </div>
-                  <p className="mt-4 font-serif text-lg leading-snug text-ink">An arguable case, worth pursuing with preparation.</p>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">The evidence supports a claim but the signed satisfaction form is a material risk. An independent survey would significantly strengthen the position.</p>
+              {/* Verdict — top of page */}
+              <div className="rounded-2xl border border-line bg-paper p-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Verdict</span>
+                  <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${RECOMMENDATION_STYLE[caseRecommendation]?.bg ?? ""} ${RECOMMENDATION_STYLE[caseRecommendation]?.border ?? ""} ${RECOMMENDATION_STYLE[caseRecommendation]?.text ?? ""}`}>
+                    {RECOMMENDATION_STYLE[caseRecommendation]?.label ?? caseRecommendation}
+                  </span>
                 </div>
-
-                <div className="rounded-2xl border border-line bg-paper p-6">
-                  <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Recommended action</span>
-                  <div className="mt-4 space-y-3">
-                    <button onClick={() => setDecision("submit")} className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-colors ${decision === "submit" ? "border-verdict-green/40 bg-verdict-green/5" : "border-line hover:bg-canvas-deep"}`}>
-                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${decision === "submit" ? "bg-verdict-green/20" : "bg-canvas-deep"}`}>
-                        <svg className={`h-4 w-4 ${decision === "submit" ? "text-verdict-green" : "text-ink-faint"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
-                      </span>
-                      <div><p className="text-sm font-medium text-ink">Send pre-action letter</p><p className="mt-0.5 text-xs text-ink-soft">Formal letter before action</p></div>
-                    </button>
-                    <button onClick={() => setDecision("escalate")} className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-colors ${decision === "escalate" ? "border-accent/40 bg-accent-tint" : "border-line hover:bg-canvas-deep"}`}>
-                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${decision === "escalate" ? "bg-accent/15" : "bg-canvas-deep"}`}>
-                        <svg className={`h-4 w-4 ${decision === "escalate" ? "text-accent" : "text-ink-faint"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-                      </span>
-                      <div><p className="text-sm font-medium text-ink">Escalate to Lawhive</p><p className="mt-0.5 text-xs text-ink-soft">Solicitor with prepared file</p></div>
-                    </button>
-                    {decision && (
-                      <button onClick={() => setSubmitted(true)} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent-deep">
-                        {decision === "escalate" ? "Escalate to Lawhive" : "Prepare letter"}<span aria-hidden>&rarr;</span>
-                      </button>
-                    )}
-                  </div>
+                <div className="mt-4 flex gap-2">
+                  <span className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink-faint">WEAK</span>
+                  <span className="rounded-md border border-verdict-amber/40 bg-verdict-amber/10 px-2.5 py-1 text-xs font-semibold text-verdict-amber">ARGUABLE</span>
+                  <span className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink-faint">STRONG</span>
                 </div>
+                <p className="mt-4 font-serif text-lg leading-snug text-ink">An arguable case, worth pursuing with preparation.</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">The evidence supports a claim but the signed satisfaction form is a material risk. An independent survey would significantly strengthen the position.</p>
               </div>
 
               {/* Report body */}
@@ -598,6 +573,30 @@ export default function ReportPage() {
                     <div key={r.id} className="flex items-start gap-2 text-sm"><span className="mt-0.5 text-accent">&#167;</span><div><span className="font-medium text-ink">{r.shortLabel}</span><span className="text-ink-soft"> — {r.summary}</span></div></div>
                   ))}
                 </div>
+              </div>
+
+              {/* Recommended action — bottom */}
+              <div className="rounded-2xl border border-line bg-paper p-6">
+                <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Recommended action</span>
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <button onClick={() => setDecision("submit")} className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${decision === "submit" ? "border-verdict-green/40 bg-verdict-green/5" : "border-line hover:bg-canvas-deep"}`}>
+                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${decision === "submit" ? "bg-verdict-green/20" : "bg-canvas-deep"}`}>
+                      <svg className={`h-4 w-4 ${decision === "submit" ? "text-verdict-green" : "text-ink-faint"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                    </span>
+                    <div><p className="text-sm font-medium text-ink">Send pre-action letter</p><p className="mt-0.5 text-xs text-ink-soft">Formal letter before action</p></div>
+                  </button>
+                  <button onClick={() => setDecision("escalate")} className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${decision === "escalate" ? "border-accent/40 bg-accent-tint" : "border-line hover:bg-canvas-deep"}`}>
+                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${decision === "escalate" ? "bg-accent/15" : "bg-canvas-deep"}`}>
+                      <svg className={`h-4 w-4 ${decision === "escalate" ? "text-accent" : "text-ink-faint"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                    </span>
+                    <div><p className="text-sm font-medium text-ink">Escalate to Lawhive</p><p className="mt-0.5 text-xs text-ink-soft">Solicitor with prepared file</p></div>
+                  </button>
+                </div>
+                {decision && (
+                  <button onClick={() => setSubmitted(true)} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent-deep">
+                    {decision === "escalate" ? "Escalate to Lawhive" : "Prepare letter"}<span aria-hidden>&rarr;</span>
+                  </button>
+                )}
               </div>
             </div>
           )}
