@@ -514,32 +514,7 @@ export default function ReportPage() {
           {/* ==================== OVERVIEW ==================== */}
           {activeTab === "Overview" && (
             <div className="space-y-8">
-              <div className="rounded-2xl border border-line bg-paper p-7 sm:p-9">
-                <div className="space-y-5 font-serif text-[15px] leading-relaxed text-ink">
-                  {reportData.paragraphs.map((para, i) => (<p key={i}><HighlightedText text={para.text} highlights={para.highlights} /></p>))}
-                </div>
-                <div className="mt-6 flex items-center gap-4 border-t border-line-soft pt-5 text-xs text-ink-faint">
-                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded bg-verdict-green/25" />Supporting evidence</span>
-                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded bg-verdict-red/25" />Flag / risk</span>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-line bg-paper">
-                <div className="flex border-b border-line">
-                  {ANALYSIS_TABS.map((tab) => (
-                    <button key={tab} onClick={() => setAnalysisTab(tab)} className={`relative flex-1 px-4 py-3 text-sm font-medium transition-colors ${analysisTab === tab ? "text-ink" : "text-ink-faint hover:text-ink-soft"}`}>
-                      {tab}
-                      {analysisTab === tab && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-accent" />}
-                    </button>
-                  ))}
-                </div>
-                <div className="p-5">
-                  {analysisTab === "Arguments for" && (<ul className="space-y-3">{analysisData.forPoints.map((p, i) => (<li key={i} className="flex gap-3 text-sm leading-relaxed text-ink"><span className="mt-0.5 font-medium text-verdict-green">+</span>{p}</li>))}</ul>)}
-                  {analysisTab === "Counterarguments" && (<ul className="space-y-3">{analysisData.counterPoints.map((p, i) => (<li key={i} className="flex gap-3 text-sm leading-relaxed text-ink"><span className="mt-0.5 font-medium text-verdict-red">&minus;</span>{p}</li>))}</ul>)}
-                  {analysisTab === "Summary" && (<p className="text-sm leading-relaxed text-ink-soft">{analysisData.summary}</p>)}
-                </div>
-              </div>
-
+              {/* Verdict + Recommended action — top of page */}
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div className="rounded-2xl border border-line bg-paper p-6">
                   <div className="flex items-center justify-between">
@@ -581,6 +556,35 @@ export default function ReportPage() {
                 </div>
               </div>
 
+              {/* Report body */}
+              <div className="rounded-2xl border border-line bg-paper p-7 sm:p-9">
+                <div className="space-y-5 font-serif text-[15px] leading-relaxed text-ink">
+                  {reportData.paragraphs.map((para, i) => (<p key={i}><HighlightedText text={para.text} highlights={para.highlights} /></p>))}
+                </div>
+                <div className="mt-6 flex items-center gap-4 border-t border-line-soft pt-5 text-xs text-ink-faint">
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded bg-verdict-green/25" />Supporting evidence</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded bg-verdict-red/25" />Flag / risk</span>
+                </div>
+              </div>
+
+              {/* Analysis tabs */}
+              <div className="rounded-2xl border border-line bg-paper">
+                <div className="flex border-b border-line">
+                  {ANALYSIS_TABS.map((tab) => (
+                    <button key={tab} onClick={() => setAnalysisTab(tab)} className={`relative flex-1 px-4 py-3 text-sm font-medium transition-colors ${analysisTab === tab ? "text-ink" : "text-ink-faint hover:text-ink-soft"}`}>
+                      {tab}
+                      {analysisTab === tab && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-accent" />}
+                    </button>
+                  ))}
+                </div>
+                <div className="p-5">
+                  {analysisTab === "Arguments for" && (<ul className="space-y-3">{analysisData.forPoints.map((p, i) => (<li key={i} className="flex gap-3 text-sm leading-relaxed text-ink"><span className="mt-0.5 font-medium text-verdict-green">+</span>{p}</li>))}</ul>)}
+                  {analysisTab === "Counterarguments" && (<ul className="space-y-3">{analysisData.counterPoints.map((p, i) => (<li key={i} className="flex gap-3 text-sm leading-relaxed text-ink"><span className="mt-0.5 font-medium text-verdict-red">&minus;</span>{p}</li>))}</ul>)}
+                  {analysisTab === "Summary" && (<p className="text-sm leading-relaxed text-ink-soft">{analysisData.summary}</p>)}
+                </div>
+              </div>
+
+              {/* Key references */}
               <div className="rounded-2xl border border-line bg-paper p-6">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Key references</span>
