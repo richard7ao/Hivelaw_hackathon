@@ -21,20 +21,20 @@
 
 ## 2. Paragraph pitch (~30 seconds)
 
-Almost every consumer-legal AI validates the user. None of them show you how
-you'll lose — and in a £19 billion consumer law market where six million adults
-face an unmet legal need every year, and 38% of people with a civil issue get no
-help at all, that gap is enormous. The Steelman closes it: the legal agent that
-argues the *opponent's* best case against you, grounded in your own documents,
-giving everyone what only a solicitor's first meeting used to provide — an honest
-assessment of where you actually stand. You paste your case file; it finds your
-strongest position, then turns around and attacks it the way the other side will,
-quoting your own evidence back at you as a weapon. What comes out is a **Case
-Reality Report**: your prospects, an actionable evidence-gap checklist, and an
-honest recommendation — handle it yourself, escalate to a Lawhive solicitor *with
-a prepared file*, or reconsider pursuing. The honest "no" is a feature Lawhive
-wants: fewer dead-end intakes, lower cost-to-serve, and warm escalations that
-arrive with their evidence already mapped.
+Almost every consumer-legal AI validates the user. None of them show you how you'll
+lose. Consumer law in the UK is a £19 billion market — and six million adults have
+an unmet legal need every year. 38% of people with a civil legal issue get no help
+at all. Not because they don't have a case — because they can't afford to find out.
+The Steelman changes that. It argues the *opponent's* best case against you,
+grounded in your own documents — giving everyone what only a solicitor's first
+meeting used to provide: an honest assessment of where you stand. You paste your
+case file; it gives you your strongest position, then role-plays how the other side
+attacks — quoting your own evidence back at you as a weapon — then hands you a
+**Case Reality Report**: your prospects, an actionable evidence-gap checklist, and
+an honest recommendation (handle it yourself, escalate to a Lawhive solicitor
+*with a prepared file*, or reconsider pursuing). The honest "no" is a feature
+Lawhive wants: fewer dead-end intakes, lower cost-to-serve, and warm escalations
+that arrive with their evidence already mapped.
 
 ---
 
