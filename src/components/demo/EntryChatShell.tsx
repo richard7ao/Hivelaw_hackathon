@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 
+import SteelmanLogo from "@/components/SteelmanLogo";
 import { classifyAttachment } from "@/lib/intake/files";
 import type {
   IntakeAttachmentKind,
@@ -34,6 +35,11 @@ export default function EntryChatShell() {
   const visibleProgress = result?.readinessScore ?? 5;
   const stageLabel = formatStage(result?.currentStage ?? "understanding-problem");
   const allEvidence = useMemo(() => sessionFiles, [sessionFiles]);
+
+  // The sidebar (progress + evidence + scaffold) only matters once the case has
+  // begun. Before the first message it's hidden; on the first turn the grid
+  // animates the chat narrower and slides the sidebar in.
+  const hasStarted = messages.length > 0;
 
   const suggestions = [
     "My landlord won't fix the damp and mould in my flat.",
@@ -146,17 +152,15 @@ export default function EntryChatShell() {
   return (
     <section className="dot-grid h-[calc(100dvh-4rem)] overflow-hidden bg-canvas">
       <div className="mx-auto flex h-full max-w-[80rem] flex-col px-4 py-4 sm:px-6 sm:py-6">
-        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-6">
+        <div
+          className={`grid min-h-0 flex-1 gap-4 transition-[grid-template-columns] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:gap-6 ${
+            hasStarted
+              ? "lg:grid-cols-[minmax(0,1fr)_22rem]"
+              : "lg:grid-cols-[minmax(0,1fr)_0rem]"
+          }`}
+        >
           {/* ── Chat column ───────────────────────────────────────────── */}
           <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-line bg-paper shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_48px_-32px_rgba(40,20,20,0.38)]">
-            <div className="flex items-center gap-3 border-b border-line px-5 py-4">
-              <BrandMark />
-              <div>
-                <p className="text-sm font-semibold text-ink">Steelman intake</p>
-                <p className="text-xs text-ink-faint">Honest case assessment — not legal advice</p>
-              </div>
-            </div>
-
             {/* Scrollable transcript */}
             <div className="scroll-thin min-h-0 flex-1 overflow-y-auto bg-canvas px-4 py-6 sm:px-6">
               {messages.length === 0 ? (
@@ -258,7 +262,14 @@ export default function EntryChatShell() {
           </div>
 
           {/* ── Sidebar ───────────────────────────────────────────────── */}
-          <aside className="scroll-thin min-h-0 space-y-4 overflow-y-auto pb-2 lg:pr-1">
+          <aside
+            className={`scroll-thin min-h-0 space-y-4 overflow-y-auto overflow-x-hidden pb-2 transition-all duration-500 lg:pr-1 ${
+              hasStarted
+                ? "translate-x-0 opacity-100 delay-150"
+                : "pointer-events-none translate-x-4 opacity-0"
+            }`}
+            aria-hidden={!hasStarted}
+          >
             <ProgressCard progress={visibleProgress} stageLabel={stageLabel} result={result} />
 
             {result?.fileRequests.length ? (
@@ -304,7 +315,7 @@ export default function EntryChatShell() {
 function BrandMark() {
   return (
     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent shadow-[0_6px_16px_-8px_rgba(150,20,20,0.7)]">
-      <span className="block h-3 w-3 rotate-45 rounded-[2px] bg-paper" />
+      <SteelmanLogo className="h-6 w-6 text-paper" />
     </span>
   );
 }
