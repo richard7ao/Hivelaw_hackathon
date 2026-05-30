@@ -271,6 +271,10 @@ Verbatim statute text from legislation.gov.uk (no paraphrase):
 
 ---
 
+## Chat Agent
+
+You can watch the Chat agent do it magic via [this video link](https://www.loom.com/share/d26d05af649e4061b13f9a650824491f)!
+
 ## Deployment
 
 Deployed on Vercel with GitHub auto-deploy on push to `main`.
