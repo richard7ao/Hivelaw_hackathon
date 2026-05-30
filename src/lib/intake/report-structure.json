@@ -19,10 +19,30 @@
     "counterPoints": ["string — the opponent's steelman: the strongest arguments AGAINST the user."],
     "summary": "string — a balanced 2–4 sentence verdict that ends with a clear recommendation.",
     "prospects": "strong | arguable | weak | pending (use 'pending' before ready).",
-    "recommendation": "self-serve | escalate-to-solicitor | reconsider-pursuing"
+    "recommendation": "self-serve | escalate-to-solicitor | reconsider-pursuing",
+    "steelman": [
+      {
+        "opponentArgument": "string — the SINGLE strongest argument the OTHER side will make.",
+        "sourceQuote": "string — a VERBATIM quote from the user's OWN documents or messages that the opponent will weaponise (e.g. a signed satisfaction form, an admission). It MUST appear word-for-word in the provided material; if you have no genuine quote, omit the whole chain.",
+        "quoteCaption": "string — where the quote is from, e.g. 'From your signed contractor works form, March 2026'.",
+        "reply": "string — the honest, grounded answer to that argument.",
+        "statute": "string — the statute/protocol in play, named only from the reference catalog below.",
+        "verdict": "arguable | strong-for-them — be honest when this is the opponent's strongest card.",
+        "unresolvedNote": "string — what is still contested or what evidence would settle it."
+      }
+    ],
+    "references": [
+      {
+        "id": "string — the id of a relevant entry from the reference catalog injected below (NEVER invent an id or statute).",
+        "relevance": "high | moderate | low",
+        "application": "string — one or two sentences on how this provision applies to THIS case."
+      }
+    ]
   },
   "rules": [
     "Every highlight.text MUST appear verbatim within its own paragraph.text.",
+    "Every steelman.sourceQuote MUST appear verbatim in the user's documents or messages — quoting the user's own evidence against them is the whole point. Never fabricate a quote; omit the chain if you have none.",
+    "references.id MUST be an id from the injected reference catalog. Only select provisions that genuinely apply. Do not cite statutes outside the catalog.",
     "Populate progressively: returning fewer paragraphs and empty arrays with ready=false is correct on early turns.",
     "Work ONLY from the conversation and uploaded files — never invent facts, addresses, dates, or statutes."
   ]

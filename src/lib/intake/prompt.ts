@@ -1,5 +1,6 @@
 import type { CaseManifestEntry } from "@/lib/cases/manifest";
 import type { IntakeEvaluationMode } from "./types";
+import { REFERENCE_CATALOG } from "./reference-catalog";
 
 import reportStructure from "./report-structure.json";
 
@@ -92,14 +93,20 @@ MINIMUM VIABLE REPORT RULE:
   3. at least 1 forPoint
   4. at least 1 counterPoint
   5. a non-empty summary, prospects, and recommendation
+  6. at least 1 steelman chain (with a verbatim sourceQuote) IF the user has
+     given any quotable document or statement; otherwise an empty steelman array
+  7. at least 1 reference selected by id from the catalog
 
 THE LIVE REPORT (the "report" field):
-Build the Case Reality Report progressively, turn by turn, as facts emerge —
-do not wait until the end. Follow this exact structure and rules:
+Follow this exact structure and rules:
 ${JSON.stringify(reportStructure, null, 2)}
-Each turn, return the best report you can from everything known so far. Set
-report.ready=false while still gathering basics; set it true once there is a
-problem summary, the user's best case, and at least one steelman counter.
+FOR SPEED, keep the report LEAN while you are still gathering facts: a short
+title and subtitle, report.ready=false, and EMPTY paragraphs, forPoints,
+counterPoints, steelman, and references are all correct early on. Do the full,
+heavy report — the paragraphs with highlights, the grounded steelman chains, and
+the reference selections — only once you are actually assessing
+(report.ready=true / canEvaluateNow). That is the moment the user opens the
+report, so there is no benefit to generating it on every interview turn.
 ${
   evaluationMode === "user-requested"
     ? `\nIMPORTANT — the user has explicitly chosen to skip further questions and
@@ -117,6 +124,9 @@ items in evidence gaps, missing facts, fileRequests, and report flag highlights
 so the user can see what would strengthen the case next.\n`
     : ""
 }
+Reference catalog (cite statutes ONLY from this closed list, by id):
+${REFERENCE_CATALOG.map((ref) => `- ${ref.id} — ${ref.citation}: ${ref.summary}`).join("\n")}
+
 Cases layer:
 ${caseLayer}
 

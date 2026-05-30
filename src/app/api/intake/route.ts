@@ -117,6 +117,10 @@ function mergeReport(primary: IntakeReport, fallback: IntakeReport): IntakeRepor
     summary: primary.summary.trim() || fallback.summary,
     prospects: primary.prospects === "pending" ? fallback.prospects : primary.prospects,
     recommendation: primary.recommendation,
+    // Grounded Steelman chains + selected references come from the model; keep
+    // them (fall back to the local path's, which are empty).
+    steelman: primary.steelman?.length ? primary.steelman : fallback.steelman,
+    references: primary.references?.length ? primary.references : fallback.references,
   };
 }
 

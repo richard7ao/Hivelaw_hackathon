@@ -162,6 +162,9 @@ export default function ReportPage() {
   const caseCounterRefs = activeCase?.counterReferences ?? MOCK_COUNTER_REFERENCES;
   const caseProspects = activeCase?.prospects ?? "arguable";
   const caseRecommendation = activeCase?.recommendation ?? "escalate-to-solicitor";
+  // Live intake supplies its own grounded Steelman chains; curated/empty cases
+  // fall back to the built-in demo chains.
+  const steelmanChains = activeCase?.steelman?.length ? activeCase.steelman : STEELMAN_CHAINS;
 
   const activeHighlights = expandedRef
     ? (caseRefs.find((r) => r.id === expandedRef)?.highlightLinks ??
@@ -488,12 +491,12 @@ export default function ReportPage() {
               {previewFile && (
                 <div className="rounded-2xl border border-line bg-paper">
                   <div className="flex items-center justify-between border-b border-line px-5 py-3">
-                    <span className="text-sm font-medium text-ink">{CASE_07_FILES.find((f) => f.path === previewFile)?.name}</span>
+                    <span className="text-sm font-medium text-ink">{CASE_07_FILES.find((f) => f.path === previewFile)?.name ?? userFiles.find((f) => f.url === previewFile)?.name ?? "Document"}</span>
                     <button onClick={() => setPreviewFile(null)} className="rounded-lg p-1.5 text-ink-faint hover:bg-canvas-deep hover:text-ink">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                   </div>
-                  {previewFile.endsWith(".pdf") ? (
+                  {previewFile.endsWith(".pdf") || userFiles.find((f) => f.url === previewFile)?.type === "pdf" ? (
                     <iframe src={previewFile} className="h-[70vh] w-full" title="Document preview" />
                   ) : (
                     <div className="flex justify-center p-4"><img src={previewFile} alt="Evidence" className="max-h-[70vh] rounded-lg" /></div>
@@ -513,10 +516,10 @@ export default function ReportPage() {
                   </button>
                   <input ref={fileInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.txt,.doc,.docx" className="hidden" onChange={handleRealUpload} />
 
-                  {uploadedFiles.length > 0 && (
+                  {(uploadedFiles.length > 0 || userFiles.length > 0) && (
                     <div className="space-y-2">
-                      <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Case files ({uploadedFiles.length})</span>
-                      {CASE_07_FILES.map((f) => (
+                      <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Case files ({uploadedFiles.length + userFiles.length})</span>
+                      {uploadedFiles.length > 0 && CASE_07_FILES.map((f) => (
                         <button key={f.path} onClick={() => setPreviewFile(f.path)} className="flex w-full items-center gap-3 rounded-xl border border-line bg-paper px-4 py-3 text-left transition-colors hover:border-accent/30 hover:bg-accent-tint">
                           {f.type === "pdf" ? (
                             <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
@@ -655,17 +658,17 @@ export default function ReportPage() {
 
               {/* Summary strip — the honest overview at a glance (the billboard test) */}
               <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-canvas-deep px-4 py-3">
-                <span className="font-serif text-lg text-ink">{STEELMAN_CHAINS.length} arguments</span>
+                <span className="font-serif text-lg text-ink">{steelmanChains.length} arguments</span>
                 <span className="text-sm text-ink-soft">they will run against you</span>
-                {STEELMAN_CHAINS.filter((c) => c.verdict === "arguable").length > 0 && (
+                {steelmanChains.filter((c) => c.verdict === "arguable").length > 0 && (
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-verdict-amber/40 bg-verdict-amber/10 px-2.5 py-1 text-xs font-semibold text-verdict-amber">
                     <span className="h-1.5 w-1.5 rounded-full bg-verdict-amber" />
-                    {STEELMAN_CHAINS.filter((c) => c.verdict === "arguable").length} arguable
+                    {steelmanChains.filter((c) => c.verdict === "arguable").length} arguable
                   </span>
                 )}
-                {STEELMAN_CHAINS.filter((c) => c.verdict === "strong-for-them").length > 0 && (
+                {steelmanChains.filter((c) => c.verdict === "strong-for-them").length > 0 && (
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-verdict-red/40 bg-verdict-red/10 px-2.5 py-1 text-xs font-semibold text-verdict-red">
-                    {STEELMAN_CHAINS.filter((c) => c.verdict === "strong-for-them").length} strong for them
+                    {steelmanChains.filter((c) => c.verdict === "strong-for-them").length} strong for them
                   </span>
                 )}
                 <span className="ml-auto text-xs text-ink-faint">Tap any argument to see the chain</span>
@@ -673,7 +676,7 @@ export default function ReportPage() {
 
               {/* Accordion of chains — the collapsed list IS the overview; one open at a time */}
               <div className="space-y-3">
-                {STEELMAN_CHAINS.map((chain, i) => {
+                {steelmanChains.map((chain, i) => {
                   const open = openChain === chain.id;
                   const isArguable = chain.verdict === "arguable";
                   return (

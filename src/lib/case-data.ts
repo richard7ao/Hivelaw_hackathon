@@ -1,5 +1,5 @@
 import type { ReportData, AnalysisData } from "./demo-context";
-import type { ExtendedReference, CounterReference } from "./demo-data";
+import type { ExtendedReference, CounterReference, SteelmanChain } from "./demo-data";
 
 export type CaseData = {
   id: string;
@@ -13,6 +13,9 @@ export type CaseData = {
   analysis: AnalysisData;
   references: ExtendedReference[];
   counterReferences: CounterReference[];
+  // Live intake fills these; curated cases omit them and the report page falls
+  // back to its built-in Steelman chains.
+  steelman?: SteelmanChain[];
   status: "complete" | "in-progress" | "new";
   date: string;
 };

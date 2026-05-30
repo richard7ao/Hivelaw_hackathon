@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import type { IntakeReport } from "@/lib/intake/types";
+import { resolveReferences } from "@/lib/intake/reference-catalog";
 import type { CaseData } from "./case-data";
 import {
   MOCK_RESEARCH,
@@ -11,6 +12,7 @@ import {
   MOCK_EXTENDED_REFERENCES,
   MOCK_COUNTER_REFERENCES,
 } from "./demo-data";
+import type { CounterReference, SteelmanChain } from "./demo-data";
 
 export type Message = { role: "user" | "assistant"; content: string };
 
@@ -115,6 +117,28 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   // Map the entry chat's live AI report into a CaseData and make it active.
   const setReport = (report: IntakeReport) => {
+    // The Steelman chains the agent built (each carrying a verbatim quote).
+    const steelman: SteelmanChain[] = (report.steelman ?? []).map((chain, i) => ({
+      id: `sc-${i}`,
+      ...chain,
+    }));
+
+    // Supporting statutes the agent selected from the closed catalog. Counter-
+    // references (the opponent's legal basis) are derived from the steelman so
+    // the References tab's two halves stay consistent with the analysis.
+    const references = report.references?.length
+      ? resolveReferences(report.references)
+      : MOCK_EXTENDED_REFERENCES;
+    const counterReferences: CounterReference[] = steelman.length
+      ? steelman.map((chain, i) => ({
+          id: `cr-${i}`,
+          argument: chain.opponentArgument,
+          basis: chain.statute,
+          detail: chain.unresolvedNote,
+          highlightLinks: chain.sourceQuote ? [chain.sourceQuote] : [],
+        }))
+      : MOCK_COUNTER_REFERENCES;
+
     setActiveCase({
       id: "live-intake",
       title: report.title,
@@ -133,8 +157,9 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         counterPoints: report.counterPoints,
         summary: report.summary,
       },
-      references: MOCK_EXTENDED_REFERENCES,
-      counterReferences: MOCK_COUNTER_REFERENCES,
+      references,
+      counterReferences,
+      steelman: steelman.length ? steelman : undefined,
       status: "in-progress",
       date: "",
     });
