@@ -200,7 +200,7 @@ function buildKnownFacts(
     facts.push("There is some timeline information in the intake.");
   }
   if (buckets.priorActions) {
-    facts.push("The user has already taken some steps before coming to Hivelaw.");
+    facts.push("The user has already taken some steps before coming to Steeleman.");
   }
   if (attachments.length > 0) {
     facts.push(`Files uploaded so far: ${attachments.map((attachment) => attachment.name).join(", ")}.`);

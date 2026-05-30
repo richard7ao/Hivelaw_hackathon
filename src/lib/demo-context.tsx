@@ -73,7 +73,7 @@ export function useDemoContext() {
 // The active case (whether picked from the dashboard or built live by the chat)
 // is persisted locally as JSON so it survives a reload and the chat -> report
 // hop. File blobs aren't serialisable, so only the structured case is stored.
-const STORAGE_KEY = "hivelaw.demo.active-case.v1";
+const STORAGE_KEY = "steeleman.demo.active-case.v1";
 
 export function DemoProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
