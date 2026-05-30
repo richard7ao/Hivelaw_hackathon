@@ -344,7 +344,7 @@ export default function ReportPage() {
           </button>
         </div>
 
-        <div className="mt-6 flex gap-1 border-b border-line">
+        <div className="mt-6 flex flex-wrap gap-1 border-b border-line">
           {PAGE_TABS.map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)} className={`relative px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === tab ? "text-ink" : "text-ink-faint hover:text-ink-soft"}`}>
               {tab}
