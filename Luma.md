@@ -1,4 +1,4 @@
-# Hivelaw Hackathon
+# Steeleman Hackathon
 ​​Lawhive Hackathon London
 ​​📍 Lawhive HQ, Hoxton, London
 🗓️ May 30th, 2026

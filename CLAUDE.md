@@ -1,4 +1,4 @@
-# CLAUDE.md — Lawhive Hackathon (Hivelaw): **The Steelman**
+# CLAUDE.md — Lawhive Hackathon (Steeleman): **The Steelman**
 
 > **Purpose of this repo:** build, demo, and rehearse **The Steelman** — the legal
 > agent that argues the opponent's best case *against you*. The source of truth for

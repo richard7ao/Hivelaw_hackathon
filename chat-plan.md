@@ -409,5 +409,5 @@ Those can plug in after the entry chat and evaluation contract are stable.
 - Upload is available from the first screen but only becomes a big call-to-action when evidence is actually needed.
 - The progress bar reflects sufficiency, not message count.
 - The final output cleanly feeds best case, steelman, and report generation without coupling the chat UI to the report UI.
-- The intake flow looks like the existing Hivelaw product, not a bolted-on prototype with unrelated scaffolding.
+- The intake flow looks like the existing Steeleman product, not a bolted-on prototype with unrelated scaffolding.
 - The AI's document requests feel grounded in the evidence patterns already present in `cases/`.

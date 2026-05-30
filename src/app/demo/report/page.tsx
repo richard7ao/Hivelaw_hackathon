@@ -149,9 +149,15 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(false);
   const [fileResults, setFileResults] = useState(MOCK_FILE_RESULTS.map((f) => ({ ...f })));
   const [expandedRef, setExpandedRef] = useState<string | null>(null);
-  const [previewFile, setPreviewFile] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<{ url: string; name: string; type: "pdf" | "image" | "other" } | null>(null);
   const [filesLoaded, setFilesLoaded] = useState(true);
   const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [showEmailCompose, setShowEmailCompose] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailTo, setEmailTo] = useState("");
+  const [letterBody, setLetterBody] = useState(MOCK_SUBMISSION_PREVIEW);
+  const [emailAttachments, setEmailAttachments] = useState<string[]>(["Pre-Action Letter.pdf", ...CASE_07_FILES.map((f) => f.name)]);
+  const removeAttachment = (name: string) => setEmailAttachments((prev) => prev.filter((a) => a !== name));
   // The Steelman tab: one chain expanded at a time (hero chain open by default)
   const [openChain, setOpenChain] = useState<string | null>(STEELMAN_CHAINS[0]?.id ?? null);
   const [contactedLawyers, setContactedLawyers] = useState<Set<string>>(new Set());
@@ -325,6 +331,110 @@ export default function ReportPage() {
   }
 
   if (submitted && decision === "submit") {
+    if (emailSent) {
+      return (
+        <div className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4">
+          <div className="text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-verdict-green/15">
+              <svg className="h-8 w-8 text-verdict-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 className="mt-5 text-3xl text-ink">Letter sent</h2>
+            <p className="mt-2 text-[15px] text-ink-soft">Pre-action letter with {CASE_07_FILES.length} attached documents sent to {emailTo || "the recipient"}.</p>
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <button onClick={() => router.push("/demo")} className="inline-flex items-center gap-2 rounded-full border border-line px-6 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-canvas-deep">Back to dashboard</button>
+              <button onClick={() => { setSubmitted(false); setDecision(null); setEmailSent(false); setShowEmailCompose(false); }} className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-accent-deep">View report</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (showEmailCompose) {
+      return (
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+          <div className="rounded-2xl border border-line bg-paper shadow-[0_8px_30px_-8px_rgba(40,20,20,0.3)]">
+            {/* Email header */}
+            <div className="border-b border-line p-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-medium text-ink">Send pre-action letter</h2>
+                <button onClick={() => setShowEmailCompose(false)} className="rounded-lg p-1.5 text-ink-faint hover:bg-canvas-deep hover:text-ink">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+            </div>
+
+            {/* To field */}
+            <div className="border-b border-line-soft px-5 py-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-ink-faint">To:</span>
+                <input
+                  type="email"
+                  value={emailTo}
+                  onChange={(e) => setEmailTo(e.target.value)}
+                  placeholder="landlord@example.com"
+                  className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-faint"
+                />
+              </div>
+            </div>
+
+            {/* Subject */}
+            <div className="border-b border-line-soft px-5 py-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-ink-faint">Subject:</span>
+                <span className="text-sm text-ink">Pre-Action Letter — {reportData.title}</span>
+              </div>
+            </div>
+
+            {/* Attachments */}
+            <div className="border-b border-line-soft px-5 py-3">
+              <span className="text-xs font-medium uppercase tracking-[0.14em] text-ink-faint">Attachments ({emailAttachments.length})</span>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {emailAttachments.map((name) => (
+                  <span key={name} className={`group inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs ${name === "Pre-Action Letter.pdf" ? "border-accent/30 bg-accent-tint font-medium text-accent" : "border-line bg-canvas-deep text-ink-soft"}`}>
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" /></svg>
+                    {name}
+                    <button onClick={() => removeAttachment(name)} className="ml-1 rounded-full p-0.5 opacity-0 transition-opacity hover:bg-ink/10 group-hover:opacity-100">
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Letter body — editable */}
+            <div className="px-5 py-4">
+              <textarea
+                value={letterBody}
+                onChange={(e) => setLetterBody(e.target.value)}
+                className="w-full resize-none whitespace-pre-wrap rounded-lg border border-line-soft bg-transparent p-3 font-serif text-sm leading-relaxed text-ink outline-none transition-colors focus:border-accent/40 focus:ring-1 focus:ring-accent/20"
+                rows={16}
+              />
+              <div className="mt-4 border-t border-line-soft pt-4">
+                <span className="text-xs text-ink-faint">Statutory basis:</span>
+                <ul className="mt-1 space-y-0.5 text-xs text-ink-soft">
+                  {caseRefs.filter((r) => r.relevance === "high").map((r) => (
+                    <li key={r.id}>&#167; {r.citation}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Send button */}
+            <div className="border-t border-line p-5">
+              <button
+                onClick={() => { setEmailSent(true); }}
+                disabled={!emailTo.trim()}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent-deep disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                {emailAttachments.length > 0 ? `Send with ${emailAttachments.length} attachments` : "Send letter"}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <div className="mb-8 text-center">
@@ -342,7 +452,10 @@ export default function ReportPage() {
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                 {pdfGenerating ? "..." : "Download PDF"}
               </button>
-              <button className="inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-deep">
+              <button
+                onClick={() => setShowEmailCompose(true)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-deep"
+              >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
                 Send letter
               </button>
@@ -491,15 +604,21 @@ export default function ReportPage() {
               {previewFile && (
                 <div className="rounded-2xl border border-line bg-paper">
                   <div className="flex items-center justify-between border-b border-line px-5 py-3">
-                    <span className="text-sm font-medium text-ink">{CASE_07_FILES.find((f) => f.path === previewFile)?.name ?? userFiles.find((f) => f.url === previewFile)?.name ?? "Document"}</span>
+                    <span className="text-sm font-medium text-ink">{previewFile.name}</span>
                     <button onClick={() => setPreviewFile(null)} className="rounded-lg p-1.5 text-ink-faint hover:bg-canvas-deep hover:text-ink">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                   </div>
-                  {previewFile.endsWith(".pdf") || userFiles.find((f) => f.url === previewFile)?.type === "pdf" ? (
-                    <iframe src={previewFile} className="h-[70vh] w-full" title="Document preview" />
+                  {previewFile.type === "pdf" ? (
+                    <iframe src={previewFile.url} className="h-[70vh] w-full" title="Document preview" />
+                  ) : previewFile.type === "image" ? (
+                    <div className="flex justify-center p-4"><img src={previewFile.url} alt={previewFile.name} className="max-h-[70vh] rounded-lg" /></div>
                   ) : (
-                    <div className="flex justify-center p-4"><img src={previewFile} alt="Evidence" className="max-h-[70vh] rounded-lg" /></div>
+                    <div className="flex flex-col items-center justify-center py-16 text-ink-faint">
+                      <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                      <p className="mt-3 text-sm">{previewFile.name}</p>
+                      <p className="mt-1 text-xs">Preview not available for this file type</p>
+                    </div>
                   )}
                 </div>
               )}
@@ -520,7 +639,7 @@ export default function ReportPage() {
                     <div className="space-y-2">
                       <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Case files ({uploadedFiles.length + userFiles.length})</span>
                       {uploadedFiles.length > 0 && CASE_07_FILES.map((f) => (
-                        <button key={f.path} onClick={() => setPreviewFile(f.path)} className="flex w-full items-center gap-3 rounded-xl border border-line bg-paper px-4 py-3 text-left transition-colors hover:border-accent/30 hover:bg-accent-tint">
+                        <button key={f.path} onClick={() => setPreviewFile({ url: f.path, name: f.name, type: f.type === "image" ? "image" : f.type === "pdf" ? "pdf" : "other" })} className="flex w-full items-center gap-3 rounded-xl border border-line bg-paper px-4 py-3 text-left transition-colors hover:border-accent/30 hover:bg-accent-tint">
                           {f.type === "pdf" ? (
                             <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                           ) : (
@@ -532,7 +651,7 @@ export default function ReportPage() {
                         </button>
                       ))}
                       {userFiles.map((f) => (
-                        <button key={f.url} onClick={() => setPreviewFile(f.url)} className="flex w-full items-center gap-3 rounded-xl border border-accent/30 bg-accent-tint px-4 py-3 text-left transition-colors hover:bg-accent-tint">
+                        <button key={f.url} onClick={() => setPreviewFile({ url: f.url, name: f.name, type: f.type })} className="flex w-full items-center gap-3 rounded-xl border border-accent/30 bg-accent-tint px-4 py-3 text-left transition-colors hover:bg-accent-tint">
                           <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                           <span className="flex-1 text-sm text-ink">{f.name}</span>
                           <span className="rounded border border-accent/30 px-1.5 py-0.5 text-[10px] font-medium text-accent">Uploaded</span>
