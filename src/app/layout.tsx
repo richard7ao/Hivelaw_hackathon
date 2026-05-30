@@ -19,9 +19,9 @@ const hanken = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Steeleman: the renter’s honest legal brain",
+  title: "Steelman — Every legal AI tells you you’re right. We tell you how you’ll lose.",
   description:
-    "Steeleman reads a renter’s evidence, grounds every answer in current law, and tells them where they really stand on a damp & mould disrepair claim. It prepares the pre-action letter when it’s worth sending, and says so honestly when it isn’t.",
+    "The Steelman argues the opponent’s best case against you, grounded in your own documents. Access to justice for everyone — 5.1 billion people have an unmet justice need.",
 };
 
 export default function RootLayout({
