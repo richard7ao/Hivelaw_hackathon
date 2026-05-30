@@ -9,13 +9,32 @@
  * Run:  ANTHROPIC_API_KEY=sk-ant-... npm run cases
  * (or put the key in a .env file in the repo root — see .env.example)
  *
+ * --- Document ingestion (NEW) -------------------------------------------------
+ * Cases are now BUNDLES, not lone markdown files. A bundle is a directory that
+ * contains a `*_Problem_Statement.md` plus the client's supporting documents.
+ * We currently have full document sets for rental case 01 and 07. For each
+ * bundle we:
+ *   - read the problem statement (the client's account), AND
+ *   - extract the TEXT from every sibling .pdf via the `pdftotext` CLI, and
+ *     append it (clearly delimited) to the case text we send to Claude.
+ * Images (the deposit-scheme screenshots, the mould photos) are NOT ingested —
+ * v1 is text-only (no vision) — but they're listed in the report manifest, and
+ * the problem statement's "Documents Provided" table already describes them.
+ *
+ * Why this matters for the demo: the killer steelman quote ("I confirm that the
+ * above works have been carried out to my satisfaction") lives in case 07's
+ * contractor_works_form.pdf, NOT in the problem statement. Ingesting the PDF
+ * text is what lets the agent quote her own signed form back at her — and what
+ * lets the anti-hallucination guard verify that quote verbatim.
+ *
  * v1 is deliberately dumb and sequential-ish (small concurrency pool). No DB,
  * no framework. Comments > cleverness — this is throwaway scaffolding.
  */
 
 import Anthropic from "@anthropic-ai/sdk";
-import { readFile, readdir, writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -49,6 +68,10 @@ if (!process.env.ANTHROPIC_API_KEY) {
   process.exit(1);
 }
 
+// Document ingestion leans on the `pdftotext` CLI (poppler). Probe for it up
+// front so we can warn loudly rather than silently shipping document-less cases.
+const HAVE_PDFTOTEXT = checkPdftotext();
+
 const client = new Anthropic();
 
 // ---------------------------------------------------------------------------
@@ -61,9 +84,12 @@ consumer legal dispute. You are NOT their solicitor. Your job is to show them
 the truth about their case — including how the other side will attack it —
 before they spend time and money they can't get back.
 
-You will be given the full text of a case file (the client's account plus a
-description of their documents). Work ONLY from what is in the file. Never
-invent facts, statutes, or quotes.
+You will be given the full text of a case file: the client's account, PLUS the
+extracted text of their supporting documents (each delimited by a "SUPPORTING
+DOCUMENT:" header). Work ONLY from what is in the file. Never invent facts,
+statutes, or quotes. When you quote for a steelman point, you may quote from
+EITHER the client's account OR any supporting document — both are part of the
+case file the opponent can weaponise.
 
 Produce, via the provided tool/output format:
 
@@ -175,6 +201,34 @@ type CaseReport = {
   legal_basis: LegalBasis[];
 };
 
+// One document inside a case bundle.
+type DocInfo = {
+  name: string;
+  kind: "pdf" | "image" | "image-folder" | "other";
+  included: boolean; // did its text make it into the case file we sent Claude?
+  chars?: number; // extracted-text length (pdf)
+  count?: number; // image count (image-folder)
+};
+
+// A case bundle: the client's account plus its supporting documents.
+type Bundle = {
+  id: string; // e.g. "rental-01" (derived from the folder path under cases/)
+  title: string; // first # heading in the problem statement
+  dir: string;
+  caseText: string; // problem statement + every ingested PDF's text
+  docs: DocInfo[];
+};
+
+type BundleResult = {
+  id: string;
+  title: string;
+  ok: boolean;
+  verifiedAll: boolean;
+  prospects?: string;
+  recommendation?: string;
+  docCount?: number;
+};
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -182,31 +236,43 @@ type CaseReport = {
 async function main() {
   await mkdir(REPORTS_DIR, { recursive: true });
 
-  const files = (await readdir(CASES_DIR))
-    .filter((f) => f.endsWith(".md"))
-    .sort();
-
-  if (files.length === 0) {
-    console.error(`No .md case files found in ${CASES_DIR}`);
+  const problemFiles = findProblemStatements(CASES_DIR);
+  if (problemFiles.length === 0) {
+    console.error(
+      `No *_Problem_Statement.md files found under ${CASES_DIR}. ` +
+        `Each case is a folder containing a problem statement + its documents.`,
+    );
     process.exit(1);
   }
 
+  const bundles = problemFiles.map(loadBundle);
+
   console.log(
-    `Running ${files.length} cases through ${MODEL} (effort=${EFFORT}, concurrency=${CONCURRENCY})…\n`,
+    `Running ${bundles.length} case bundle(s) through ${MODEL} ` +
+      `(effort=${EFFORT}, concurrency=${CONCURRENCY})…\n`,
   );
+  for (const b of bundles) {
+    const pdfs = b.docs.filter((d) => d.kind === "pdf" && d.included);
+    const skipped = b.docs.filter((d) => !d.included);
+    console.log(
+      `  • ${b.id}: ${pdfs.length} PDF(s) ingested` +
+        (skipped.length ? `, ${skipped.length} non-text item(s) noted (images)` : ""),
+    );
+  }
+  console.log("");
 
-  const results: { file: string; ok: boolean; verifiedAll: boolean; prospects?: string; recommendation?: string }[] = [];
+  const results: BundleResult[] = [];
 
-  // Simple concurrency pool — process `files` CONCURRENCY at a time.
+  // Simple concurrency pool — process `bundles` CONCURRENCY at a time.
   let cursor = 0;
   async function worker() {
-    while (cursor < files.length) {
-      const file = files[cursor++];
-      const res = await runOne(file).catch((err) => {
-        console.error(`✗ ${file} — ${err?.message ?? err}`);
-        return { ok: false, verifiedAll: false };
+    while (cursor < bundles.length) {
+      const bundle = bundles[cursor++];
+      const res = await runOne(bundle).catch((err) => {
+        console.error(`✗ ${bundle.id} — ${err?.message ?? err}`);
+        return { id: bundle.id, title: bundle.title, ok: false, verifiedAll: false };
       });
-      results.push({ file, ...res } as any);
+      results.push(res as BundleResult);
     }
   }
   await Promise.all(Array.from({ length: Math.max(1, CONCURRENCY) }, worker));
@@ -222,8 +288,8 @@ async function main() {
   console.log(`Reports in: ${path.relative(process.cwd(), REPORTS_DIR)}/`);
 }
 
-async function runOne(file: string) {
-  const caseText = await readFile(path.join(CASES_DIR, file), "utf8");
+async function runOne(bundle: Bundle): Promise<BundleResult> {
+  const caseText = bundle.caseText;
   const started = Date.now();
 
   const response = await client.messages.create({
@@ -254,7 +320,7 @@ async function runOne(file: string) {
     messages: [
       {
         role: "user",
-        content: `Here is the full case file. Produce the Case Reality assessment.\n\n${caseText}`,
+        content: `Here is the full case file (the client's account plus the extracted text of their supporting documents). Produce the Case Reality assessment.\n\n${caseText}`,
       },
     ],
   } as any);
@@ -264,8 +330,9 @@ async function runOne(file: string) {
   if (!textBlock) throw new Error("no text block in response");
   const report = JSON.parse(textBlock.text) as CaseReport;
 
-  // --- Guard 1: steelman quotes. Soft-fail — verify against the CASE FILE,
-  // flag (⚠) any that aren't found, but keep them so the lawyer can review. ---
+  // --- Guard 1: steelman quotes. Soft-fail — verify against the CASE FILE
+  // (problem statement + ingested document text), flag (⚠) any that aren't
+  // found, but keep them so the lawyer can review. ---
   const verified = report.opponent_steelman.map((p) => ({
     ...p,
     verified: quoteAppears(p.source_quote, caseText),
@@ -293,9 +360,10 @@ async function runOne(file: string) {
   const citeCount =
     report.legal_basis.length +
     verified.reduce((n, v) => n + v.legal_basis.length, 0);
+  const ingested = bundle.docs.filter((d) => d.included).length;
   console.log(
-    `${verifiedAll ? "✓" : "⚠"} ${file} — ${report.prospects} / ${report.recommendation}` +
-      ` · ${citeCount} grounded citation(s)${strippedCitations ? `, ${strippedCitations} stripped` : ""}` +
+    `${verifiedAll ? "✓" : "⚠"} ${bundle.id} — ${report.prospects} / ${report.recommendation}` +
+      ` · ${ingested} doc(s), ${citeCount} grounded citation(s)${strippedCitations ? `, ${strippedCitations} stripped` : ""}` +
       ` (${secs}s, in ${usage.input_tokens ?? "?"} / out ${usage.output_tokens ?? "?"}` +
       `${usage.cache_read_input_tokens ? `, cache-read ${usage.cache_read_input_tokens}` : ""})`,
   );
@@ -305,13 +373,96 @@ async function runOne(file: string) {
     }
   }
 
-  await writeReport(file, report, verified);
+  await writeReport(bundle, report, verified);
+  await writeHtmlReport(bundle, report, verified);
   return {
+    id: bundle.id,
+    title: bundle.title,
     ok: true,
     verifiedAll,
     prospects: report.prospects,
     recommendation: report.recommendation,
+    docCount: ingested,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Case-bundle discovery + document ingestion
+// ---------------------------------------------------------------------------
+
+/** Recursively find every `*_Problem_Statement.md` under `root`. Each one
+ *  anchors a case bundle (its folder holds the supporting documents). */
+function findProblemStatements(root: string): string[] {
+  const out: string[] = [];
+  const walk = (dir: string) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) walk(full);
+      else if (/problem_statement\.md$/i.test(ent.name)) out.push(full);
+    }
+  };
+  walk(root);
+  return out.sort();
+}
+
+/** Load a bundle: read the problem statement, extract text from every sibling
+ *  PDF, and concatenate it all into the case text we send Claude. Images are
+ *  recorded in the manifest but not ingested (v1 is text-only). */
+function loadBundle(problemPath: string): Bundle {
+  const dir = path.dirname(problemPath);
+  const relDir = path.relative(CASES_DIR, dir);
+  const id = relDir ? relDir.split(path.sep).join("-") : path.basename(dir);
+  const problemMd = readFileSync(problemPath, "utf8");
+  const title = (problemMd.match(/^#\s+(.+)$/m)?.[1] ?? id).trim();
+
+  const docs: DocInfo[] = [];
+  const parts: string[] = [problemMd.trim()];
+
+  // Scan the bundle directory's immediate entries. PDFs → extract + append.
+  // Image files / image folders → note in the manifest, don't ingest.
+  for (const ent of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const full = path.join(dir, ent.name);
+    if (ent.isDirectory()) {
+      const imgs = readdirSync(full).filter((f) => /\.(png|jpe?g|webp|gif)$/i.test(f));
+      if (imgs.length) {
+        docs.push({ name: ent.name + "/", kind: "image-folder", count: imgs.length, included: false });
+      }
+      continue;
+    }
+    if (ent.name === path.basename(problemPath) || ent.name.endsWith(".md")) continue;
+    if (/\.pdf$/i.test(ent.name)) {
+      const text = extractPdfText(full);
+      docs.push({ name: ent.name, kind: "pdf", chars: text.length, included: true });
+      parts.push(`${docHeader(ent.name)}\n${text.trim()}`);
+    } else if (/\.(png|jpe?g|webp|gif)$/i.test(ent.name)) {
+      docs.push({ name: ent.name, kind: "image", included: false });
+    } else {
+      docs.push({ name: ent.name, kind: "other", included: false });
+    }
+  }
+
+  return { id, title, dir, caseText: parts.join("\n\n"), docs };
+}
+
+/** Extract text from a PDF via the poppler `pdftotext` CLI. */
+function extractPdfText(pdfPath: string): string {
+  if (!HAVE_PDFTOTEXT) {
+    return `(pdftotext not installed — text of ${path.basename(pdfPath)} not extracted)`;
+  }
+  try {
+    return execFileSync("pdftotext", ["-q", "-enc", "UTF-8", pdfPath, "-"], {
+      encoding: "utf8",
+      maxBuffer: 64 * 1024 * 1024,
+    });
+  } catch (err: any) {
+    console.warn(`    ⚠ pdftotext failed on ${path.basename(pdfPath)} — ${err?.message ?? err}`);
+    return `(could not extract text from ${path.basename(pdfPath)})`;
+  }
+}
+
+function docHeader(name: string): string {
+  const bar = "=".repeat(60);
+  return `${bar}\nSUPPORTING DOCUMENT: ${name}\n${bar}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -336,17 +487,19 @@ function quoteAppears(quote: string, caseText: string): boolean {
 }
 
 async function writeReport(
-  file: string,
+  bundle: Bundle,
   r: CaseReport,
   verified: (SteelmanPoint & { verified: boolean })[],
 ) {
-  const base = file.replace(/\.md$/, "");
+  const base = bundle.id;
   const lines: string[] = [];
-  lines.push(`# Case Reality Report — ${base}`);
+  lines.push(`# Case Reality Report — ${bundle.title}`);
   lines.push("");
   lines.push(`**Prospects:** ${badge(r.prospects)} — ${r.prospects_reason}`);
   lines.push("");
   lines.push(`**Recommendation:** \`${r.recommendation}\` — ${r.recommendation_detail}`);
+  lines.push("");
+  lines.push(`**Documents ingested:** ${docManifestLine(bundle)}`);
   lines.push("");
   lines.push("## Act 1 — Your strongest case");
   lines.push("");
@@ -393,22 +546,202 @@ async function writeReport(
   await writeFile(path.join(REPORTS_DIR, `${base}.report.md`), lines.join("\n"), "utf8");
 }
 
-async function writeIndex(
-  results: { file: string; ok: boolean; verifiedAll: boolean; prospects?: string; recommendation?: string }[],
+// ---------------------------------------------------------------------------
+// HTML report (the demo-facing Case Reality Report viewer)
+// ---------------------------------------------------------------------------
+
+async function writeHtmlReport(
+  bundle: Bundle,
+  r: CaseReport,
+  verified: (SteelmanPoint & { verified: boolean })[],
 ) {
+  const html = buildHtml(bundle, r, verified);
+  await writeFile(path.join(REPORTS_DIR, `${bundle.id}.report.html`), html, "utf8");
+}
+
+function buildHtml(
+  bundle: Bundle,
+  r: CaseReport,
+  verified: (SteelmanPoint & { verified: boolean })[],
+): string {
+  const prospectClass =
+    r.prospects === "strong" ? "strong" : r.prospects === "arguable" ? "arguable" : "weak";
+
+  const steelmanCards = verified
+    .map((v) => {
+      const legal = (v.legal_basis ?? [])
+        .map(
+          (lb) =>
+            `<div class="legal"><span class="cite">⚖️ ${esc(lb.citation)}</span> <span class="lq">“${esc(lb.source_quote)}”</span></div>`,
+        )
+        .join("");
+      const status = v.verified
+        ? `<span class="badge ok">✓ grounded verbatim in the file</span>`
+        : `<span class="badge bad">⚠ quote not found verbatim — review</span>`;
+      return `
+      <div class="card ${v.verified ? "" : "unverified"}">
+        <p class="arg">${esc(v.argument)}</p>
+        <blockquote class="quote">“${esc(v.source_quote)}”</blockquote>
+        ${status}
+        ${legal}
+      </div>`;
+    })
+    .join("");
+
+  const gaps = r.evidence_gaps
+    .map((g) => `<li><label><input type="checkbox"> ${esc(g)}</label></li>`)
+    .join("");
+
+  const legalBasis =
+    r.legal_basis.length > 0
+      ? `<ul class="legal-list">${r.legal_basis
+          .map(
+            (lb) =>
+              `<li><span class="cite">${esc(lb.citation)}</span> <span class="lq">“${esc(lb.source_quote)}”</span></li>`,
+          )
+          .join("")}</ul>`
+      : `<p class="muted">No corpus provision applies to this case (the corpus currently covers housing only).</p>`;
+
+  const docRows = bundle.docs
+    .map((d) => {
+      const status = d.included
+        ? `<span class="doctag in">text ingested</span>`
+        : d.kind === "image" || d.kind === "image-folder"
+          ? `<span class="doctag img">image — not ingested (v1 text-only)</span>`
+          : `<span class="doctag skip">not ingested</span>`;
+      const detail =
+        d.kind === "pdf" && d.chars != null
+          ? `${d.chars.toLocaleString()} chars`
+          : d.kind === "image-folder" && d.count != null
+            ? `${d.count} image(s)`
+            : "";
+      return `<tr><td class="docname">${esc(d.name)}</td><td>${status}</td><td class="muted">${detail}</td></tr>`;
+    })
+    .join("");
+
+  const nextSteps =
+    r.recommendation === "self-serve"
+      ? "You can likely handle this yourself — the report below is your roadmap."
+      : r.recommendation === "escalate-to-solicitor"
+        ? "Escalate to a Lawhive solicitor — and hand them this prepared file."
+        : "Reconsider pursuing this as it stands — here's an honest read of why.";
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case Reality Report — ${esc(bundle.title)}</title>
+<style>
+  :root {
+    --ink: #1a1a2e; --muted: #6b7280; --line: #e5e7eb; --bg: #f7f7fb;
+    --strong: #16a34a; --arguable: #d97706; --weak: #dc2626; --accent: #4338ca;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+  header.head { border-bottom: 2px solid var(--ink); padding-bottom: 20px; margin-bottom: 28px; }
+  .kicker { text-transform: uppercase; letter-spacing: .12em; font-size: 12px; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 28px; margin: 6px 0 16px; line-height: 1.25; }
+  .verdict { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; color: #fff; }
+  .pill.strong { background: var(--strong); } .pill.arguable { background: var(--arguable); } .pill.weak { background: var(--weak); }
+  .reason { color: var(--muted); font-size: 15px; }
+  .nextsteps { margin-top: 16px; padding: 14px 16px; background: #eef2ff; border-left: 4px solid var(--accent); border-radius: 6px; }
+  .nextsteps b { color: var(--accent); }
+  section { margin-top: 36px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+  .act-num { color: var(--muted); font-weight: 400; }
+  .best { font-size: 17px; }
+  .card { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--weak); border-radius: 8px; padding: 16px 18px; margin: 14px 0; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .card.unverified { border-left-color: #9ca3af; background: #fafafa; }
+  .arg { font-weight: 600; margin: 0 0 10px; }
+  blockquote.quote { margin: 0 0 10px; padding: 10px 14px; background: #fef2f2; border-radius: 6px; font-style: italic; color: #7f1d1d; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .badge.ok { background: #dcfce7; color: #166534; } .badge.bad { background: #fee2e2; color: #991b1b; }
+  .legal { margin-top: 8px; font-size: 13px; }
+  .legal .cite, .legal-list .cite { font-weight: 700; color: var(--accent); }
+  .legal .lq, .legal-list .lq { color: var(--muted); }
+  ul.gaps { list-style: none; padding: 0; } ul.gaps li { padding: 6px 0; }
+  ul.gaps input { margin-right: 8px; transform: translateY(1px); }
+  ul.legal-list { padding-left: 0; list-style: none; } ul.legal-list li { padding: 8px 0; border-bottom: 1px dashed var(--line); }
+  table.docs { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px; }
+  table.docs td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .docname { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  .doctag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .doctag.in { background: #dcfce7; color: #166534; } .doctag.img { background: #fef3c7; color: #92400e; } .doctag.skip { background: #f3f4f6; color: #6b7280; }
+  .muted { color: var(--muted); }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div class="kicker">Case Reality Report</div>
+    <h1>${esc(bundle.title)}</h1>
+    <div class="verdict">
+      <span class="pill ${prospectClass}">${esc(r.prospects.toUpperCase())}</span>
+      <span class="reason">${esc(r.prospects_reason)}</span>
+    </div>
+    <div class="nextsteps">
+      <b>Next step:</b> ${esc(nextSteps)}<br>
+      <span class="muted">${esc(r.recommendation_detail)}</span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="act-num">Act 1</span> — Your strongest case</h2>
+    <p class="best">${esc(r.best_case)}</p>
+  </section>
+
+  <section>
+    <h2><span class="act-num">Act 2</span> — The Steelman: how the other side comes at you</h2>
+    ${steelmanCards}
+  </section>
+
+  <section>
+    <h2><span class="act-num">Act 3</span> — Evidence gaps to close (your checklist)</h2>
+    <ul class="gaps">${gaps}</ul>
+  </section>
+
+  <section>
+    <h2>Legal basis <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">— verified verbatim against the corpus; ungrounded citations stripped</span></h2>
+    ${legalBasis}
+  </section>
+
+  <section>
+    <h2>Documents on file</h2>
+    <table class="docs"><tbody>${docRows}</tbody></table>
+  </section>
+
+  <footer>
+    Generated by The Steelman — an honest case-assessment assistant, not a solicitor.
+    Every quote above is string-matched verbatim against this client's own file; legal
+    citations are matched against a closed statutory corpus and stripped if unverified.
+  </footer>
+</div>
+</body>
+</html>`;
+}
+
+async function writeIndex(results: BundleResult[]) {
   const lines: string[] = [];
   lines.push("# Steelman — case run index");
   lines.push("");
-  lines.push("| Case | Status | Prospects | Recommendation |");
-  lines.push("|---|---|---|---|");
-  for (const r of results.sort((a, b) => a.file.localeCompare(b.file))) {
+  lines.push("| Case | Status | Docs | Prospects | Recommendation |");
+  lines.push("|---|---|---|---|---|");
+  for (const r of results.sort((a, b) => a.id.localeCompare(b.id))) {
     const status = !r.ok ? "❌ failed" : r.verifiedAll ? "✅ clean" : "⚠ quote issue";
     lines.push(
-      `| [${r.file}](./${r.file.replace(/\.md$/, "")}.report.md) | ${status} | ${r.prospects ?? "-"} | ${r.recommendation ?? "-"} |`,
+      `| [${r.id}](./${r.id}.report.html) | ${status} | ${r.docCount ?? "-"} | ${r.prospects ?? "-"} | ${r.recommendation ?? "-"} |`,
     );
   }
   lines.push("");
-  lines.push("Legend: ✅ all steelman quotes verified verbatim · ⚠ a quote wasn't found in the file (review before featuring) · ❌ the run errored.");
+  lines.push(
+    "Legend: ✅ all steelman quotes verified verbatim · ⚠ a quote wasn't found in the file (review before featuring) · ❌ the run errored. " +
+      "Each case links to its HTML Case Reality Report; a `.report.md` is also written alongside for red-pen.",
+  );
   await writeFile(path.join(REPORTS_DIR, "INDEX.md"), lines.join("\n"), "utf8");
 }
 
@@ -421,6 +754,36 @@ function badge(p: string) {
 }
 function truncate(s: string, n: number) {
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
+}
+function esc(s: string): string {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+function docManifestLine(bundle: Bundle): string {
+  const pdfs = bundle.docs.filter((d) => d.kind === "pdf" && d.included).map((d) => d.name);
+  const images = bundle.docs
+    .filter((d) => d.kind === "image" || d.kind === "image-folder")
+    .reduce((n, d) => n + (d.count ?? 1), 0);
+  const parts: string[] = [];
+  parts.push(pdfs.length ? `${pdfs.length} PDF(s) (${pdfs.join(", ")})` : "no PDFs");
+  if (images) parts.push(`${images} image(s) noted but not ingested (v1 is text-only)`);
+  return parts.join("; ");
+}
+function checkPdftotext(): boolean {
+  try {
+    execFileSync("pdftotext", ["-v"], { stdio: "ignore" });
+    return true;
+  } catch {
+    console.warn(
+      "⚠ `pdftotext` not found on PATH. PDF documents will NOT be ingested — " +
+        "install poppler (`brew install poppler`) to include them. Continuing with " +
+        "problem-statement text only.",
+    );
+    return false;
+  }
 }
 function loadCorpus(dir: string): string {
   // Concatenate every corpus/*.md into one blob. This is both injected into the
