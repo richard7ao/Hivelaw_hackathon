@@ -25,9 +25,7 @@ Almost every consumer-legal AI validates the user. None of them show you how you
 lose. Legal services is a $1 trillion global market — and 5.1 billion people
 worldwide have an unmet justice need. Half of everyone who faces a legal problem
 can't get help. Not because they don't have a case — because they can't afford to
-find out. One of our team watched his mum type her legal problems into ChatGPT. It
-told her she was right. It missed every counter-argument that mattered. The
-Steelman changes that. It argues the *opponent's* best case against you, grounded
+find out. The Steelman changes that. It argues the *opponent's* best case against you, grounded
 in your own documents — giving everyone what only a solicitor's first meeting used
 to provide: an honest assessment of where you stand. You paste your case file; it
 gives you your strongest position, then role-plays how the other side attacks —
@@ -94,13 +92,12 @@ hard ceiling — cut any word that isn't load-bearing.
 - **VIDEO:** Title card ("The Steelman"), then the case picker with validated cases;
   Crystal / Case 07 is selected and her case file opens.
 - **VOICE (Thinker):**
-  > "Five billion people worldwide have an unmet justice need. My mum is one of
-  > them — she typed her legal problems into ChatGPT. It told her she was right.
-  > It missed every counter-argument that mattered. Every legal AI does this. We
-  > built the one that tells you how you'll lose — because that's the one that
-  > actually protects you. This is Crystal. Eight months of damp and black mould
-  > in her council flat, a sick child, fifteen ignored emails. Watch what our
-  > agent does with her case."
+  > "Five billion people worldwide have an unmet justice need. Not because they
+  > don't have a case — because they can't afford to find out. Every legal AI
+  > tells them they're right. We built the one that tells you how you'll lose —
+  > because that's the one that actually protects you. This is Crystal. Eight
+  > months of damp and black mould in her council flat, a sick child, fifteen
+  > ignored emails. Watch what our agent does with her case."
 
 ### Beat 2 — The three acts, the hero punch (0:35–1:55) · ENGINEER
 
@@ -201,7 +198,27 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 
 ---
 
-## 8. GTM (one slide / one breath if asked)
+## 8. The personal beat (optional — read the room)
+
+> Drop this in if the room feels receptive to a personal moment. Works best in
+> Beat 1 (Thinker, after the "five billion" line) or Beat 3 (Lawyer, before the
+> close). Pick one spot, not both. If the energy is formal or time is tight, skip
+> it — the pitch stands without it.
+
+**The line (Thinker version):**
+
+> "My mum is one of them. She typed her legal problems into ChatGPT. It told her
+> she was right. It missed every counter-argument that mattered."
+
+**The line (Lawyer version):**
+
+> "One of our team watched his mum type her legal problems into ChatGPT. It told
+> her she was right. It missed every counter-argument that would have sunk her
+> case."
+
+---
+
+## 9. GTM (one slide / one breath if asked)
 
 1. **Lawhive partnership** — the honest intake/triage front door. Self-serve cases
    stay self-served; escalations arrive with a prepared file. Not a competitor — a
@@ -213,7 +230,7 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 
 ---
 
-## 9. Objection handling (Q&A prep)
+## 10. Objection handling (Q&A prep)
 
 - **"Isn't this just discouraging people from getting justice?"** The opposite. We
   validate the strongest case *first*, then show the gap so it can be closed. The
@@ -238,7 +255,7 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 
 ---
 
-## 10. Production checklist (pre-stage)
+## 11. Production checklist (pre-stage)
 
 - [ ] App renders Case 07 from cache exactly per the §5 build contract.
 - [ ] Record the clean master video (case pick → 3 acts → report), projector-legible.
@@ -252,7 +269,7 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 
 ---
 
-## 11. Data sources (verify before quoting on stage)
+## 12. Data sources (verify before quoting on stage)
 
 | Claim | Figure | Source |
 |---|---|---|
