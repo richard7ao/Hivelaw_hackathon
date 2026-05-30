@@ -152,6 +152,9 @@ export default function ReportPage() {
   const [previewFile, setPreviewFile] = useState<string | null>(null);
   const [filesLoaded, setFilesLoaded] = useState(true);
   const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [showEmailCompose, setShowEmailCompose] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailTo, setEmailTo] = useState("");
   // The Steelman tab: one chain expanded at a time (hero chain open by default)
   const [openChain, setOpenChain] = useState<string | null>(STEELMAN_CHAINS[0]?.id ?? null);
   const [contactedLawyers, setContactedLawyers] = useState<Set<string>>(new Set());
@@ -322,6 +325,105 @@ export default function ReportPage() {
   }
 
   if (submitted && decision === "submit") {
+    if (emailSent) {
+      return (
+        <div className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4">
+          <div className="text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-verdict-green/15">
+              <svg className="h-8 w-8 text-verdict-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 className="mt-5 text-3xl text-ink">Letter sent</h2>
+            <p className="mt-2 text-[15px] text-ink-soft">Pre-action letter with {CASE_07_FILES.length} attached documents sent to {emailTo || "the recipient"}.</p>
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <button onClick={() => router.push("/demo")} className="inline-flex items-center gap-2 rounded-full border border-line px-6 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-canvas-deep">Back to dashboard</button>
+              <button onClick={() => { setSubmitted(false); setDecision(null); setEmailSent(false); setShowEmailCompose(false); }} className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-accent-deep">View report</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (showEmailCompose) {
+      return (
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+          <div className="rounded-2xl border border-line bg-paper shadow-[0_8px_30px_-8px_rgba(40,20,20,0.3)]">
+            {/* Email header */}
+            <div className="border-b border-line p-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-medium text-ink">Send pre-action letter</h2>
+                <button onClick={() => setShowEmailCompose(false)} className="rounded-lg p-1.5 text-ink-faint hover:bg-canvas-deep hover:text-ink">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+            </div>
+
+            {/* To field */}
+            <div className="border-b border-line-soft px-5 py-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-ink-faint">To:</span>
+                <input
+                  type="email"
+                  value={emailTo}
+                  onChange={(e) => setEmailTo(e.target.value)}
+                  placeholder="landlord@example.com"
+                  className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-faint"
+                />
+              </div>
+            </div>
+
+            {/* Subject */}
+            <div className="border-b border-line-soft px-5 py-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-ink-faint">Subject:</span>
+                <span className="text-sm text-ink">Pre-Action Letter — {reportData.title}</span>
+              </div>
+            </div>
+
+            {/* Attachments */}
+            <div className="border-b border-line-soft px-5 py-3">
+              <span className="text-xs font-medium uppercase tracking-[0.14em] text-ink-faint">Attachments ({CASE_07_FILES.length + 1})</span>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-accent-tint px-3 py-1.5 text-xs font-medium text-accent">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                  Pre-Action Letter.pdf
+                </span>
+                {CASE_07_FILES.map((f) => (
+                  <span key={f.path} className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-canvas-deep px-3 py-1.5 text-xs text-ink-soft">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" /></svg>
+                    {f.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Letter body */}
+            <div className="px-5 py-4">
+              <pre className="whitespace-pre-wrap font-serif text-sm leading-relaxed text-ink">{MOCK_SUBMISSION_PREVIEW}</pre>
+              <div className="mt-4 border-t border-line-soft pt-4">
+                <span className="text-xs text-ink-faint">Statutory basis:</span>
+                <ul className="mt-1 space-y-0.5 text-xs text-ink-soft">
+                  {caseRefs.filter((r) => r.relevance === "high").map((r) => (
+                    <li key={r.id}>&#167; {r.citation}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Send button */}
+            <div className="border-t border-line p-5">
+              <button
+                onClick={() => { setEmailSent(true); }}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent-deep"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                Send with {CASE_07_FILES.length + 1} attachments
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <div className="mb-8 text-center">
@@ -340,11 +442,7 @@ export default function ReportPage() {
                 {pdfGenerating ? "..." : "Download PDF"}
               </button>
               <button
-                onClick={() => {
-                  const subject = encodeURIComponent(`Pre-Action Letter — ${reportData.title}`);
-                  const body = encodeURIComponent(MOCK_SUBMISSION_PREVIEW + "\n\n---\nStatutory basis:\n" + caseRefs.filter((r) => r.relevance === "high").map((r) => `- ${r.citation}`).join("\n") + "\n\nGenerated by Steelman — Case Assessment AI.\nThis is not legal advice.");
-                  window.open(`mailto:?subject=${subject}&body=${body}`, "_self");
-                }}
+                onClick={() => setShowEmailCompose(true)}
                 className="inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-deep"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
