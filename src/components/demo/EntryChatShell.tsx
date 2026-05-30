@@ -31,7 +31,7 @@ type SessionFile = {
 
 export default function EntryChatShell() {
   const router = useRouter();
-  const { setReport } = useDemoContext();
+  const { setReport, addUserFile } = useDemoContext();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [pendingFiles, setPendingFiles] = useState<SessionFile[]>([]);
@@ -159,6 +159,21 @@ export default function EntryChatShell() {
       evaluationMode,
       nextUserTurnCount,
       files: pendingFiles,
+    });
+
+    // Surface the user's uploads on the report's Documents tab (preview via a
+    // blob URL that stays valid for in-app navigation).
+    pendingFiles.forEach((pendingFile) => {
+      addUserFile({
+        name: pendingFile.file.name,
+        url: URL.createObjectURL(pendingFile.file),
+        type:
+          pendingFile.kind === "image-evidence"
+            ? "image"
+            : pendingFile.kind === "pdf-document"
+              ? "pdf"
+              : "other",
+      });
     });
 
     setMessages(nextMessages);

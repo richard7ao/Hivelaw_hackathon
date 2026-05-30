@@ -112,6 +112,44 @@ export const INTAKE_OUTPUT_SCHEMA = {
           type: "string",
           enum: ["self-serve", "escalate-to-solicitor", "reconsider-pursuing"],
         },
+        steelman: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              opponentArgument: { type: "string" },
+              sourceQuote: { type: "string" },
+              quoteCaption: { type: "string" },
+              reply: { type: "string" },
+              statute: { type: "string" },
+              verdict: { type: "string", enum: ["arguable", "strong-for-them"] },
+              unresolvedNote: { type: "string" },
+            },
+            required: [
+              "opponentArgument",
+              "sourceQuote",
+              "quoteCaption",
+              "reply",
+              "statute",
+              "verdict",
+              "unresolvedNote",
+            ],
+            additionalProperties: false,
+          },
+        },
+        references: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              relevance: { type: "string", enum: ["high", "moderate", "low"] },
+              application: { type: "string" },
+            },
+            required: ["id", "relevance", "application"],
+            additionalProperties: false,
+          },
+        },
       },
       required: [
         "ready",
@@ -123,6 +161,8 @@ export const INTAKE_OUTPUT_SCHEMA = {
         "summary",
         "prospects",
         "recommendation",
+        "steelman",
+        "references",
       ],
       additionalProperties: false,
     },
@@ -192,6 +232,9 @@ export function normalizeIntakeResult(
       summary: raw.report?.summary ?? "",
       prospects: raw.report?.prospects ?? "pending",
       recommendation: raw.report?.recommendation ?? "escalate-to-solicitor",
+      // Steelman chains are pre-filtered for quote-grounding in the Anthropic path.
+      steelman: raw.report?.steelman ?? [],
+      references: raw.report?.references ?? [],
     },
   };
 }

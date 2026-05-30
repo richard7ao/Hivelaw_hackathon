@@ -126,6 +126,10 @@ function buildReport(
     summary: scaffold.recommendation,
     prospects: ready ? "arguable" : "pending",
     recommendation: "escalate-to-solicitor",
+    // The deterministic no-API path doesn't fabricate grounded quotes or cite
+    // statutes; the report page falls back to its curated content for these.
+    steelman: [],
+    references: [],
   };
 }
 

@@ -60,6 +60,27 @@ export type IntakeReportParagraph = {
   highlights: IntakeReportHighlight[];
 };
 
+// A single Steelman chain: the opponent's best argument, grounded in a verbatim
+// quote from the user's OWN evidence, then answered. Mirrors demo-data's
+// SteelmanChain so the report's "The Steelman" tab renders it directly.
+export type IntakeSteelmanChain = {
+  opponentArgument: string;
+  sourceQuote: string; // VERBATIM from the user's documents/messages
+  quoteCaption: string; // where the quote is from
+  reply: string;
+  statute: string;
+  verdict: "arguable" | "strong-for-them";
+  unresolvedNote: string;
+};
+
+// The agent's selection of a relevant statute from the closed reference catalog
+// (it returns an id from the catalog + how it applies — never invents statute text).
+export type IntakeReferenceSelection = {
+  id: string;
+  relevance: "high" | "moderate" | "low";
+  application: string;
+};
+
 // The live Case Reality Report the agent builds during the conversation.
 // Mirrors demo-context ReportData + AnalysisData (see report-structure.json) so
 // the /demo/report page can render it directly.
@@ -73,6 +94,8 @@ export type IntakeReport = {
   summary: string;
   prospects: "strong" | "arguable" | "weak" | "pending";
   recommendation: "self-serve" | "escalate-to-solicitor" | "reconsider-pursuing";
+  steelman: IntakeSteelmanChain[];
+  references: IntakeReferenceSelection[];
 };
 
 export type IntakeTurnResult = {
