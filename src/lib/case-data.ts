@@ -1,4 +1,5 @@
-import type { ReportData, AnalysisData, ExtendedReference, CounterReference } from "./demo-data";
+import type { ReportData, AnalysisData } from "./demo-context";
+import type { ExtendedReference, CounterReference } from "./demo-data";
 
 export type CaseData = {
   id: string;

@@ -23,6 +23,7 @@ const RECOMMENDATION_STYLE = {
   "escalate-to-solicitor": { label: "Escalate to solicitor", bg: "bg-verdict-amber/10", border: "border-verdict-amber/40", text: "text-verdict-amber" },
   "self-serve": { label: "Self-serve", bg: "bg-verdict-green/10", border: "border-verdict-green/40", text: "text-verdict-green" },
   "do-not-pursue": { label: "Do not pursue", bg: "bg-verdict-red/10", border: "border-verdict-red/40", text: "text-verdict-red" },
+  "reconsider-pursuing": { label: "Reconsider pursuing", bg: "bg-verdict-red/10", border: "border-verdict-red/40", text: "text-verdict-red" },
   recommended: { label: "Recommended", bg: "bg-accent-tint", border: "border-accent/40", text: "text-accent" },
 } as const;
 

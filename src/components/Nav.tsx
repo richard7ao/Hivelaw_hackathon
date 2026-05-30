@@ -17,24 +17,24 @@ export default function Nav() {
         </Link>
 
         <nav className="flex items-center gap-7 text-sm">
-          <a
+          <Link
             href="/#how"
             className="hidden text-ink-soft transition-colors hover:text-ink sm:inline"
           >
             How it works
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#verdict"
             className="hidden text-ink-soft transition-colors hover:text-ink sm:inline"
           >
             The honest no
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#gtm"
             className="hidden text-ink-soft transition-colors hover:text-ink md:inline"
           >
             Go to market
-          </a>
+          </Link>
           <Link
             href="/demo"
             className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 font-medium text-paper transition-colors duration-200 hover:bg-accent-deep"

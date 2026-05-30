@@ -1,7 +1,16 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+
+import type { IntakeReport } from "@/lib/intake/types";
 import type { CaseData } from "./case-data";
+import {
+  MOCK_RESEARCH,
+  MOCK_REPORT,
+  MOCK_ANALYSIS,
+  MOCK_EXTENDED_REFERENCES,
+  MOCK_COUNTER_REFERENCES,
+} from "./demo-data";
 
 export type Message = { role: "user" | "assistant"; content: string };
 
@@ -48,6 +57,9 @@ type DemoState = {
   analysisData: AnalysisData;
   activeCase: CaseData | null;
   setActiveCase: (c: CaseData) => void;
+  // Live intake: the entry chat maps its AI report into a CaseData and pushes
+  // it in, so the report page renders it through the same activeCase path.
+  setReport: (report: IntakeReport) => void;
 };
 
 const DemoContext = createContext<DemoState | null>(null);
@@ -58,7 +70,10 @@ export function useDemoContext() {
   return ctx;
 }
 
-import { MOCK_RESEARCH, MOCK_REPORT, MOCK_ANALYSIS } from "./demo-data";
+// The active case (whether picked from the dashboard or built live by the chat)
+// is persisted locally as JSON so it survives a reload and the chat -> report
+// hop. File blobs aren't serialisable, so only the structured case is stored.
+const STORAGE_KEY = "hivelaw.demo.active-case.v1";
 
 export function DemoProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -66,6 +81,18 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [userFiles, setUserFiles] = useState<UserFile[]>([]);
   const [activeCase, setActiveCaseState] = useState<CaseData | null>(null);
+
+  // Hydrate the persisted case after mount (avoids an SSR hydration mismatch).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+      setActiveCaseState(JSON.parse(raw) as CaseData);
+    } catch {
+      // Ignore corrupt storage — fall back to the mock report.
+    }
+  }, []);
 
   const addMessage = (msg: Message) => setMessages((prev) => [...prev, msg]);
 
@@ -76,13 +103,42 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       ),
     );
 
-  const addFile = (f: UploadedFile) =>
-    setUploadedFiles((prev) => [...prev, f]);
+  const addFile = (f: UploadedFile) => setUploadedFiles((prev) => [...prev, f]);
+  const addUserFile = (f: UserFile) => setUserFiles((prev) => [...prev, f]);
 
-  const addUserFile = (f: UserFile) =>
-    setUserFiles((prev) => [...prev, f]);
+  const setActiveCase = (c: CaseData) => {
+    setActiveCaseState(c);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(c));
+    }
+  };
 
-  const setActiveCase = (c: CaseData) => setActiveCaseState(c);
+  // Map the entry chat's live AI report into a CaseData and make it active.
+  const setReport = (report: IntakeReport) => {
+    setActiveCase({
+      id: "live-intake",
+      title: report.title,
+      subtitle: report.subtitle,
+      description: report.summary,
+      prospects: report.prospects === "pending" ? "arguable" : report.prospects,
+      recommendation: report.recommendation,
+      recommendationDetail: report.summary,
+      report: {
+        title: report.title,
+        subtitle: report.subtitle,
+        paragraphs: report.paragraphs,
+      },
+      analysis: {
+        forPoints: report.forPoints,
+        counterPoints: report.counterPoints,
+        summary: report.summary,
+      },
+      references: MOCK_EXTENDED_REFERENCES,
+      counterReferences: MOCK_COUNTER_REFERENCES,
+      status: "in-progress",
+      date: "",
+    });
+  };
 
   const reportData = activeCase?.report ?? MOCK_REPORT;
   const analysisData = activeCase?.analysis ?? MOCK_ANALYSIS;
@@ -102,6 +158,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         analysisData,
         activeCase,
         setActiveCase,
+        setReport,
       }}
     >
       {children}
