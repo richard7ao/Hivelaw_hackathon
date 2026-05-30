@@ -149,7 +149,7 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(false);
   const [fileResults, setFileResults] = useState(MOCK_FILE_RESULTS.map((f) => ({ ...f })));
   const [expandedRef, setExpandedRef] = useState<string | null>(null);
-  const [previewFile, setPreviewFile] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<{ url: string; name: string; type: "pdf" | "image" | "other" } | null>(null);
   const [filesLoaded, setFilesLoaded] = useState(true);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [showEmailCompose, setShowEmailCompose] = useState(false);
@@ -601,15 +601,21 @@ export default function ReportPage() {
               {previewFile && (
                 <div className="rounded-2xl border border-line bg-paper">
                   <div className="flex items-center justify-between border-b border-line px-5 py-3">
-                    <span className="text-sm font-medium text-ink">{CASE_07_FILES.find((f) => f.path === previewFile)?.name}</span>
+                    <span className="text-sm font-medium text-ink">{previewFile.name}</span>
                     <button onClick={() => setPreviewFile(null)} className="rounded-lg p-1.5 text-ink-faint hover:bg-canvas-deep hover:text-ink">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                   </div>
-                  {previewFile.endsWith(".pdf") ? (
-                    <iframe src={previewFile} className="h-[70vh] w-full" title="Document preview" />
+                  {previewFile.type === "pdf" ? (
+                    <iframe src={previewFile.url} className="h-[70vh] w-full" title="Document preview" />
+                  ) : previewFile.type === "image" ? (
+                    <div className="flex justify-center p-4"><img src={previewFile.url} alt={previewFile.name} className="max-h-[70vh] rounded-lg" /></div>
                   ) : (
-                    <div className="flex justify-center p-4"><img src={previewFile} alt="Evidence" className="max-h-[70vh] rounded-lg" /></div>
+                    <div className="flex flex-col items-center justify-center py-16 text-ink-faint">
+                      <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                      <p className="mt-3 text-sm">{previewFile.name}</p>
+                      <p className="mt-1 text-xs">Preview not available for this file type</p>
+                    </div>
                   )}
                 </div>
               )}
@@ -630,7 +636,7 @@ export default function ReportPage() {
                     <div className="space-y-2">
                       <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Case files ({uploadedFiles.length})</span>
                       {CASE_07_FILES.map((f) => (
-                        <button key={f.path} onClick={() => setPreviewFile(f.path)} className="flex w-full items-center gap-3 rounded-xl border border-line bg-paper px-4 py-3 text-left transition-colors hover:border-accent/30 hover:bg-accent-tint">
+                        <button key={f.path} onClick={() => setPreviewFile({ url: f.path, name: f.name, type: f.type })} className="flex w-full items-center gap-3 rounded-xl border border-line bg-paper px-4 py-3 text-left transition-colors hover:border-accent/30 hover:bg-accent-tint">
                           {f.type === "pdf" ? (
                             <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                           ) : (
@@ -642,7 +648,7 @@ export default function ReportPage() {
                         </button>
                       ))}
                       {userFiles.map((f) => (
-                        <button key={f.url} onClick={() => setPreviewFile(f.url)} className="flex w-full items-center gap-3 rounded-xl border border-accent/30 bg-accent-tint px-4 py-3 text-left transition-colors hover:bg-accent-tint">
+                        <button key={f.url} onClick={() => setPreviewFile({ url: f.url, name: f.name, type: f.type })} className="flex w-full items-center gap-3 rounded-xl border border-accent/30 bg-accent-tint px-4 py-3 text-left transition-colors hover:bg-accent-tint">
                           <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                           <span className="flex-1 text-sm text-ink">{f.name}</span>
                           <span className="rounded border border-accent/30 px-1.5 py-0.5 text-[10px] font-medium text-accent">Uploaded</span>
