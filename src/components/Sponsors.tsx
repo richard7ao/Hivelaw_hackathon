@@ -1,27 +1,20 @@
 import type { ReactNode } from "react";
 
-/*
-  Sponsor / powered-by strip, modelled on the reference pitch-deck header.
-  Roster from brief.md: Lawhive is the host, GV + Balderton the VCs (sponsors);
-  Anthropic, Google Cloud, Gemini, Lovable provide the tech (powered by).
-  Monogram chips stand in for logos so nothing depends on hot-linked brand SVGs.
-*/
-
 type Tone = "light" | "dark";
 
-type Org = { name: string; mark: string; accent?: boolean };
+type Org = { name: string; mark: string; accent?: boolean; url: string };
 
 const SPONSORS: Org[] = [
-  { name: "Lawhive", mark: "⬡", accent: true },
-  { name: "GV", mark: "GV" },
-  { name: "Balderton", mark: "◇" },
+  { name: "Lawhive", mark: "⬡", accent: true, url: "https://lawhive.co.uk" },
+  { name: "GV", mark: "GV", url: "https://www.gv.com" },
+  { name: "Balderton", mark: "◇", url: "https://www.balderton.com" },
 ];
 
 const POWERED: Org[] = [
-  { name: "Anthropic", mark: "✱" },
-  { name: "Google Cloud", mark: "G" },
-  { name: "Gemini", mark: "✦" },
-  { name: "Lovable", mark: "♥" },
+  { name: "Anthropic", mark: "✱", url: "https://www.anthropic.com" },
+  { name: "Google Cloud", mark: "G", url: "https://cloud.google.com" },
+  { name: "Gemini", mark: "✦", url: "https://gemini.google.com" },
+  { name: "Lovable", mark: "♥", url: "https://lovable.dev" },
 ];
 
 function Mark({ org, tone }: { org: Org; tone: Tone }) {
@@ -46,20 +39,24 @@ function Group({
 }) {
   const labelSkin = tone === "dark" ? "text-canvas/45" : "text-ink-faint";
   const ruleSkin = tone === "dark" ? "bg-canvas/20" : "bg-line";
-  const nameSkin = tone === "dark" ? "text-canvas/85" : "text-ink";
+  const nameSkin = tone === "dark" ? "text-canvas/85 hover:text-canvas" : "text-ink hover:text-accent";
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
-      <span
-        className={`text-[10px] font-medium uppercase tracking-[0.18em] ${labelSkin}`}
-      >
+      <span className={`text-[10px] font-medium uppercase tracking-[0.18em] ${labelSkin}`}>
         {label}
       </span>
       <span className={`hidden h-px w-6 sm:block ${ruleSkin}`} aria-hidden />
       {items.map((org) => (
-        <span key={org.name} className="inline-flex items-center gap-2">
+        <a
+          key={org.name}
+          href={org.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-flex items-center gap-2 transition-colors ${nameSkin}`}
+        >
           <Mark org={org} tone={tone} />
-          <span className={`text-sm ${nameSkin}`}>{org.name}</span>
-        </span>
+          <span className="text-sm">{org.name}</span>
+        </a>
       ))}
     </div>
   );
