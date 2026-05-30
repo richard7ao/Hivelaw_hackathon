@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import SteelmanLogo from "@/components/SteelmanLogo";
@@ -8,14 +8,19 @@ import { useDemoContext } from "@/lib/demo-context";
 import { classifyAttachment } from "@/lib/intake/files";
 import type {
   IntakeAttachmentKind,
+  IntakeEvaluationMode,
   IntakeTurnResult,
 } from "@/lib/intake/types";
+
+const MAX_ASSISTANT_FOLLOW_UPS = 2;
+const MAX_INTAKE_USER_TURNS = MAX_ASSISTANT_FOLLOW_UPS + 1;
 
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
   attachments: Array<{ name: string; kind: IntakeAttachmentKind }>;
+  highlights?: Array<{ text: string; type: "support" | "flag" }>;
 };
 
 type SessionFile = {
@@ -33,12 +38,15 @@ export default function EntryChatShell() {
   const [sessionFiles, setSessionFiles] = useState<SessionFile[]>([]);
   const [result, setResult] = useState<IntakeTurnResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [isPickingFiles, setIsPickingFiles] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const visibleProgress = result?.readinessScore ?? 5;
   const stageLabel = formatStage(result?.currentStage ?? "understanding-problem");
   const allEvidence = useMemo(() => sessionFiles, [sessionFiles]);
+  const userTurnCount = countUserMessages(messages);
 
   // The sidebar (progress + evidence + scaffold) only matters once the case has
   // begun. Before the first message it's hidden; on the first turn the grid
@@ -54,7 +62,20 @@ export default function EntryChatShell() {
     "A builder did poor work and won't refund me.",
   ];
 
+  useEffect(() => {
+    if (!isPickingFiles || typeof window === "undefined") {
+      return;
+    }
+
+    const handleFocus = () => setIsPickingFiles(false);
+
+    window.addEventListener("focus", handleFocus, { once: true });
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [isPickingFiles]);
+
   function queueFiles(fileList: FileList | null) {
+    setIsPickingFiles(false);
+
     if (!fileList) return;
 
     const nextFiles = Array.from(fileList).map((file) => ({
@@ -64,6 +85,15 @@ export default function EntryChatShell() {
     }));
 
     setPendingFiles((current) => dedupeFiles([...current, ...nextFiles]));
+  }
+
+  function openFilePicker() {
+    if (isPending || isPickingFiles) {
+      return;
+    }
+
+    setIsPickingFiles(true);
+    fileInputRef.current?.click();
   }
 
   function removePendingFile(id: string) {
@@ -97,11 +127,24 @@ export default function EntryChatShell() {
 
     const nextMessages = [...messages, userMessage];
     const nextSessionFiles = dedupeFiles([...sessionFiles, ...pendingFiles]);
+    const nextUserTurnCount = countUserMessages(nextMessages);
+    const evaluationMode: IntakeEvaluationMode = force
+      ? "user-requested"
+      : nextUserTurnCount >= MAX_INTAKE_USER_TURNS
+        ? "turn-limit"
+        : "none";
+    const turnPendingStatus = buildPendingStatus({
+      force,
+      evaluationMode,
+      nextUserTurnCount,
+      files: pendingFiles,
+    });
 
     setMessages(nextMessages);
     setSessionFiles(nextSessionFiles);
     setDraft("");
     setPendingFiles([]);
+    setPendingStatus(turnPendingStatus);
     setError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -121,8 +164,8 @@ export default function EntryChatShell() {
           formData.append("files", sessionFile.file);
         });
 
-        if (force) {
-          formData.append("forceEvaluate", "true");
+        if (evaluationMode !== "none") {
+          formData.append("evaluationMode", evaluationMode);
         }
 
         const response = await fetch("/api/intake", {
@@ -150,6 +193,7 @@ export default function EntryChatShell() {
         ) {
           setReport(liveReport);
         }
+        setPendingStatus(null);
         setMessages((current) => [
           ...current,
           {
@@ -157,9 +201,11 @@ export default function EntryChatShell() {
             role: "assistant",
             content: intakeResult.assistantMessage,
             attachments: [],
+            highlights: intakeResult.assistantHighlights,
           },
         ]);
       } catch (submissionError) {
+        setPendingStatus(null);
         setError(
           submissionError instanceof Error
             ? submissionError.message
@@ -193,7 +239,7 @@ export default function EntryChatShell() {
                   {messages.map((message) => (
                     <MessageBubble key={message.id} message={message} />
                   ))}
-                  {isPending ? <TypingBubble /> : null}
+                  {isPending ? <TypingBubble status={pendingStatus} /> : null}
                 </div>
               )}
             </div>
@@ -210,7 +256,7 @@ export default function EntryChatShell() {
                   Your case report is ready — view it
                   <span aria-hidden>&rarr;</span>
                 </button>
-              ) : messages.length >= 3 ? (
+              ) : userTurnCount >= MAX_INTAKE_USER_TURNS - 1 ? (
                 <button
                   type="button"
                   onClick={() => sendTurn({ force: true })}
@@ -245,15 +291,25 @@ export default function EntryChatShell() {
                   type="file"
                   multiple
                   className="hidden"
-                  onChange={(event) => queueFiles(event.target.files)}
+                  onChange={(event) => {
+                    queueFiles(event.target.files);
+                    event.target.value = "";
+                  }}
                 />
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Attach files (PDF, image, text)"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-lg text-ink-soft transition-colors hover:bg-canvas-deep hover:text-ink"
+                  onClick={openFilePicker}
+                  title={isPickingFiles ? "Opening file picker..." : "Attach files (PDF, image, text)"}
+                  disabled={isPending || isPickingFiles}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-lg text-ink-soft transition-colors hover:bg-canvas-deep hover:text-ink disabled:cursor-wait disabled:opacity-70"
                 >
-                  <span aria-hidden>+</span>
+                  {isPickingFiles ? (
+                    <span aria-hidden className="steelman-spin inline-flex">
+                      <SteelmanLogo className="h-4 w-4 text-accent" />
+                    </span>
+                  ) : (
+                    <span aria-hidden>+</span>
+                  )}
                   <span className="sr-only">Attach files</span>
                 </button>
 
@@ -266,7 +322,7 @@ export default function EntryChatShell() {
                       sendTurn();
                     }
                   }}
-                  placeholder="Tell us what happened, and what outcome you want…"
+                  placeholder="Tell us what happened, who the other side is, when it started, what you want, and any evidence you have…"
                   rows={1}
                   className="max-h-40 min-h-10 flex-1 resize-none self-center bg-transparent py-2 text-[15px] leading-relaxed text-ink outline-none placeholder:text-ink-faint"
                   disabled={isPending}
@@ -279,13 +335,15 @@ export default function EntryChatShell() {
                   title="Send"
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-lg text-paper transition-colors hover:bg-accent-deep disabled:cursor-not-allowed disabled:bg-ink/15 disabled:text-ink-faint"
                 >
-                  <span aria-hidden>{isPending ? "…" : "↑"}</span>
+                  <span aria-hidden>{isPending ? "•" : "↑"}</span>
                   <span className="sr-only">Send</span>
                 </button>
               </div>
 
               <p className="mt-2 px-2 text-xs text-ink-faint">
-                PDFs, images, and text files supported. Press Enter to send, Shift+Enter for a new line.
+                {isPickingFiles
+                  ? "Opening your file picker..."
+                  : "PDFs, images, and text files supported. Press Enter to send, Shift+Enter for a new line."}
               </p>
               {error ? <p className="mt-2 px-2 text-sm text-verdict-red">{error}</p> : null}
             </div>
@@ -342,6 +400,48 @@ export default function EntryChatShell() {
   );
 }
 
+function countUserMessages(messages: ChatMessage[]) {
+  return messages.filter((message) => message.role === "user").length;
+}
+
+function buildPendingStatus({
+  force,
+  evaluationMode,
+  nextUserTurnCount,
+  files,
+}: {
+  force: boolean;
+  evaluationMode: IntakeEvaluationMode;
+  nextUserTurnCount: number;
+  files: SessionFile[];
+}) {
+  if (files.length === 1) {
+    return `Reading and ingesting ${files[0].file.name}...`;
+  }
+
+  if (files.length > 1) {
+    return `Reading and ingesting ${summarizeFileNames(files)}...`;
+  }
+
+  if (force || evaluationMode !== "none") {
+    return "Writing your first-pass assessment from what you've shared...";
+  }
+
+  if (nextUserTurnCount <= 1) {
+    return "Reviewing what happened and deciding the next best question...";
+  }
+
+  return "Reviewing your facts and updating the case assessment...";
+}
+
+function summarizeFileNames(files: SessionFile[]) {
+  if (files.length === 2) {
+    return `${files[0].file.name} and ${files[1].file.name}`;
+  }
+
+  return `${files[0].file.name}, ${files[1].file.name}, and ${files.length - 2} more files`;
+}
+
 function BrandMark() {
   return (
     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent shadow-[0_6px_16px_-8px_rgba(150,20,20,0.7)]">
@@ -363,8 +463,9 @@ function EmptyState({
         <BrandMark />
         <div className="rounded-[1.25rem] rounded-tl-md border border-line bg-paper px-5 py-4 shadow-sm">
           <p className="text-[15px] leading-relaxed text-ink">
-            Hi — I&apos;m the Steelman intake assistant. Tell me what happened in your own words,
-            and upload anything important (letters, photos, contracts).
+            Hi — I&apos;m the Steelman intake assistant. Tell me what happened, who the other
+            side is, when it started, what outcome you want, and upload anything important
+            like letters, photos, or contracts.
           </p>
           <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
             I&apos;ll find your strongest position — then show you exactly how the other side will
@@ -419,7 +520,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         {isUser ? (
           <p className="whitespace-pre-wrap">{message.content}</p>
         ) : (
-          <FormattedMessage content={message.content} />
+          <FormattedMessage content={message.content} highlights={message.highlights ?? []} />
         )}
         {message.attachments.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -443,14 +544,17 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   );
 }
 
-function TypingBubble() {
+function TypingBubble({ status }: { status: string | null }) {
   return (
     <div className="flex items-start gap-3">
       <BrandMark />
-      <div className="flex items-center gap-1.5 rounded-[1.25rem] rounded-tl-md border border-line bg-paper px-5 py-4 shadow-sm">
-        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint [animation-delay:-0.3s]" />
-        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint [animation-delay:-0.15s]" />
-        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint" />
+      <div className="flex items-center gap-3 rounded-[1.25rem] rounded-tl-md border border-line bg-paper px-5 py-4 shadow-sm">
+        <span aria-hidden className="steelman-spin inline-flex">
+          <SteelmanLogo className="h-4 w-4 text-accent" />
+        </span>
+        <p className="text-sm leading-relaxed text-ink-soft">
+          {status ?? "Reviewing your case..."}
+        </p>
       </div>
     </div>
   );
@@ -632,7 +736,15 @@ function ReportHandoffCard({ result }: { result: IntakeTurnResult }) {
 // numbered lists, and **bold**. Deliberately tiny — no dependency — because the
 // model only ever emits these few constructs. Grouping consecutive list lines
 // into a single <ul>/<ol> is what turns inline "(1)…(2)…" prose into clean lists.
-function FormattedMessage({ content }: { content: string }) {
+type MsgHighlight = { text: string; type: "support" | "flag" };
+
+function FormattedMessage({
+  content,
+  highlights = [],
+}: {
+  content: string;
+  highlights?: MsgHighlight[];
+}) {
   const lines = content.replace(/\r\n/g, "\n").split("\n");
   const blocks: React.ReactNode[] = [];
   let list: { ordered: boolean; items: string[] } | null = null;
@@ -642,7 +754,7 @@ function FormattedMessage({ content }: { content: string }) {
     if (!list) return;
     const items = list.items.map((item, i) => (
       <li key={i} className="leading-relaxed">
-        {renderInline(item)}
+        {renderInline(item, highlights)}
       </li>
     ));
     blocks.push(
@@ -685,7 +797,7 @@ function FormattedMessage({ content }: { content: string }) {
       flushList();
       blocks.push(
         <p key={key++} className="leading-relaxed">
-          {renderInline(line)}
+          {renderInline(line, highlights)}
         </p>,
       );
     }
@@ -695,8 +807,48 @@ function FormattedMessage({ content }: { content: string }) {
   return <div className="space-y-2.5">{blocks}</div>;
 }
 
-// Render **bold** spans within a line; everything else is plain text.
-function renderInline(text: string): React.ReactNode {
+// Same green(support)/red(flag) semantics as the report's HighlightedText.
+function markClass(type: "support" | "flag") {
+  return type === "support"
+    ? "rounded px-0.5 bg-verdict-green/15 text-verdict-green"
+    : "rounded px-0.5 bg-verdict-red/15 text-verdict-red";
+}
+
+// Render a line with green/red <mark> highlights (verbatim substrings) and
+// **bold**. Highlights are applied first; bold is applied to the gaps between.
+function renderInline(text: string, highlights: MsgHighlight[] = []): React.ReactNode {
+  const ranges = highlights
+    .map((h) => ({ ...h, start: text.indexOf(h.text) }))
+    .filter((r) => r.start !== -1)
+    .sort((a, b) => a.start - b.start)
+    .reduce<Array<MsgHighlight & { start: number; end: number }>>((acc, r) => {
+      const end = r.start + r.text.length;
+      // Skip overlapping matches.
+      if (acc.length && r.start < acc[acc.length - 1].end) return acc;
+      acc.push({ ...r, end });
+      return acc;
+    }, []);
+
+  if (ranges.length === 0) return renderBold(text);
+
+  const nodes: React.ReactNode[] = [];
+  let cursor = 0;
+  let key = 0;
+  for (const r of ranges) {
+    if (r.start > cursor) nodes.push(<span key={key++}>{renderBold(text.slice(cursor, r.start))}</span>);
+    nodes.push(
+      <mark key={key++} className={markClass(r.type)}>
+        {r.text}
+      </mark>,
+    );
+    cursor = r.end;
+  }
+  if (cursor < text.length) nodes.push(<span key={key++}>{renderBold(text.slice(cursor))}</span>);
+  return nodes;
+}
+
+// Render **bold** spans within a string; everything else is plain text.
+function renderBold(text: string): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) =>
     part.startsWith("**") && part.endsWith("**") ? (

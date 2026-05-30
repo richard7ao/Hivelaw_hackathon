@@ -47,6 +47,18 @@ export const INTAKE_OUTPUT_SCHEMA = {
     },
     canEvaluateNow: { type: "boolean" },
     assistantMessage: { type: "string" },
+    assistantHighlights: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          text: { type: "string" },
+          type: { type: "string", enum: ["support", "flag"] },
+        },
+        required: ["text", "type"],
+        additionalProperties: false,
+      },
+    },
     reportScaffold: {
       type: "object",
       properties: {
@@ -126,6 +138,7 @@ export const INTAKE_OUTPUT_SCHEMA = {
     "fileRequests",
     "canEvaluateNow",
     "assistantMessage",
+    "assistantHighlights",
     "report",
   ],
   additionalProperties: false,
@@ -138,6 +151,7 @@ export function normalizeIntakeResult(
   const readinessScore = Number.isFinite(raw.readinessScore)
     ? Math.max(0, Math.min(100, Math.round(raw.readinessScore ?? 0)))
     : 0;
+  const canEvaluateNow = raw.canEvaluateNow ?? false;
 
   return {
     engine,
@@ -152,13 +166,17 @@ export function normalizeIntakeResult(
       ...request,
       satisfied: request.satisfied ?? false,
     })),
-    canEvaluateNow: raw.canEvaluateNow ?? false,
+    canEvaluateNow,
     assistantMessage:
       raw.assistantMessage ??
       "Tell me what happened in plain English and I’ll work out what matters next.",
+    assistantHighlights: (raw.assistantHighlights ?? []).filter(
+      // Only keep highlights that appear verbatim in the message (anti-hallucination).
+      (highlight) => highlight.text && raw.assistantMessage?.includes(highlight.text),
+    ),
     reportScaffold: raw.reportScaffold,
     report: {
-      ready: raw.report?.ready ?? false,
+      ready: (raw.report?.ready ?? false) && canEvaluateNow,
       title: raw.report?.title ?? "Case assessment",
       subtitle: raw.report?.subtitle ?? "Draft assessment — still gathering facts",
       paragraphs: (raw.report?.paragraphs ?? []).map((paragraph) => ({

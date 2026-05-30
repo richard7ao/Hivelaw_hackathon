@@ -6,6 +6,8 @@ export type IntakeStage =
   | "final-evaluation"
   | "report-handoff";
 
+export type IntakeEvaluationMode = "none" | "user-requested" | "turn-limit";
+
 export type IntakeMessageInput = {
   role: "user" | "assistant";
   content: string;
@@ -85,6 +87,9 @@ export type IntakeTurnResult = {
   fileRequests: FileRequest[];
   canEvaluateNow: boolean;
   assistantMessage: string;
+  // Verbatim substrings of assistantMessage to highlight inline in the chat:
+  // "support" = good for the user (green), "flag" = a risk/issue against them (red).
+  assistantHighlights: IntakeReportHighlight[];
   reportScaffold?: ReportScaffold;
   // Progressively-built report; ready=false until there's enough to render.
   report: IntakeReport;
