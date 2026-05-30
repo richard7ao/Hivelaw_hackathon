@@ -101,15 +101,21 @@ the single-point-of-failure that sank the prior plan.
    entirely** (a wrong statute is worse than no statute). The whole credibility claim
    is "it quotes your own evidence" — a fabricated quote inverts the demo live.
 4. Case Reality Report view: render the JSON cleanly. The evidence-gap checklist is
-   the hero artifact. HTML on localhost.
+   the hero artifact. The recommendation renders as **verdict-conditional Next Steps**
+   (strong→self-serve · arguable→escalate-to-Lawhive *with the prepared file* ·
+   weak→honest-no) — the access-to-justice close made literal. HTML on localhost.
 5. Live-pick flow: dropdown of **only validated (engineer hand-checked) cases** + optional file-upload
    fallback (runs, but carries no soundness guarantee).
 6. **Pre-cache the JSON for every validated case;** render from cache live (responses
    are real, just pre-generated), with the live API as the "run it fresh?" backup.
 
 **v1 is NOT** PDF export, 3D/spatial, multi-agent, an agentic tool loop, vision on
-evidence photos, auth, or a DB. v1 ingests **text only** (both hero beats are
-text-grounded). Cut anything off the critical path.
+evidence photos, auth, a DB, **a numeric £/time/outcome estimator (ungroundable — it
+inverts the trust mechanic; explicitly CUT, see `docs/decisions/2026-05-30-feature-scope.md`),
+or live case-law matching (the 6 verified precedent PDFs in `cases/reference/` are a
+deferred stretch — cached + hand-verified summaries only, never in the 3-min spine)**.
+v1 ingests **text only** (both hero beats are text-grounded). Cut anything off the
+critical path.
 
 ## Agent design (v1)
 
@@ -172,6 +178,9 @@ optionally re-introduce judge-picks-from-dropdown. Rehearse the 3-min core eithe
   a live API run — confirm the model populates `legal_basis` and the strip-guard fires.
 - **Not built yet:** the Next.js chat UI + Case Reality Report viewer, the live-pick
   dropdown, and the pre-cached render path.
+- **Scope decision (2026-05-30, `docs/decisions/2026-05-30-feature-scope.md`):**
+  Feature 3 (verdict-conditional Next Steps) is IN core; the numeric estimator is CUT
+  (ungroundable, inverts trust); similar-cases matching is CUT this build (stretch only).
 - **Next likely actions:** verify the corpus/citation guard on a real run; scaffold the
-  Next.js app + report viewer; lock + rehearse the 3-minute script; record the master
-  demo video.
+  Next.js app + report viewer with the verdict-conditional Next Steps block; lock +
+  rehearse the 3-minute script; record the master demo video.
