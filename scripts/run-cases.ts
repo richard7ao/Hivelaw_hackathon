@@ -175,6 +175,19 @@ type CaseReport = {
   legal_basis: LegalBasis[];
 };
 
+type RunOneResult = {
+  ok: boolean;
+  verifiedAll: boolean;
+  prospects?: string;
+  recommendation?: string;
+};
+
+type UsageSummary = {
+  input_tokens?: number;
+  output_tokens?: number;
+  cache_read_input_tokens?: number;
+};
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -195,18 +208,18 @@ async function main() {
     `Running ${files.length} cases through ${MODEL} (effort=${EFFORT}, concurrency=${CONCURRENCY})…\n`,
   );
 
-  const results: { file: string; ok: boolean; verifiedAll: boolean; prospects?: string; recommendation?: string }[] = [];
+  const results: ({ file: string } & RunOneResult)[] = [];
 
   // Simple concurrency pool — process `files` CONCURRENCY at a time.
   let cursor = 0;
   async function worker() {
     while (cursor < files.length) {
       const file = files[cursor++];
-      const res = await runOne(file).catch((err) => {
+      const res = await runOne(file).catch((err): RunOneResult => {
         console.error(`✗ ${file} — ${err?.message ?? err}`);
         return { ok: false, verifiedAll: false };
       });
-      results.push({ file, ...res } as any);
+      results.push({ file, ...res });
     }
   }
   await Promise.all(Array.from({ length: Math.max(1, CONCURRENCY) }, worker));
@@ -257,10 +270,10 @@ async function runOne(file: string) {
         content: `Here is the full case file. Produce the Case Reality assessment.\n\n${caseText}`,
       },
     ],
-  } as any);
+  } as never);
 
   // output_config.format guarantees the first text block is valid JSON.
-  const textBlock = response.content.find((b: any) => b.type === "text") as any;
+  const textBlock = response.content.find((block) => block.type === "text");
   if (!textBlock) throw new Error("no text block in response");
   const report = JSON.parse(textBlock.text) as CaseReport;
 
@@ -288,7 +301,7 @@ async function runOne(file: string) {
   report.legal_basis = keepGroundedCitations(report.legal_basis);
   for (const v of verified) v.legal_basis = keepGroundedCitations(v.legal_basis);
 
-  const usage = response.usage ?? ({} as any);
+  const usage = (response.usage ?? {}) as UsageSummary;
   const secs = ((Date.now() - started) / 1000).toFixed(1);
   const citeCount =
     report.legal_basis.length +
