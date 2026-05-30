@@ -1,6 +1,14 @@
 node_modules/
 .env
-reports/
+# Reports are regenerable artifacts and ignored by default, but we commit the
+# two cases we have full document sets for (01, 07) so they ship with the repo.
+# (A parent dir can't be re-included once excluded, so ignore the contents,
+# then negate the specific files we want tracked.)
+reports/*
+!reports/rental-01.report.html
+!reports/rental-01.report.md
+!reports/rental-07.report.html
+!reports/rental-07.report.md
 .claude/
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
