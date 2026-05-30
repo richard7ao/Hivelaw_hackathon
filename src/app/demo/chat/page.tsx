@@ -81,10 +81,10 @@ export default function EntryChat() {
         {showContinue && (
           <div className="mt-6 flex justify-center">
             <button
-              onClick={() => router.push("/demo/research")}
+              onClick={() => router.push("/demo/report")}
               className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-accent-deep"
             >
-              Continue to research
+              View case report
               <span aria-hidden>&rarr;</span>
             </button>
           </div>
