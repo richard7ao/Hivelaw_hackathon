@@ -38,6 +38,7 @@ export default function EntryChatShell() {
   const [sessionFiles, setSessionFiles] = useState<SessionFile[]>([]);
   const [result, setResult] = useState<IntakeTurnResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [isPickingFiles, setIsPickingFiles] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -132,11 +133,18 @@ export default function EntryChatShell() {
       : nextUserTurnCount >= MAX_INTAKE_USER_TURNS
         ? "turn-limit"
         : "none";
+    const turnPendingStatus = buildPendingStatus({
+      force,
+      evaluationMode,
+      nextUserTurnCount,
+      files: pendingFiles,
+    });
 
     setMessages(nextMessages);
     setSessionFiles(nextSessionFiles);
     setDraft("");
     setPendingFiles([]);
+    setPendingStatus(turnPendingStatus);
     setError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -185,6 +193,7 @@ export default function EntryChatShell() {
         ) {
           setReport(liveReport);
         }
+        setPendingStatus(null);
         setMessages((current) => [
           ...current,
           {
@@ -196,6 +205,7 @@ export default function EntryChatShell() {
           },
         ]);
       } catch (submissionError) {
+        setPendingStatus(null);
         setError(
           submissionError instanceof Error
             ? submissionError.message
@@ -229,7 +239,7 @@ export default function EntryChatShell() {
                   {messages.map((message) => (
                     <MessageBubble key={message.id} message={message} />
                   ))}
-                  {isPending ? <TypingBubble /> : null}
+                  {isPending ? <TypingBubble status={pendingStatus} /> : null}
                 </div>
               )}
             </div>
@@ -325,7 +335,7 @@ export default function EntryChatShell() {
                   title="Send"
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-lg text-paper transition-colors hover:bg-accent-deep disabled:cursor-not-allowed disabled:bg-ink/15 disabled:text-ink-faint"
                 >
-                  <span aria-hidden>{isPending ? "…" : "↑"}</span>
+                  <span aria-hidden>{isPending ? "•" : "↑"}</span>
                   <span className="sr-only">Send</span>
                 </button>
               </div>
@@ -392,6 +402,44 @@ export default function EntryChatShell() {
 
 function countUserMessages(messages: ChatMessage[]) {
   return messages.filter((message) => message.role === "user").length;
+}
+
+function buildPendingStatus({
+  force,
+  evaluationMode,
+  nextUserTurnCount,
+  files,
+}: {
+  force: boolean;
+  evaluationMode: IntakeEvaluationMode;
+  nextUserTurnCount: number;
+  files: SessionFile[];
+}) {
+  if (files.length === 1) {
+    return `Reading and ingesting ${files[0].file.name}...`;
+  }
+
+  if (files.length > 1) {
+    return `Reading and ingesting ${summarizeFileNames(files)}...`;
+  }
+
+  if (force || evaluationMode !== "none") {
+    return "Writing your first-pass assessment from what you've shared...";
+  }
+
+  if (nextUserTurnCount <= 1) {
+    return "Reviewing what happened and deciding the next best question...";
+  }
+
+  return "Reviewing your facts and updating the case assessment...";
+}
+
+function summarizeFileNames(files: SessionFile[]) {
+  if (files.length === 2) {
+    return `${files[0].file.name} and ${files[1].file.name}`;
+  }
+
+  return `${files[0].file.name}, ${files[1].file.name}, and ${files.length - 2} more files`;
 }
 
 function BrandMark() {
@@ -496,14 +544,17 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   );
 }
 
-function TypingBubble() {
+function TypingBubble({ status }: { status: string | null }) {
   return (
     <div className="flex items-start gap-3">
       <BrandMark />
-      <div className="flex items-center gap-1.5 rounded-[1.25rem] rounded-tl-md border border-line bg-paper px-5 py-4 shadow-sm">
-        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint [animation-delay:-0.3s]" />
-        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint [animation-delay:-0.15s]" />
-        <span className="h-2 w-2 animate-bounce rounded-full bg-ink-faint" />
+      <div className="flex items-center gap-3 rounded-[1.25rem] rounded-tl-md border border-line bg-paper px-5 py-4 shadow-sm">
+        <span aria-hidden className="steelman-spin inline-flex">
+          <SteelmanLogo className="h-4 w-4 text-accent" />
+        </span>
+        <p className="text-sm leading-relaxed text-ink-soft">
+          {status ?? "Reviewing your case..."}
+        </p>
       </div>
     </div>
   );
