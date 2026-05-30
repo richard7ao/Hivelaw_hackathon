@@ -4,6 +4,8 @@
 
 <h1 align="center">Steelman</h1>
 
+<img width="1797" height="930" alt="image" src="https://github.com/user-attachments/assets/21ea754c-f0d8-4d88-8c7a-3de98ea8d618" />
+
 <p align="center">
   <strong>Every legal AI tells you you're right. We tell you how you'll lose.</strong>
 </p>
