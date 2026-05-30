@@ -1,18 +1,18 @@
 import Link from "next/link";
+import SteelmanLogo from "./SteelmanLogo";
 
-/** Fixed, slim top bar. Wordmark left, in-page anchors + demo CTA right. */
 export default function Nav() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-canvas/95">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-canvas/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-[88rem] items-center justify-between px-6">
         <Link
           href="/"
-          className="group flex items-center gap-2.5"
-          aria-label="Hivelaw home"
+          className="group flex items-center gap-2"
+          aria-label="Steelman home"
         >
-          <span className="block h-2.5 w-2.5 rounded-[2px] bg-accent transition-transform duration-300 group-hover:rotate-45" />
+          <SteelmanLogo className="h-7 w-7 text-accent transition-transform duration-300 group-hover:scale-110" />
           <span className="font-serif text-lg font-semibold tracking-tight text-ink">
-            Hivelaw
+            Steelman
           </span>
         </Link>
 

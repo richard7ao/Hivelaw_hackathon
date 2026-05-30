@@ -114,7 +114,7 @@ export default function Dashboard() {
           return (
             <Link
               key={c.id}
-              href="/demo/chat"
+              href="/demo/report"
               className="group flex flex-col gap-4 rounded-2xl border border-line bg-paper p-5 transition-colors hover:border-accent/30 hover:bg-accent-tint sm:flex-row sm:items-center sm:p-6"
             >
               {/* Left — info */}

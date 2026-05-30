@@ -162,6 +162,17 @@ html {
   }
 }
 
+/* --- SteelMan 3D spin loader --- */
+.steelman-spin {
+  perspective: 400px;
+  animation: steelman-rotate 2s ease-in-out infinite;
+}
+@keyframes steelman-rotate {
+  0% { transform: rotateY(0deg) scale(1); }
+  50% { transform: rotateY(180deg) scale(1.08); }
+  100% { transform: rotateY(360deg) scale(1); }
+}
+
 /* --- Respect reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
   *,
