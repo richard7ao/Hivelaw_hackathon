@@ -52,6 +52,25 @@ export const MOCK_FILE_RESULTS = [
   { id: "f3", label: "Photographs — visible mould growth, bedroom ceiling", selected: false },
 ];
 
+export type CaseFile = {
+  name: string;
+  path: string;
+  type: "pdf" | "image" | "text";
+  size: string;
+};
+
+export const CASE_07_FILES: CaseFile[] = [
+  { name: "Tenancy Agreement", path: "/case-07/tenancy_agreement.pdf", type: "pdf", size: "320 KB" },
+  { name: "Contractor Works Form", path: "/case-07/contractor_works_form.pdf", type: "pdf", size: "185 KB" },
+  { name: "Council Inspection Report", path: "/case-07/council_inspection_report.pdf", type: "pdf", size: "290 KB" },
+  { name: "Email Chain with Council", path: "/case-07/email_chain_with_council.pdf", type: "pdf", size: "156 KB" },
+  { name: "GP Letter", path: "/case-07/gp_letter.pdf", type: "pdf", size: "98 KB" },
+  { name: "Phone Call Log", path: "/case-07/phone_call_log.pdf", type: "pdf", size: "112 KB" },
+  { name: "Mould Photo — Month 1", path: "/case-07/month_1_photo_1.jpg", type: "image", size: "1.2 MB" },
+  { name: "Mould Photo — Month 3", path: "/case-07/month_3_photo_1.jpg", type: "image", size: "1.4 MB" },
+  { name: "Mould Photo — Month 8", path: "/case-07/month_8_photo_1.jpg", type: "image", size: "1.6 MB" },
+];
+
 export const MOCK_REPORT: ReportData = {
   title: "Damp & Mould Disrepair — 12 Ardwick Court",
   subtitle: "Pre-action assessment under the Housing Conditions Protocol",
@@ -116,3 +135,78 @@ The property is in breach of the landlord’s repairing obligation under s.11 of
 We require a written response within 20 working days setting out your proposals for inspection and repair. Failure to respond may result in proceedings being issued without further notice.
 
 Yours faithfully`;
+
+export type ExtendedReference = {
+  id: string;
+  shortLabel: string;
+  citation: string;
+  summary: string;
+  fullText: string;
+  url: string;
+  relevance: "high" | "moderate" | "low";
+  highlightLinks: string[];
+  application: string;
+};
+
+export const MOCK_EXTENDED_REFERENCES: ExtendedReference[] = [
+  {
+    id: "ref1",
+    shortLabel: "LTA 1985, s.11",
+    citation: "Landlord and Tenant Act 1985, Section 11",
+    summary: "Implies a covenant to keep in repair the structure and exterior of the dwelling.",
+    fullText:
+      "In a lease to which this section applies there is implied a covenant by the lessor — (a) to keep in repair the structure and exterior of the dwelling-house (including drains, gutters and external pipes), (b) to keep in repair and proper working order the installations in the dwelling-house for the supply of water, gas and electricity and for sanitation (including basins, sinks, baths and sanitary conveniences), (c) to keep in repair and proper working order the installations in the dwelling-house for space heating and heating water.",
+    url: "https://www.legislation.gov.uk/ukpga/1985/70/section/11",
+    relevance: "high",
+    highlightLinks: ["implied obligation to keep the structure and exterior in repair"],
+    application: "The landlord's failure to address penetrating damp over 6+ months is a clear breach of the s.11 covenant. The tenant notified in writing three times — sufficient notice for the obligation to crystallise.",
+  },
+  {
+    id: "ref2",
+    shortLabel: "Fitness Act 2018",
+    citation: "Homes (Fitness for Human Habitation) Act 2018",
+    summary: "Requires landlords to ensure properties are fit for habitation, including freedom from damp.",
+    fullText:
+      "The Homes (Fitness for Human Habitation) Act 2018 amends the Landlord and Tenant Act 1985 to require that residential rented accommodation is provided and maintained in a state of fitness for human habitation. Fitness is assessed by reference to the matters set out in section 10 of the 1985 Act, which include repair, freedom from damp, natural lighting, ventilation, water supply, drainage and sanitary conveniences, and facilities for the preparation and cooking of food.",
+    url: "https://www.legislation.gov.uk/ukpga/2018/34/enacted",
+    relevance: "high",
+    highlightLinks: ["prima facie evidence of a breach"],
+    application: "Persistent damp and mould renders the property unfit for habitation. The landlord's duty is ongoing — the signed satisfaction form does not extinguish it if the problem recurred.",
+  },
+  {
+    id: "ref3",
+    shortLabel: "HA 2004, Pt 1",
+    citation: "Housing Act 2004, Part 1 — Housing Health and Safety Rating System",
+    summary: "Damp and mould growth is a prescribed hazard. Category 1 hazards trigger a duty to act.",
+    fullText:
+      "Part 1 of the Housing Act 2004 introduces the Housing Health and Safety Rating System (HHSRS), replacing the housing fitness standard. Under HHSRS, 29 categories of hazard are prescribed, including damp and mould growth. Each hazard is assessed for likelihood of occurrence and probable severity of outcome. A Category 1 hazard (scoring 1000+) imposes a duty on the local housing authority to take appropriate enforcement action, which may include an improvement notice, prohibition order, or emergency remedial action.",
+    url: "https://www.legislation.gov.uk/ukpga/2004/34/part/1",
+    relevance: "high",
+    highlightLinks: ["obtain an independent damp survey"],
+    application: "If a damp survey classifies this as a Category 1 hazard, the local authority has a mandatory duty to act. This strengthens the tenant's position significantly and may trigger enforcement independently of a civil claim.",
+  },
+  {
+    id: "ref4",
+    shortLabel: "Pre-Action Protocol",
+    citation: "Pre-Action Protocol for Housing Conditions Claims (England)",
+    summary: "Requires written notification and reasonable time for repair before court proceedings.",
+    fullText:
+      "The Pre-Action Protocol for Housing Conditions Claims sets out the steps that the court would normally expect prospective parties to take before starting a claim. The tenant must notify the landlord in writing of the defects, giving the landlord a reasonable opportunity to inspect and carry out any necessary works. 'Reasonable' will depend on the nature and urgency of the defect, but should generally be at least 20 working days for non-urgent matters. The protocol encourages early disclosure of documents and expert evidence to support negotiation.",
+    url: "https://www.justice.gov.uk/courts/procedure-rules/civil/protocol/prot_hou",
+    relevance: "moderate",
+    highlightLinks: ["notified in writing on three occasions"],
+    application: "Three written notifications over 6 months exceeds the protocol's 'reasonable opportunity' threshold. The tenant has complied with pre-action requirements and may now proceed to formal proceedings.",
+  },
+  {
+    id: "ref5",
+    shortLabel: "DPA 1972, s.4",
+    citation: "Defective Premises Act 1972, Section 4",
+    summary: "Landlord owes duty of care to persons affected by defects where they have a repair obligation.",
+    fullText:
+      "Where premises are let under a tenancy which puts on the landlord an obligation to the tenant for the maintenance or repair of the premises, the landlord owes to all persons who might reasonably be expected to be affected by defects in the state of the premises a duty to take such care as is reasonable in all the circumstances to see that they are reasonably safe from personal injury or from damage to their property caused by a relevant defect.",
+    url: "https://www.legislation.gov.uk/ukpga/1972/35/section/4",
+    relevance: "low",
+    highlightLinks: ["landlord's defence that the issue is lifestyle-related"],
+    application: "If the landlord's repair obligation is established via s.11, this section extends the duty of care to all occupants. Relevant if children or vulnerable persons are affected by the mould.",
+  },
+];

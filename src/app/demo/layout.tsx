@@ -5,7 +5,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
   return (
     <DemoProvider>
       <Nav />
-      <main className="h-dvh overflow-hidden pt-16">{children}</main>
+      <main className="min-h-dvh pt-16">{children}</main>
     </DemoProvider>
   );
 }
