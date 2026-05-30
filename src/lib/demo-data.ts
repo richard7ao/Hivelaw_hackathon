@@ -256,6 +256,71 @@ export type LawyerProfile = {
   profileUrl: string;
 };
 
+/**
+ * The Steelman — chains of argument.
+ * Each chain models ONE argument the other side will make, as a sequence:
+ *   1. opponentArgument — their headline (the accordion card header / node 1)
+ *   2. sourceQuote      — the gut-punch: they quote the tenant's OWN words back
+ *   3. reply            — the strongest HONEST reply, grounded in statute
+ *   4. unresolvedNote   — why it stays contested, NOT won
+ *
+ * Chain 1 (signed satisfaction form) is the verified hero used in the demo.
+ * Chains 2-3 are illustrative housing-disrepair defences — plausible, but the
+ * quotes/statute should be grounded against the real file before relying on them.
+ */
+export type SteelmanChain = {
+  id: string;
+  opponentArgument: string;
+  sourceQuote: string;
+  quoteCaption: string;
+  reply: string;
+  statute: string;
+  verdict: "arguable" | "strong-for-them";
+  unresolvedNote: string;
+};
+
+export const STEELMAN_CHAINS: SteelmanChain[] = [
+  {
+    id: "sc1",
+    opponentArgument:
+      "The repairing obligation was discharged — the previous works were completed and signed off as satisfactory.",
+    sourceQuote: "I confirm that the above works have been carried out to my satisfaction.",
+    quoteCaption: "From your signed contractor works form, March 2026",
+    reply:
+      "One satisfaction note for one set of works does not extinguish an ongoing statutory duty. The repairing covenant and the duty to keep the home fit for habitation are continuing obligations — if the damp has recurred since March, the duty re-engages.",
+    statute: "LTA 1985 s.11 (repairing covenant) & s.9A (fitness for human habitation)",
+    verdict: "arguable",
+    unresolvedNote:
+      "Contested, not won. The signed form is the first thing a judge will look at, and it remains a material risk until an independent survey shows the defect recurred.",
+  },
+  {
+    id: "sc2",
+    opponentArgument:
+      "The damp is condensation from how the flat is used, not a structural defect we are obliged to fix.",
+    sourceQuote: "Occupier reports drying laundry indoors; trickle vents observed closed at inspection.",
+    quoteCaption: "From the council inspection report",
+    reply:
+      "Even where lifestyle is a factor, a landlord must still address inadequate ventilation, heating or insulation that makes condensation unavoidable — those are design defects, and persistent condensation dampness can still render a home unfit.",
+    statute: "LTA 1985 s.9A & Housing Act 2004 Pt 1 (HHSRS)",
+    verdict: "strong-for-them",
+    unresolvedNote:
+      "This is the other side's strongest card. Without an independent damp survey establishing a structural or design cause, the burden sits on you and this argument may carry.",
+  },
+  {
+    id: "sc3",
+    opponentArgument:
+      "Your photographs show mould but prove nothing about its cause, severity, or our knowledge of any defect.",
+    sourceQuote: "Mould Photo — Month 1; Mould Photo — Month 3; Mould Photo — Month 8.",
+    quoteCaption: "From your uploaded evidence",
+    reply:
+      "The photographs are not the whole case — they corroborate a timeline of worsening, recurring mould across eight months, which supports both ongoing disrepair and the reasonableness of expert investigation.",
+    statute: "Pre-Action Protocol for Housing Conditions Claims",
+    verdict: "arguable",
+    unresolvedNote:
+      "Contested, not won. A court will expect a surveyor's report on cause and HHSRS hazard category; the photos support that case but cannot stand in for it.",
+  },
+];
+
 export const MOCK_LAWYERS: LawyerProfile[] = [
   {
     id: "l1",
