@@ -210,3 +210,83 @@ export const MOCK_EXTENDED_REFERENCES: ExtendedReference[] = [
     application: "If the landlord's repair obligation is established via s.11, this section extends the duty of care to all occupants. Relevant if children or vulnerable persons are affected by the mould.",
   },
 ];
+
+export type CounterReference = {
+  id: string;
+  argument: string;
+  basis: string;
+  detail: string;
+  highlightLinks: string[];
+};
+
+export const MOCK_COUNTER_REFERENCES: CounterReference[] = [
+  {
+    id: "cr1",
+    argument: "Tenant signed a satisfaction form after prior works",
+    basis: "Contractual estoppel / waiver argument",
+    detail: "The landlord will rely on the signed contractor works form dated March 2026 in which the tenant confirmed previous remedial works were 'carried out to my satisfaction.' This creates an evidential hurdle: the tenant acknowledged the problem was fixed, weakening the argument of continuous disrepair. However, this does not prevent a fresh claim if the damp recurred after the form was signed — the form only evidences the state at that date, not a waiver of future rights.",
+    highlightLinks: ["signed satisfaction form dated March 2026"],
+  },
+  {
+    id: "cr2",
+    argument: "No independent survey to rule out condensation damp",
+    basis: "Causation defence — lifestyle vs. structural",
+    detail: "The landlord's most likely defence is that the damp is caused by condensation from the tenant's lifestyle (inadequate ventilation, drying clothes indoors) rather than a structural defect. Without an independent damp survey establishing the cause, the tenant cannot rebut this defence. The burden of proving the defect is structural falls on the tenant. A Type III survey (destructive investigation) may be needed if the cause is disputed.",
+    highlightLinks: ["obtain an independent damp survey", "landlord's defence that the issue is lifestyle-related"],
+  },
+  {
+    id: "cr3",
+    argument: "Photographic evidence alone may be insufficient",
+    basis: "Evidential weight — expert evidence preferred",
+    detail: "Photographs show the visible presence of mould but do not establish its cause, severity under HHSRS, or the landlord's knowledge of a structural defect. A court would expect expert evidence (e.g., a chartered surveyor's report) to establish the hazard category and causation. Photographs are supporting evidence, not primary proof.",
+    highlightLinks: ["failed to carry out meaningful inspection or repair"],
+  },
+];
+
+export type LawyerProfile = {
+  id: string;
+  name: string;
+  firm: string;
+  specialisation: string;
+  experience: string;
+  qualifications: string[];
+  rating: number;
+  casesWon: number;
+  imageUrl: string;
+};
+
+export const MOCK_LAWYERS: LawyerProfile[] = [
+  {
+    id: "l1",
+    name: "Sarah Chen",
+    firm: "Ashworth & Partners",
+    specialisation: "Housing disrepair & tenant rights",
+    experience: "12 years in housing litigation. Former Shelter legal advisor.",
+    qualifications: ["LLB (Hons) UCL", "CILEX Fellow", "Housing Law Practitioners Association"],
+    rating: 4.9,
+    casesWon: 340,
+    imageUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=Sarah&backgroundColor=e8e0d8",
+  },
+  {
+    id: "l2",
+    name: "James Okafor",
+    firm: "Temple Row Legal",
+    specialisation: "HHSRS enforcement & disrepair claims",
+    experience: "8 years. Specialises in damp & mould cases against social landlords.",
+    qualifications: ["LLB King's College London", "SQE qualified", "Legal Aid accredited"],
+    rating: 4.8,
+    casesWon: 215,
+    imageUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=James&backgroundColor=e8e0d8",
+  },
+  {
+    id: "l3",
+    name: "Priya Sharma",
+    firm: "Citizens Law Centre",
+    specialisation: "Tenant representation & pre-action protocol",
+    experience: "6 years. Pro bono housing clinic lead. Expert in fitness for habitation claims.",
+    qualifications: ["LLM Housing Law (LSE)", "SQE qualified", "CILEx member"],
+    rating: 4.7,
+    casesWon: 128,
+    imageUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=Priya&backgroundColor=e8e0d8",
+  },
+];

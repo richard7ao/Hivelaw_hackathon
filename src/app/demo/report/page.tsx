@@ -9,6 +9,8 @@ import {
   MOCK_FILE_RESULTS,
   MOCK_SUBMISSION_PREVIEW,
   MOCK_EXTENDED_REFERENCES,
+  MOCK_COUNTER_REFERENCES,
+  MOCK_LAWYERS,
   CASE_07_FILES,
 } from "@/lib/demo-data";
 
@@ -127,7 +129,10 @@ export default function ReportPage() {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const activeHighlights = expandedRef ? MOCK_EXTENDED_REFERENCES.find((r) => r.id === expandedRef)?.highlightLinks ?? [] : [];
+  const activeHighlights = expandedRef
+    ? (MOCK_EXTENDED_REFERENCES.find((r) => r.id === expandedRef)?.highlightLinks ??
+       MOCK_COUNTER_REFERENCES.find((r) => r.id === expandedRef)?.highlightLinks ?? [])
+    : [];
 
   const toggleFileResult = (id: string) => setFileResults((prev) => prev.map((f) => (f.id === id ? { ...f, selected: !f.selected } : f)));
 
@@ -190,23 +195,111 @@ export default function ReportPage() {
 
   if (loading) return <Spinner message="Regenerating case assessment..." />;
 
-  if (submitted) {
+  if (submitted && decision === "escalate") {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <div className="mb-6 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent-tint">
+            <SteelmanLogo className="h-7 w-7 text-accent" />
+          </div>
+          <h2 className="mt-4 text-3xl text-ink">Escalated to Lawhive</h2>
+          <p className="mt-2 text-[15px] text-ink-soft">Your case file has been sent. Here are solicitors who specialise in housing disrepair.</p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.2fr]">
+          {/* Left — case summary */}
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-line bg-paper p-6">
+              <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Case file summary</span>
+              <h3 className="mt-3 text-lg font-medium text-ink">{reportData.title}</h3>
+              <div className="mt-3 flex items-center gap-2">
+                <span className="rounded-md border border-verdict-amber/40 bg-verdict-amber/10 px-2 py-0.5 text-xs font-semibold text-verdict-amber">ARGUABLE</span>
+                <span className="text-xs text-ink-faint">Escalate to solicitor</span>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-ink-soft">{analysisData.summary}</p>
+              <div className="mt-4 border-t border-line-soft pt-4">
+                <span className="text-xs font-medium text-ink-faint">Key statutes cited</span>
+                <ul className="mt-2 space-y-1 text-xs text-ink-soft">
+                  {MOCK_EXTENDED_REFERENCES.filter((r) => r.relevance === "high").map((r) => (
+                    <li key={r.id} className="flex items-start gap-2"><span className="text-accent">&#167;</span>{r.shortLabel}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleDownloadPdf} disabled={pdfGenerating} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep disabled:opacity-50">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                {pdfGenerating ? "Generating..." : "Download PDF"}
+              </button>
+              <button onClick={() => router.push("/demo")} className="inline-flex flex-1 items-center justify-center rounded-full border border-line px-4 py-2.5 text-xs font-medium text-ink transition-colors hover:bg-canvas-deep">Dashboard</button>
+            </div>
+          </div>
+
+          {/* Right — recommended lawyers */}
+          <div>
+            <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Recommended solicitors — housing disrepair</span>
+            <div className="mt-4 space-y-4">
+              {MOCK_LAWYERS.map((lawyer) => (
+                <div key={lawyer.id} className="rounded-2xl border border-line bg-paper p-5 transition-colors hover:border-accent/30">
+                  <div className="flex gap-4">
+                    <img src={lawyer.imageUrl} alt={lawyer.name} className="h-16 w-16 rounded-full border border-line bg-canvas-deep" />
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="text-sm font-medium text-ink">{lawyer.name}</h4>
+                          <p className="text-xs text-ink-soft">{lawyer.firm}</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs">
+                          <svg className="h-3.5 w-3.5 text-verdict-amber" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                          <span className="font-medium text-ink">{lawyer.rating}</span>
+                        </div>
+                      </div>
+                      <p className="mt-1 text-xs font-medium text-accent">{lawyer.specialisation}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-ink-soft">{lawyer.experience}</p>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {lawyer.qualifications.map((q) => (
+                          <span key={q} className="rounded border border-line bg-canvas-deep px-2 py-0.5 text-[10px] text-ink-faint">{q}</span>
+                        ))}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-xs text-ink-faint">{lawyer.casesWon} cases won</span>
+                        <button className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep">
+                          Request consultation <span>&rarr;</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (submitted && decision === "submit") {
     return (
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <div className="mb-8 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-verdict-green/15">
             <svg className="h-8 w-8 text-verdict-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
           </div>
-          <h2 className="mt-5 text-3xl text-ink">{decision === "escalate" ? "Escalated to Lawhive" : "Letter prepared"}</h2>
-          <p className="mt-2 text-[15px] text-ink-soft">{decision === "escalate" ? "Your case file has been sent to a Lawhive solicitor. They'll be in touch within 2 working days." : "Your pre-action letter is ready to download and send."}</p>
+          <h2 className="mt-5 text-3xl text-ink">Letter prepared</h2>
+          <p className="mt-2 text-[15px] text-ink-soft">Your pre-action letter is ready to download and send to the landlord.</p>
         </div>
         <div className="rounded-2xl border border-line bg-paper p-7 sm:p-9">
           <div className="flex items-center justify-between border-b border-line-soft pb-4">
-            <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">{decision === "escalate" ? "Case file summary" : "Pre-action letter"}</span>
-            <button onClick={handleDownloadPdf} disabled={pdfGenerating} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-deep disabled:opacity-50">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-              {pdfGenerating ? "Generating..." : "Download PDF"}
-            </button>
+            <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Pre-action letter</span>
+            <div className="flex gap-2">
+              <button onClick={handleDownloadPdf} disabled={pdfGenerating} className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-xs font-medium text-ink transition-colors hover:bg-canvas-deep disabled:opacity-50">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                {pdfGenerating ? "..." : "Download PDF"}
+              </button>
+              <button className="inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-deep">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                Send letter
+              </button>
+            </div>
           </div>
           <pre className="mt-5 whitespace-pre-wrap font-serif text-[15px] leading-relaxed text-ink">{MOCK_SUBMISSION_PREVIEW}</pre>
           <div className="mt-6 border-t border-line-soft pt-5">
@@ -366,17 +459,15 @@ export default function ReportPage() {
 
               {!previewFile && (
                 <>
-                  <div className="flex gap-3">
-                    <button onClick={handleUpload} className="flex flex-1 flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint">
-                      <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                      <span className="text-sm font-medium text-ink-soft">{filesLoaded ? "Load more files" : "Load case 07 files"}</span>
-                    </button>
-                    <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper px-8 py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint">
-                      <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                      <span className="text-sm font-medium text-ink-soft">Upload</span>
-                    </button>
-                    <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleRealUpload} />
-                  </div>
+                  <button
+                    onClick={() => { if (filesLoaded) { fileInputRef.current?.click(); } else { handleUpload(); } }}
+                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint"
+                  >
+                    <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                    <span className="text-sm font-medium text-ink-soft">{filesLoaded ? "Upload additional files" : "Click to upload case files"}</span>
+                    <span className="text-xs text-ink-faint">PDF, images, or text files</span>
+                  </button>
+                  <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleRealUpload} />
 
                   {uploadedFiles.length > 0 && (
                     <div className="space-y-2">
@@ -432,6 +523,7 @@ export default function ReportPage() {
                 </div>
               </div>
               <div className="min-w-0 flex-1 space-y-4">
+                <span className="text-xs font-medium uppercase tracking-[0.16em] text-verdict-green">Supporting references</span>
                 {MOCK_EXTENDED_REFERENCES.map((ref) => (
                   <div key={ref.id} className={`rounded-xl border bg-paper transition-colors ${expandedRef === ref.id ? "border-accent/30" : "border-line"}`}>
                     <button onClick={() => setExpandedRef(expandedRef === ref.id ? null : ref.id)} className="flex w-full items-start justify-between p-5 text-left">
@@ -460,6 +552,36 @@ export default function ReportPage() {
                           View on legislation.gov.uk
                           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                         </a>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                <div className="mt-6" />
+                <span className="text-xs font-medium uppercase tracking-[0.16em] text-verdict-red">Counterargument references</span>
+                {MOCK_COUNTER_REFERENCES.map((cr) => (
+                  <div key={cr.id} className={`rounded-xl border bg-paper transition-colors ${expandedRef === cr.id ? "border-verdict-red/30" : "border-line"}`}>
+                    <button onClick={() => setExpandedRef(expandedRef === cr.id ? null : cr.id)} className="flex w-full items-start justify-between p-5 text-left">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-md border border-verdict-red/40 bg-verdict-red/10 px-2 py-0.5 text-xs font-medium text-verdict-red">counter</span>
+                          <span className="text-sm font-medium text-ink">{cr.argument}</span>
+                        </div>
+                        <p className="mt-2 text-sm leading-relaxed text-ink-soft">{cr.basis}</p>
+                      </div>
+                      <svg className={`ml-3 mt-1 h-5 w-5 shrink-0 text-ink-faint transition-transform ${expandedRef === cr.id ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                    </button>
+                    {expandedRef === cr.id && (
+                      <div className="border-t border-line-soft px-5 py-4 space-y-4">
+                        <p className="text-sm leading-relaxed text-ink">{cr.detail}</p>
+                        {cr.highlightLinks.length > 0 && (
+                          <div className="rounded-lg bg-verdict-red/5 p-4">
+                            <span className="text-xs font-medium uppercase tracking-[0.14em] text-verdict-red">Related report text</span>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {cr.highlightLinks.map((hl) => (<span key={hl} className="rounded border border-verdict-red/30 bg-paper px-2 py-0.5 text-xs text-verdict-red">&ldquo;{hl}&rdquo;</span>))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
