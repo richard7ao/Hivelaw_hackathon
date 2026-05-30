@@ -176,11 +176,19 @@ optionally re-introduce judge-picks-from-dropdown. Rehearse the 3-min core eithe
 - **Legal corpus + citation guard:** BUILT in `scripts/run-cases.ts` (`legal_basis`
   in the schema, corpus injected, ungrounded citations stripped). Not yet verified on
   a live API run — confirm the model populates `legal_basis` and the strip-guard fires.
-- **Not built yet:** the Next.js chat UI + Case Reality Report viewer, the live-pick
-  dropdown, and the pre-cached render path.
+- **Next.js demo scaffold: BUILT (mock data).** `src/app/demo/` has the walkthrough
+  flow — `/demo` dashboard, `/demo/chat`, `/demo/research` (statute-provision research,
+  corpus-aligned), `/demo/analysis`, and `/demo/report` (Case Reality Report viewer).
+  State flows through `src/lib/demo-context.tsx`; content is static mock data in
+  `src/lib/demo-data.ts` (a "12 Ardwick Court" damp case, illustrative — NOT Case 07,
+  NOT the live pipeline).
+- **Not built yet:** wiring the demo UI to **real** per-case reports (live API or
+  pre-cached JSON from `scripts/run-cases.ts`), the live-pick dropdown, and the
+  pre-cached render path. The UI is currently a deterministic mock, not grounded output.
 - **Scope decision (2026-05-30, `docs/decisions/2026-05-30-feature-scope.md`):**
   Feature 3 (verdict-conditional Next Steps) is IN core; the numeric estimator is CUT
   (ungroundable, inverts trust); similar-cases matching is CUT this build (stretch only).
-- **Next likely actions:** verify the corpus/citation guard on a real run; scaffold the
-  Next.js app + report viewer with the verdict-conditional Next Steps block; lock +
-  rehearse the 3-minute script; record the master demo video.
+- **Next likely actions:** verify the corpus/citation guard on a real run; wire the
+  `/demo/report` viewer to real cached per-case JSON (replacing `demo-data.ts` mocks)
+  and add the verdict-conditional Next Steps block; lock + rehearse the 3-minute
+  script; record the master demo video.
