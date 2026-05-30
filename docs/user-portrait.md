@@ -8,6 +8,16 @@
 > persona — we *embody* one (Crystal). This doc is prep and submission material.
 > The only thing that goes on stage is the 15-second "before" line at the end.
 
+## The category line (open and close on this)
+
+> Every other legal AI answers one question: **"Are you right?"** — and it tells
+> you yes. We answer the only question that actually protects you: **"How will you
+> lose?"**
+
+This is a *category* claim, not a feature claim. Don't lead with "free, fast,
+honest" — cheaper-and-faster is what every tool says. Lead with the question only
+we ask.
+
 ---
 
 ## The two users
@@ -42,6 +52,15 @@ crushed.
 weapon that beats them. Crystal doesn't know the satisfaction form she signed is
 the council's best defence. Jamie doesn't know screenshots aren't proof of
 non-protection.
+
+**The emotional "before" (the access-to-justice stake):** Crystal isn't a
+"litigant-in-person." She's a single mother whose youngest has a cough from black
+mould, who's been fobbed off for eight months, and who has *already* signed one
+form that could sink her case without realising it. That's the real status quo:
+vulnerable people grind doomed claims into the ground, or abandon winnable ones
+out of fear and confusion — and either way they find out the expensive way, in
+month eleven. The system makes them learn the hard truth too late, alone, after
+the money's gone. That's the gap. Not efficiency — dignity.
 
 ### User 2 — The Lawhive solicitor (our GTM user)
 
@@ -130,6 +149,23 @@ judges watch the before/after happen live:
 > something finally reads her own evidence honestly."
 
 ---
+
+## The Q&A grenade (pre-load this answer)
+
+A sharp judge will ask: *"Aren't you just discouraging people from seeking justice?
+You've built a tool that talks people out of suing."* If this fumbles, the whole
+premise wobbles. Answer, crisp and rehearsed:
+
+> "The opposite. We tell people with *real* cases to fight — prepared, with their
+> gaps already closed. And we save people with *hopeless* cases from a year of
+> misery and a costs order they never saw coming. Knowing you'll lose **is** access
+> to justice. Today's system lets people find that out the expensive way, in month
+> eleven, after the money's gone. We move that truth to day one, for free."
+
+Turn the hardest question into the strongest moment: the honest "no" is *more*
+access to justice, not less. (This is also the answer to "isn't this bad for
+Lawhive's lead volume?" — filtering out the non-cases lowers cost-to-serve and
+raises the quality of every enquiry that lands.)
 
 ## Assumptions to verify (lawyer spot-check)
 

@@ -7,9 +7,16 @@
 > **Format (locked):** 3:00 hard ceiling. Delivered as a **pre-recorded screen-capture
 > video** of the app running Case 07, with **all three teammates voicing over it live
 > on stage.** The video removes every live-failure mode (network, API latency, rate
-> limits, mis-clicks). The live voices keep the one thing no other team can fake — a
-> real housing lawyer validating the steelman in the room. Rehearse to a stopwatch;
-> record a clean master video as the artifact the voice-over is timed against.
+> limits, mis-clicks). The live voices carry the close, and the live app is the proof:
+> the recording isn't a sizzle reel — judges can pick any case afterwards and check
+> the quotes against the documents themselves. Rehearse to a stopwatch; record a clean
+> master video as the artifact the voice-over is timed against.
+>
+> **We are three engineers — not lawyers.** Nobody on stage claims to be one. Our
+> credibility is structural, not personal: every quote is matched against the user's
+> real file, every legal point comes from a closed statute corpus, and anything we
+> can't ground we don't say. That's the honest version, and in a room of real lawyers
+> it's the only safe one.
 
 ---
 
@@ -116,22 +123,25 @@ hard ceiling — cut any word that isn't load-bearing.
   > letter. Send a pre-action protocol letter. The exact moves that turn a losing
   > position into a winning one."
 
-### Beat 3 — Lawyer validates + access-to-justice close (1:55–3:00) · LAWYER
+### Beat 3 — The trust mechanic + access-to-justice close (1:55–3:00) · CLOSER
 
 - **VIDEO:** Holds on the Case Reality Report / evidence-gap checklist; soft close card
   at the very end.
-- **VOICE (Lawyer):**
-  > "I'm a housing lawyer. That steelman — the signed satisfaction form — is exactly
-  > the argument I'd warn Crystal about in a first meeting. It's real, and the agent
-  > found it on its own.
+- **VOICE (Closer):**
+  > "We're three engineers — we're not lawyers, and that's exactly why we built it this
+  > way. The agent can't make a claim it can't back up. Every quote you just saw is
+  > matched character-for-character against Crystal's real documents. Every point about
+  > the law comes from a closed library of actual statute text — and if it can't find a
+  > basis there, it says so instead of guessing.
   >
   > This is recalibration, and the honest 'no' is a feature Lawhive *wants*. Fewer
   > dead-end intakes. And when a case should escalate, the solicitor doesn't get a
   > panicked email — they get a prepared file with the gaps already mapped.
   >
-  > Every other tool tells people they're right. The tool that tells you how you'll
-  > lose is the one that finally gives people a fair shot. That's access to justice.
-  > Thank you."
+  > And this isn't a sizzle reel — the app is running right now. Pick any case and
+  > watch it argue against you. Every other tool tells people they're right. The tool
+  > that tells you how you'll lose is the one that finally gives people a fair shot.
+  > That's access to justice. Thank you."
 
 **Timing note:** the script above is ~320 words (~3:00 at a measured pace). Rehearse
 10× to a stopwatch. The video is the metronome — speakers sync to it, not vice versa.
@@ -142,7 +152,7 @@ hard ceiling — cut any word that isn't load-bearing.
 
 This is the engineer's spec. The video is recorded once, clean; build to exactly this.
 
-- [ ] **Case picker** showing only lawyer-validated cases, Case 07 (Crystal) selected.
+- [ ] **Case picker** showing only validated (hand-checked) cases, Case 07 (Crystal) selected.
 - [ ] **Act 1 best_case** renders in plain English (penetrating damp / failed repair / on notice).
 - [ ] **Act 2 opponent_steelman** renders 2–4 arguments. The signed-form argument is
       present and its `source_quote` — *"I confirm that the above works have been
@@ -169,8 +179,9 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
   signed-away defence). Not a toy.
 - **A judge can interact with it / impossible to fake.** The agent argues against a
   real person using documents nobody scripted; the trust mechanic (verbatim quote
-  matching) is demonstrable. The live lawyer validation is the proof no other team
-  can stage.
+  matching) is demonstrable. The app is live — a judge can pick any case after the
+  pitch and check every quote against the source documents themselves. The recording
+  is the timed pitch; the running app is the standing dare.
 - **Technical substance.** Robust arbitrary-document ingestion + a single structured
   completion + an anti-hallucination guard that strips ungrounded quotes. Stayed
   all-Anthropic on purpose (panel signal, zero night-before plumbing risk).
@@ -214,6 +225,14 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 - **"Is this legal advice / are you a solicitor?"** No. It's an honest
   case-assessment assistant that shows the truth and points to a solicitor when one is
   needed. The recommendation path makes that explicit.
+- **"You're three engineers — how do you know the legal reasoning is sound?"** We
+  designed the system so soundness doesn't depend on us being lawyers. It works in
+  evidence and procedure (burden of proof, what a judge needs to see, pre-action
+  conduct) — domain-general and far safer than free-reciting statute. Quotes are
+  grounded in the user's file; citations come only from a closed, verbatim corpus;
+  anything ungrounded is stripped. We position as triage and recalibration that routes
+  to a real solicitor, not as a substitute for one. We'd genuinely value a Lawhive
+  lawyer pressure-testing the outputs — that's the v2 loop.
 - **"What about non-housing cases?"** The agent runs on any case file; the statute
   corpus currently covers housing only, and non-housing cases say "no corpus provision
   applies" rather than inventing one. The demo features housing; the architecture
