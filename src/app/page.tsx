@@ -112,13 +112,15 @@ export default function Home() {
           <Sponsors tone="light" className="border-b border-line pb-5" />
         </div>
 
-        <div className="relative mx-auto grid w-full max-w-[88rem] grid-cols-1 items-center gap-12 px-6 pt-12 pb-24 lg:grid-cols-[1.15fr_0.85fr] lg:pt-16">
+        <div className="relative mx-auto w-full max-w-[88rem] px-6 pt-10 pb-4 text-center">
+          <h2 className="font-serif text-2xl text-ink sm:text-3xl">Everyone has a right to good legal advice.</h2>
+        </div>
+
+        <div className="relative mx-auto grid w-full max-w-[88rem] grid-cols-1 items-center gap-12 px-6 pt-4 pb-24 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             <Kicker>Access to justice · for everyone</Kicker>
             <h1 className="mt-6 max-w-2xl text-5xl leading-[1.04] text-ink sm:text-6xl lg:text-[4.25rem]">
-              Everyone has a right to good legal advice.
-              <br />
-              <span className="text-ink-soft">Every legal AI tells you you're right.</span>
+              Every legal AI tells you you're right.
               <br />
               <span className="italic text-accent">We tell you how you'll lose.</span>
             </h1>
