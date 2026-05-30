@@ -54,3 +54,4 @@ next-env.d.ts
 
 # local scratch (browser QA captures)
 /.playwright-mcp/
+.gstack/
