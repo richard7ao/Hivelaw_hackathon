@@ -42,6 +42,7 @@ export default function EntryChatShell() {
   const [isPickingFiles, setIsPickingFiles] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const visibleProgress = result?.readinessScore ?? 5;
   const stageLabel = formatStage(result?.currentStage ?? "understanding-problem");
@@ -72,6 +73,26 @@ export default function EntryChatShell() {
     window.addEventListener("focus", handleFocus, { once: true });
     return () => window.removeEventListener("focus", handleFocus);
   }, [isPickingFiles]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "auto";
+
+    const computedStyle = window.getComputedStyle(textarea);
+    const lineHeight = Number.parseFloat(computedStyle.lineHeight) || 24;
+    const paddingTop = Number.parseFloat(computedStyle.paddingTop) || 0;
+    const paddingBottom = Number.parseFloat(computedStyle.paddingBottom) || 0;
+    const borderTop = Number.parseFloat(computedStyle.borderTopWidth) || 0;
+    const borderBottom = Number.parseFloat(computedStyle.borderBottomWidth) || 0;
+    const maxHeight = lineHeight * 3 + paddingTop + paddingBottom + borderTop + borderBottom;
+
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+  }, [draft]);
 
   function queueFiles(fileList: FileList | null) {
     setIsPickingFiles(false);
@@ -173,12 +194,22 @@ export default function EntryChatShell() {
           body: formData,
         });
 
+        const responseText = await response.text();
+        const payload = parseJsonResponse(responseText);
+
         if (!response.ok) {
-          const payload = (await response.json()) as { error?: string };
-          throw new Error(payload.error ?? "The intake request failed.");
+          throw new Error(
+            payload && typeof payload === "object" && "error" in payload
+              ? String(payload.error ?? "The intake request failed.")
+              : "The intake request failed.",
+          );
         }
 
-        const intakeResult = (await response.json()) as IntakeTurnResult;
+        if (!payload) {
+          throw new Error("The intake response was malformed.");
+        }
+
+        const intakeResult = payload as IntakeTurnResult;
         setResult(intakeResult);
 
         // Progressively push the live report into the shared demo context so the
@@ -314,6 +345,7 @@ export default function EntryChatShell() {
                 </button>
 
                 <textarea
+                  ref={textareaRef}
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={(event) => {
@@ -324,7 +356,7 @@ export default function EntryChatShell() {
                   }}
                   placeholder="Tell us what happened, who the other side is, when it started, what you want, and any evidence you have…"
                   rows={1}
-                  className="max-h-40 min-h-10 flex-1 resize-none self-center bg-transparent py-2 text-[15px] leading-relaxed text-ink outline-none placeholder:text-ink-faint"
+                  className="min-h-10 flex-1 resize-none self-center overflow-y-hidden bg-transparent py-2 text-[15px] leading-relaxed text-ink outline-none placeholder:text-ink-faint"
                   disabled={isPending}
                 />
 
@@ -440,6 +472,14 @@ function summarizeFileNames(files: SessionFile[]) {
   }
 
   return `${files[0].file.name}, ${files[1].file.name}, and ${files.length - 2} more files`;
+}
+
+function parseJsonResponse(text: string) {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 function BrandMark() {

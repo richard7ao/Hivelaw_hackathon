@@ -23,13 +23,21 @@ export async function POST(request: Request) {
     const evaluationMode = parseEvaluationMode(formData.get("evaluationMode"));
     const fallbackResult = runLocalIntakeDemo(messages, attachments, cases, evaluationMode);
 
-    const anthropicResult = await runAnthropicIntake(
-      files,
-      attachments,
-      messages,
-      cases,
-      evaluationMode,
-    );
+    let anthropicResult: IntakeTurnResult | null = null;
+
+    try {
+      anthropicResult = await runAnthropicIntake(
+        files,
+        attachments,
+        messages,
+        cases,
+        evaluationMode,
+      );
+    } catch (error) {
+      console.warn("Anthropic intake failed; returning local fallback instead.", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
 
     if (anthropicResult) {
       return NextResponse.json(finalizeIntakeResult(anthropicResult, fallbackResult, evaluationMode));
@@ -129,7 +137,16 @@ function parseMessages(rawMessages: FormDataEntryValue | null): IntakeMessageInp
     return [];
   }
 
-  const parsed = JSON.parse(rawMessages) as IntakeMessageInput[];
+  let parsed: IntakeMessageInput[] = [];
+
+  try {
+    parsed = JSON.parse(rawMessages) as IntakeMessageInput[];
+  } catch (error) {
+    console.warn("Failed to parse intake messages payload; continuing with empty transcript.", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
 
   return parsed.filter(
     (message) =>
