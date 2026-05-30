@@ -21,18 +21,18 @@
 
 ## 2. Paragraph pitch (~30 seconds)
 
-Almost every consumer-legal AI validates the user. None of them show you how you'll
-lose. The Steelman is the legal agent that argues the *opponent's* best case against
-you, grounded in your own documents. You paste your case file; it gives you your
-strongest position, then role-plays how the other side attacks — quoting your own
-evidence back at you as a weapon — then hands you a **Case Reality Report**: your
+Consumer law in the UK is a £19 billion market — and six million adults have an
+unmet legal need every year. 38% of people with a civil legal issue get no help at
+all. Not because they don't have a case — because they can't afford to find out.
+The Steelman gives everyone what only a solicitor's first meeting used to provide:
+an honest assessment of where you stand. You paste your case file; it gives you your
+strongest position, then argues the *opponent's* best case against you — quoting
+your own evidence back at you as a weapon — then hands you a **Case Reality Report**:
 prospects, an actionable evidence-gap checklist, and an honest recommendation
 (handle it yourself, escalate to a Lawhive solicitor *with a prepared file*, or
-reconsider pursuing). It turns the panel's own hardest insight — that the most
-valuable thing an agent can do is sometimes talk someone out of a claim — into a
-visceral, impossible-to-fake moment. The honest "no" is a feature Lawhive wants:
-fewer dead-end intakes, lower cost-to-serve, and warm escalations that arrive with
-their evidence already mapped.
+reconsider pursuing). The honest "no" is a feature Lawhive wants: fewer dead-end
+intakes, lower cost-to-serve, and warm escalations that arrive with their evidence
+already mapped.
 
 ---
 
@@ -40,11 +40,21 @@ their evidence already mapped.
 
 ### 3.1 The category argument (why we exist)
 
+Everyone has a right to legal advice. But in practice, most people can't get it.
+The UK consumer law market is worth **£19 billion** — yet **six million adults**
+face an unmet legal need every year. Only **33% of people** think they can afford a
+lawyer. Since LASPO gutted civil legal aid in 2012, cases dropped from **925,000 to
+under 500,000** — a 46% cut — and **44% of local authority areas** now have no
+housing legal aid provider at all. The system that's supposed to deliver justice
+has a hole in the middle, and millions of people fall through it every year.
+
 The gap between what you believe happened and what a judge needs to *see* is the
-single biggest source of friction at the start of any legal matter. Every tool on
-the market widens that gap by agreeing with you. The Steelman closes it. We don't
-discourage people — we arm them. Better to take the other side's hardest punch from
-us, in private, than from a judge when it's too late to fix.
+single biggest source of friction at the start of any legal matter. Every AI tool
+on the market widens that gap by agreeing with you. The Steelman closes it. We
+give everyone what used to require a £200 first consultation: an honest assessment
+of their case — including how the other side will attack it. We don't discourage
+people — we arm them. Better to take the other side's hardest punch from us, in
+private, than from a judge when it's too late to fix.
 
 ### 3.2 The product in three acts
 
@@ -85,12 +95,12 @@ hard ceiling — cut any word that isn't load-bearing.
 - **VIDEO:** Title card ("The Steelman"), then the case picker with validated cases;
   Crystal / Case 07 is selected and her case file opens.
 - **VOICE (Thinker):**
-  > "Every legal AI you've ever used tells you you're right. We built the one that
-  > tells you how you'll lose — because that's the one that actually protects you.
-  > Lawhive's own lawyers told us the most valuable thing an agent can do is sometimes
-  > talk someone out of a claim. So we built it. This is Crystal. Eight months of
-  > damp and black mould in her council flat, a sick child, fifteen ignored emails.
-  > Watch what our agent does with her case."
+  > "Six million people in this country have a legal problem they can't get help with.
+  > Not because they don't have a case — because they can't afford to find out. Every
+  > legal AI tells them they're right. We built the one that tells them how they'll
+  > lose — because that's the one that actually protects them. This is Crystal. Eight
+  > months of damp and black mould in her council flat, a sick child, fifteen ignored
+  > emails. Watch what our agent does with her case."
 
 ### Beat 2 — The three acts, the hero punch (0:35–1:55) · ENGINEER
 
@@ -125,9 +135,10 @@ hard ceiling — cut any word that isn't load-bearing.
   > the argument I'd warn Crystal about in a first meeting. It's real, and the agent
   > found it on its own.
   >
-  > This is recalibration, and the honest 'no' is a feature Lawhive *wants*. Fewer
-  > dead-end intakes. And when a case should escalate, the solicitor doesn't get a
-  > panicked email — they get a prepared file with the gaps already mapped.
+  > Consumer law in this country is worth nineteen billion pounds — and six million
+  > people a year can't get help. Since legal aid was gutted in 2012, almost half of
+  > all areas have no housing legal aid provider. Everyone has a right to know where
+  > they stand. This is how we deliver it.
   >
   > Every other tool tells people they're right. The tool that tells you how you'll
   > lose is the one that finally gives people a fair shot. That's access to justice.
@@ -174,16 +185,20 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 - **Technical substance.** Robust arbitrary-document ingestion + a single structured
   completion + an anti-hallucination guard that strips ungrounded quotes. Stayed
   all-Anthropic on purpose (panel signal, zero night-before plumbing risk).
-- **Access to justice.** The wedge: the only tool that tells you how you'll lose is
-  the one that actually protects you. The honest "no" lowers cost-to-serve and turns
+- **Access to justice — backed by numbers.** Six million unmet legal needs a year.
+  38% of people with a civil issue get no help. 44% of areas have zero housing legal
+  aid. This isn't a niche — it's a systemic failure, and AI is the only way to close
+  it at scale. The Steelman gives everyone the honest first assessment that used to
+  cost £200 and a three-week wait. The honest "no" lowers cost-to-serve and turns
   dead-end intakes into prepared, warm escalations.
 
 ---
 
 ## 7. The close (the line to land on)
 
-> "Every other tool tells people they're right. The tool that tells you how you'll
-> lose is the one that finally gives people a fair shot."
+> "Everyone has a right to know where they stand. Every other tool tells people
+> they're right. The tool that tells you how you'll lose is the one that finally
+> gives people a fair shot."
 
 ---
 
@@ -235,3 +250,20 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
       weak-case "honest no" contrast (Thinker narrates) before the lawyer's close —
       see `docs/steelman-plan.md` §"If the slot is actually ~5 min". Rehearse the
       3-min core either way.
+
+---
+
+## 11. Data sources (verify before quoting on stage)
+
+| Claim | Figure | Source |
+|---|---|---|
+| UK consumer law market value | £19bn (2024) | IRN / ResearchAndMarkets UK Legal Services Market Report 2025 |
+| Total UK legal services market | £55bn (2025) | IRN / GlobeNewsWire UK Legal Services Market Report 2026 |
+| Unmet legal needs per year | 6 million adults (England & Wales) | Legal Services Board, Legal Needs Survey 2024 |
+| People with civil issue who got no help | 38% | Legal Services Board, Legal Needs Survey 2024 |
+| Think they can afford a lawyer | Only 33% of UK adults | Lawyer Monthly / YouGov, Oct 2025 |
+| Legal aid cases pre-LASPO → post-LASPO | 925,000 → 497,000 (−46%) | Law Society, LASPO Act impact data |
+| Housing legal aid deserts | 44% of local authority areas have no provider | Law Society, Feb 2024 |
+| Social welfare legal aid drop | −99% since LASPO | Turn2us / MoJ data |
+| Law firms closed since 2020 | 1,100+ (below 9,000 SRA-regulated) | IRN UK Legal Services Market Report 2026 |
+| Civil representation certificates | 146,000 (2012/13) → 110,000 (2024/25) | Ministry of Justice |
