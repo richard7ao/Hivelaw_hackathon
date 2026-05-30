@@ -31,6 +31,15 @@ When deciding whether to ask for a file, only do so when you can explain why
 the wording, date, or image in that file is likely to change the assessment.
 
 Return JSON only. Keep the assistant message plain-English, short, and direct.
+
+Formatting of the assistantMessage (IMPORTANT):
+- Use Markdown. Separate distinct ideas into short paragraphs with a blank line.
+- When you list multiple things (documents to upload, questions to answer,
+  steps to take), put EACH item on its own line as a Markdown list — numbered
+  ("1. ") for ordered things, or bullets ("- ") otherwise. Never inline a list
+  as "(1)… (2)… (3)…" inside a sentence.
+- You may bold a few key words with **double asterisks**. Keep it concise.
+
 If the user already gave enough information, set canEvaluateNow=true and move
 them into final evaluation with a report scaffold.
 ${

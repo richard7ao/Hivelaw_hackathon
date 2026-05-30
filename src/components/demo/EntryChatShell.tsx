@@ -375,7 +375,11 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             : "rounded-[1.25rem] rounded-tl-md border border-line bg-paper text-ink"
         }`}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
+        {isUser ? (
+          <p className="whitespace-pre-wrap">{message.content}</p>
+        ) : (
+          <FormattedMessage content={message.content} />
+        )}
         {message.attachments.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
             {message.attachments.map((attachment) => (
@@ -537,6 +541,87 @@ function ReportHandoffCard({ result }: { result: IntakeTurnResult }) {
         </p>
       </div>
     </div>
+  );
+}
+
+// Lightweight Markdown renderer for assistant messages: paragraphs, bullet and
+// numbered lists, and **bold**. Deliberately tiny — no dependency — because the
+// model only ever emits these few constructs. Grouping consecutive list lines
+// into a single <ul>/<ol> is what turns inline "(1)…(2)…" prose into clean lists.
+function FormattedMessage({ content }: { content: string }) {
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
+  const blocks: React.ReactNode[] = [];
+  let list: { ordered: boolean; items: string[] } | null = null;
+  let key = 0;
+
+  const flushList = () => {
+    if (!list) return;
+    const items = list.items.map((item, i) => (
+      <li key={i} className="leading-relaxed">
+        {renderInline(item)}
+      </li>
+    ));
+    blocks.push(
+      list.ordered ? (
+        <ol key={key++} className="ml-5 list-decimal space-y-1">
+          {items}
+        </ol>
+      ) : (
+        <ul key={key++} className="ml-5 list-disc space-y-1">
+          {items}
+        </ul>
+      ),
+    );
+    list = null;
+  };
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) {
+      flushList();
+      continue;
+    }
+
+    const ordered = line.match(/^(?:\d+[.)]|\(\d+\))\s+(.*)$/);
+    const bullet = line.match(/^[-*•]\s+(.*)$/);
+
+    if (ordered) {
+      if (!list || !list.ordered) {
+        flushList();
+        list = { ordered: true, items: [] };
+      }
+      list.items.push(ordered[1]);
+    } else if (bullet) {
+      if (!list || list.ordered) {
+        flushList();
+        list = { ordered: false, items: [] };
+      }
+      list.items.push(bullet[1]);
+    } else {
+      flushList();
+      blocks.push(
+        <p key={key++} className="leading-relaxed">
+          {renderInline(line)}
+        </p>,
+      );
+    }
+  }
+  flushList();
+
+  return <div className="space-y-2.5">{blocks}</div>;
+}
+
+// Render **bold** spans within a line; everything else is plain text.
+function renderInline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") ? (
+      <strong key={i} className="font-semibold">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
   );
 }
 
