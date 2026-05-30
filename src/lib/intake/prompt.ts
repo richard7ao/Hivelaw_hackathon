@@ -1,11 +1,12 @@
 import type { CaseManifestEntry } from "@/lib/cases/manifest";
+import type { IntakeEvaluationMode } from "./types";
 
 import reportStructure from "./report-structure.json";
 
 export function buildIntakePrompt(
   cases: CaseManifestEntry[],
   conversation: string,
-  forceEvaluate = false,
+  evaluationMode: IntakeEvaluationMode = "none",
 ) {
   const caseLayer = cases
     .map(
@@ -21,6 +22,14 @@ export function buildIntakePrompt(
 You are not the user's solicitor. Your job is to understand the problem, decide
 whether enough information already exists to move to evaluation, and ask only
 the next highest-value question when facts are missing.
+
+The intake must feel finite, not like an endless interview:
+- Ask AT MOST one direct factual question per turn.
+- Prefer moving into evaluation over asking another question once you know the
+  problem, the other side, a rough timeline, the outcome sought, and what
+  evidence exists or is missing.
+- If you can already identify the likely case type and the main risks, do the
+  first-pass assessment now instead of squeezing out more detail.
 
 Use the cases layer below as examples of what a complete matter bundle looks
 like. The cases layer is NOT legal authority. It is a pattern library for:
@@ -72,6 +81,18 @@ assistantHighlights — call out the stakes inline as you analyse:
 If the user already gave enough information, set canEvaluateNow=true and move
 them into final evaluation with a report scaffold.
 
+MINIMUM VIABLE REPORT RULE:
+- As soon as you can identify the likely case type, the rough timeline, the
+  outcome sought, and the main evidence or evidence gaps, stop interviewing and
+  produce a first-pass report.
+- When canEvaluateNow=true, followUpQuestions MUST be an empty array.
+- When canEvaluateNow=true, report.ready MUST be true and the report MUST contain:
+  1. a non-empty title and subtitle
+  2. at least 1 paragraph
+  3. at least 1 forPoint
+  4. at least 1 counterPoint
+  5. a non-empty summary, prospects, and recommendation
+
 THE LIVE REPORT (the "report" field):
 Build the Case Reality Report progressively, turn by turn, as facts emerge —
 do not wait until the end. Follow this exact structure and rules:
@@ -80,13 +101,20 @@ Each turn, return the best report you can from everything known so far. Set
 report.ready=false while still gathering basics; set it true once there is a
 problem summary, the user's best case, and at least one steelman counter.
 ${
-  forceEvaluate
+  evaluationMode === "user-requested"
     ? `\nIMPORTANT — the user has explicitly chosen to skip further questions and
 proceed to a first-pass assessment NOW. You MUST set canEvaluateNow=true, set
 report.ready=true, and fully populate both the reportScaffold and the report
 from whatever information is available. Do not ask more questions. Be honest:
 keep evidenceGaps and the report's flag highlights prominent and specific so the
 user can see exactly what would still strengthen the case.\n`
+    : evaluationMode === "turn-limit"
+      ? `\nIMPORTANT — this intake has already had enough back-and-forth. You MUST
+stop asking further questions, set canEvaluateNow=true, set report.ready=true,
+and produce the best first-pass assessment you can from the information already
+shared. Do not ask for more facts in assistantMessage. Instead, put the missing
+items in evidence gaps, missing facts, fileRequests, and report flag highlights
+so the user can see what would strengthen the case next.\n`
     : ""
 }
 Cases layer:

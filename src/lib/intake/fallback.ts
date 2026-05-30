@@ -5,6 +5,7 @@ import type {
   FileRequest,
   FollowUpQuestion,
   IntakeAttachmentInput,
+  IntakeEvaluationMode,
   IntakeMessageInput,
   IntakeReport,
   IntakeTurnResult,
@@ -25,7 +26,7 @@ export function runLocalIntakeDemo(
   messages: IntakeMessageInput[],
   attachments: IntakeAttachmentInput[],
   cases: CaseManifestEntry[],
-  forceEvaluate = false,
+  evaluationMode: IntakeEvaluationMode = "none",
 ): IntakeTurnResult {
   const userTranscript = messages
     .filter((message) => message.role === "user")
@@ -39,11 +40,11 @@ export function runLocalIntakeDemo(
   const missingFacts = buildMissingFacts(userTranscript, primaryCase, buckets);
   const fileRequests = buildFileRequests(userTranscript, attachments, primaryCase);
   const followUpQuestions = buildFollowUpQuestions(primaryCase, missingFacts);
-  // The user can choose to skip ahead at any point ("run the analysis now").
-  // We still surface the evidence gaps, so a forced early assessment is honest
-  // about what is missing rather than pretending the file is complete.
+  // The user can skip ahead, and the UI also hard-stops intake after a few user
+  // turns so the flow always converges on an assessment. We still surface the
+  // evidence gaps so an early evaluation stays honest about what is missing.
   const canEvaluateNow =
-    forceEvaluate ||
+    evaluationMode !== "none" ||
     (readinessScore >= 78 && buckets.problemSummary && buckets.timeline && buckets.desiredOutcome);
   const currentStage = canEvaluateNow
     ? "ready-for-evaluation"
@@ -60,13 +61,14 @@ export function runLocalIntakeDemo(
     primaryCase,
     attachments,
     knownFacts,
-    readinessScore,
     canEvaluateNow,
   );
 
   const assistantMessage = canEvaluateNow
-    ? forceEvaluate
+    ? evaluationMode === "user-requested"
       ? "Understood — I'm running a first-pass assessment now with what you've shared. It's below. I've kept the evidence-gap list prominent so you can see exactly what would still strengthen the case."
+      : evaluationMode === "turn-limit"
+        ? "I have enough to stop intake and give you a first-pass assessment now. It's below, and I've kept the evidence gaps prominent so you can see exactly what would still strengthen the case."
       : "I have enough for a first-pass assessment. I'm moving into final evaluation now, and you can still add more context or files if you want me to tighten the report."
     : buildAssistantPrompt(followUpQuestions, fileRequests);
 
@@ -96,11 +98,10 @@ function buildReport(
   primaryCase: CaseManifestEntry | undefined,
   attachments: IntakeAttachmentInput[],
   knownFacts: string[],
-  readinessScore: number,
   canEvaluateNow: boolean,
 ): IntakeReport {
   const scaffold = buildReportScaffold(transcript, primaryCase, attachments);
-  const ready = canEvaluateNow || readinessScore >= 55;
+  const ready = canEvaluateNow;
 
   const paragraphs = ready
     ? [
@@ -123,7 +124,7 @@ function buildReport(
     forPoints: knownFacts.slice(0, 4),
     counterPoints: scaffold.counterArgument,
     summary: scaffold.recommendation,
-    prospects: ready ? (readinessScore >= 78 ? "arguable" : "weak") : "pending",
+    prospects: ready ? "arguable" : "pending",
     recommendation: "escalate-to-solicitor",
   };
 }
@@ -344,7 +345,7 @@ function buildFollowUpQuestions(
     });
   }
 
-  return questions.slice(0, 2);
+  return questions.slice(0, 1);
 }
 
 function buildReportScaffold(

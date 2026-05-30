@@ -7,6 +7,7 @@ import { buildIntakePrompt } from "./prompt";
 import { INTAKE_OUTPUT_SCHEMA, normalizeIntakeResult } from "./schema";
 import type {
   IntakeAttachmentInput,
+  IntakeEvaluationMode,
   IntakeMessageInput,
   IntakeTurnResult,
 } from "./types";
@@ -16,7 +17,7 @@ export async function runAnthropicIntake(
   attachments: IntakeAttachmentInput[],
   messages: IntakeMessageInput[],
   cases: CaseManifestEntry[],
-  forceEvaluate = false,
+  evaluationMode: IntakeEvaluationMode = "none",
 ) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -76,7 +77,7 @@ export async function runAnthropicIntake(
   const response = await client.messages.create({
     model: process.env.HIVELAW_INTAKE_MODEL ?? "claude-sonnet-4-5",
     max_tokens: 2200,
-    system: buildIntakePrompt(cases, conversation, forceEvaluate),
+    system: buildIntakePrompt(cases, conversation, evaluationMode),
     messages: [{ role: "user", content: contentBlocks }],
     output_config: {
       format: {

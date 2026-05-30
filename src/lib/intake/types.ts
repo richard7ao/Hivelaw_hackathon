@@ -6,6 +6,8 @@ export type IntakeStage =
   | "final-evaluation"
   | "report-handoff";
 
+export type IntakeEvaluationMode = "none" | "user-requested" | "turn-limit";
+
 export type IntakeMessageInput = {
   role: "user" | "assistant";
   content: string;

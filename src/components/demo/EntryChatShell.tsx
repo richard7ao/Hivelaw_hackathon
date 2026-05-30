@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import SteelmanLogo from "@/components/SteelmanLogo";
@@ -8,8 +8,12 @@ import { useDemoContext } from "@/lib/demo-context";
 import { classifyAttachment } from "@/lib/intake/files";
 import type {
   IntakeAttachmentKind,
+  IntakeEvaluationMode,
   IntakeTurnResult,
 } from "@/lib/intake/types";
+
+const MAX_ASSISTANT_FOLLOW_UPS = 2;
+const MAX_INTAKE_USER_TURNS = MAX_ASSISTANT_FOLLOW_UPS + 1;
 
 type ChatMessage = {
   id: string;
@@ -34,12 +38,14 @@ export default function EntryChatShell() {
   const [sessionFiles, setSessionFiles] = useState<SessionFile[]>([]);
   const [result, setResult] = useState<IntakeTurnResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isPickingFiles, setIsPickingFiles] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const visibleProgress = result?.readinessScore ?? 5;
   const stageLabel = formatStage(result?.currentStage ?? "understanding-problem");
   const allEvidence = useMemo(() => sessionFiles, [sessionFiles]);
+  const userTurnCount = countUserMessages(messages);
 
   // The sidebar (progress + evidence + scaffold) only matters once the case has
   // begun. Before the first message it's hidden; on the first turn the grid
@@ -55,7 +61,20 @@ export default function EntryChatShell() {
     "A builder did poor work and won't refund me.",
   ];
 
+  useEffect(() => {
+    if (!isPickingFiles || typeof window === "undefined") {
+      return;
+    }
+
+    const handleFocus = () => setIsPickingFiles(false);
+
+    window.addEventListener("focus", handleFocus, { once: true });
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [isPickingFiles]);
+
   function queueFiles(fileList: FileList | null) {
+    setIsPickingFiles(false);
+
     if (!fileList) return;
 
     const nextFiles = Array.from(fileList).map((file) => ({
@@ -65,6 +84,15 @@ export default function EntryChatShell() {
     }));
 
     setPendingFiles((current) => dedupeFiles([...current, ...nextFiles]));
+  }
+
+  function openFilePicker() {
+    if (isPending || isPickingFiles) {
+      return;
+    }
+
+    setIsPickingFiles(true);
+    fileInputRef.current?.click();
   }
 
   function removePendingFile(id: string) {
@@ -98,6 +126,12 @@ export default function EntryChatShell() {
 
     const nextMessages = [...messages, userMessage];
     const nextSessionFiles = dedupeFiles([...sessionFiles, ...pendingFiles]);
+    const nextUserTurnCount = countUserMessages(nextMessages);
+    const evaluationMode: IntakeEvaluationMode = force
+      ? "user-requested"
+      : nextUserTurnCount >= MAX_INTAKE_USER_TURNS
+        ? "turn-limit"
+        : "none";
 
     setMessages(nextMessages);
     setSessionFiles(nextSessionFiles);
@@ -122,8 +156,8 @@ export default function EntryChatShell() {
           formData.append("files", sessionFile.file);
         });
 
-        if (force) {
-          formData.append("forceEvaluate", "true");
+        if (evaluationMode !== "none") {
+          formData.append("evaluationMode", evaluationMode);
         }
 
         const response = await fetch("/api/intake", {
@@ -212,7 +246,7 @@ export default function EntryChatShell() {
                   Your case report is ready — view it
                   <span aria-hidden>&rarr;</span>
                 </button>
-              ) : messages.length >= 3 ? (
+              ) : userTurnCount >= MAX_INTAKE_USER_TURNS - 1 ? (
                 <button
                   type="button"
                   onClick={() => sendTurn({ force: true })}
@@ -247,15 +281,25 @@ export default function EntryChatShell() {
                   type="file"
                   multiple
                   className="hidden"
-                  onChange={(event) => queueFiles(event.target.files)}
+                  onChange={(event) => {
+                    queueFiles(event.target.files);
+                    event.target.value = "";
+                  }}
                 />
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Attach files (PDF, image, text)"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-lg text-ink-soft transition-colors hover:bg-canvas-deep hover:text-ink"
+                  onClick={openFilePicker}
+                  title={isPickingFiles ? "Opening file picker..." : "Attach files (PDF, image, text)"}
+                  disabled={isPending || isPickingFiles}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-lg text-ink-soft transition-colors hover:bg-canvas-deep hover:text-ink disabled:cursor-wait disabled:opacity-70"
                 >
-                  <span aria-hidden>+</span>
+                  {isPickingFiles ? (
+                    <span aria-hidden className="steelman-spin inline-flex">
+                      <SteelmanLogo className="h-4 w-4 text-accent" />
+                    </span>
+                  ) : (
+                    <span aria-hidden>+</span>
+                  )}
                   <span className="sr-only">Attach files</span>
                 </button>
 
@@ -268,7 +312,7 @@ export default function EntryChatShell() {
                       sendTurn();
                     }
                   }}
-                  placeholder="Tell us what happened, and what outcome you want…"
+                  placeholder="Tell us what happened, who the other side is, when it started, what you want, and any evidence you have…"
                   rows={1}
                   className="max-h-40 min-h-10 flex-1 resize-none self-center bg-transparent py-2 text-[15px] leading-relaxed text-ink outline-none placeholder:text-ink-faint"
                   disabled={isPending}
@@ -287,7 +331,9 @@ export default function EntryChatShell() {
               </div>
 
               <p className="mt-2 px-2 text-xs text-ink-faint">
-                PDFs, images, and text files supported. Press Enter to send, Shift+Enter for a new line.
+                {isPickingFiles
+                  ? "Opening your file picker..."
+                  : "PDFs, images, and text files supported. Press Enter to send, Shift+Enter for a new line."}
               </p>
               {error ? <p className="mt-2 px-2 text-sm text-verdict-red">{error}</p> : null}
             </div>
@@ -344,6 +390,10 @@ export default function EntryChatShell() {
   );
 }
 
+function countUserMessages(messages: ChatMessage[]) {
+  return messages.filter((message) => message.role === "user").length;
+}
+
 function BrandMark() {
   return (
     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent shadow-[0_6px_16px_-8px_rgba(150,20,20,0.7)]">
@@ -365,8 +415,9 @@ function EmptyState({
         <BrandMark />
         <div className="rounded-[1.25rem] rounded-tl-md border border-line bg-paper px-5 py-4 shadow-sm">
           <p className="text-[15px] leading-relaxed text-ink">
-            Hi — I&apos;m the Steelman intake assistant. Tell me what happened in your own words,
-            and upload anything important (letters, photos, contracts).
+            Hi — I&apos;m the Steelman intake assistant. Tell me what happened, who the other
+            side is, when it started, what outcome you want, and upload anything important
+            like letters, photos, or contracts.
           </p>
           <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
             I&apos;ll find your strongest position — then show you exactly how the other side will
