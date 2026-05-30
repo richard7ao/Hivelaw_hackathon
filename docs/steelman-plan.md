@@ -164,6 +164,37 @@ returns, string-match every `source_quote` against the ingested case text. Strip
 or flag any quote that does not literally appear. The entire credibility claim is
 "it quotes your own evidence" — a fabricated quote inverts the demo live.
 
+## Scope addition — legal grounding via a statute corpus (CEO review, 29 May)
+
+The first 10-case run came out strong but **legally thin** — it says "the
+deposit-protection rules" where a lawyer wants "Housing Act 2004, s.214" and "the
+1–3× penalty." Decision: add real legal grounding, but make it safe the same way
+the steelman is safe — a closed corpus we control, never free recall. This holds
+the "safer than statute" premise (a wrong statute in front of housing solicitors
+is the v1 trap); it does not abandon it.
+
+**Accepted (build for tomorrow, ~3–4h):**
+- `/corpus/` — real statute text pulled verbatim from legislation.gov.uk (no
+  paraphrase) for the two demo domains: Housing Act 2004 ss.213–215 (deposit +
+  s.214(4) 1–3× penalty), Landlord and Tenant Act 1985 s.11 + Homes (Fitness for
+  Human Habitation) Act 2018, Pre-Action Protocol for Housing Conditions Claims,
+  plus a short per-domain "typical outcome ranges" note.
+- Prompt + schema: inject the corpus (prompt-cached — now large enough to actually
+  cache); add `legal_basis: [{ citation, source_quote }]` to steelman points and
+  the verdict. Cite statute ONLY from the corpus; if nothing applies, say so.
+- **Extend the verification guard, legal quotes are a HARD fail.** Steelman quote
+  fails → flag ⚠. Legal citation quote not found in the corpus → **strip it
+  entirely.** A wrong statute is worse than no statute.
+
+**Deferred (v2 / "six months"):** named case-law precedent. LLMs hallucinate case
+citations (lawyers have been sanctioned for it); for tomorrow we use corpus-backed
+*outcome ranges*, not named cases. A verified case corpus is the v2 upgrade.
+
+**Known degradation:** the corpus covers housing only. The runner processes all 10
+cases; non-housing ones (employment, consumer) get thin/no legal grounding and must
+say "no corpus provision applies" rather than inventing one — the hard-fail guard
+enforces this. Demo only features housing cases, so this is fine.
+
 ## The 18-hour build plan
 
 **Engineer (critical path, in order):**
