@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, type ReactNode } from "react";
+import type { CaseData } from "./case-data";
 
 export type Message = { role: "user" | "assistant"; content: string };
 
@@ -42,6 +43,8 @@ type DemoState = {
   addFile: (f: UploadedFile) => void;
   reportData: ReportData;
   analysisData: AnalysisData;
+  activeCase: CaseData | null;
+  setActiveCase: (c: CaseData) => void;
 };
 
 const DemoContext = createContext<DemoState | null>(null);
@@ -58,6 +61,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [researchItems, setResearchItems] = useState<ResearchItem[]>(MOCK_RESEARCH);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [activeCase, setActiveCaseState] = useState<CaseData | null>(null);
 
   const addMessage = (msg: Message) => setMessages((prev) => [...prev, msg]);
 
@@ -71,6 +75,11 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const addFile = (f: UploadedFile) =>
     setUploadedFiles((prev) => [...prev, f]);
 
+  const setActiveCase = (c: CaseData) => setActiveCaseState(c);
+
+  const reportData = activeCase?.report ?? MOCK_REPORT;
+  const analysisData = activeCase?.analysis ?? MOCK_ANALYSIS;
+
   return (
     <DemoContext.Provider
       value={{
@@ -80,8 +89,10 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         toggleResearch,
         uploadedFiles,
         addFile,
-        reportData: MOCK_REPORT,
-        analysisData: MOCK_ANALYSIS,
+        reportData,
+        analysisData,
+        activeCase,
+        setActiveCase,
       }}
     >
       {children}
