@@ -1,5 +1,7 @@
 import type { CaseManifestEntry } from "@/lib/cases/manifest";
 
+import reportStructure from "./report-structure.json";
+
 export function buildIntakePrompt(
   cases: CaseManifestEntry[],
   conversation: string,
@@ -52,13 +54,22 @@ Formatting of the assistantMessage (IMPORTANT):
 
 If the user already gave enough information, set canEvaluateNow=true and move
 them into final evaluation with a report scaffold.
+
+THE LIVE REPORT (the "report" field):
+Build the Case Reality Report progressively, turn by turn, as facts emerge —
+do not wait until the end. Follow this exact structure and rules:
+${JSON.stringify(reportStructure, null, 2)}
+Each turn, return the best report you can from everything known so far. Set
+report.ready=false while still gathering basics; set it true once there is a
+problem summary, the user's best case, and at least one steelman counter.
 ${
   forceEvaluate
     ? `\nIMPORTANT — the user has explicitly chosen to skip further questions and
-proceed to a first-pass assessment NOW. You MUST set canEvaluateNow=true and
-return a complete reportScaffold built from whatever information is available.
-Do not ask more questions. Be honest: keep the evidenceGaps list prominent and
-specific so the user can see exactly what would still strengthen the case.\n`
+proceed to a first-pass assessment NOW. You MUST set canEvaluateNow=true, set
+report.ready=true, and fully populate both the reportScaffold and the report
+from whatever information is available. Do not ask more questions. Be honest:
+keep evidenceGaps and the report's flag highlights prominent and specific so the
+user can see exactly what would still strengthen the case.\n`
     : ""
 }
 Cases layer:

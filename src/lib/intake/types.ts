@@ -46,6 +46,33 @@ export type ReportScaffold = {
   recommendation: string;
 };
 
+export type ReportHighlightType = "support" | "flag";
+
+export type IntakeReportHighlight = {
+  text: string;
+  type: ReportHighlightType;
+};
+
+export type IntakeReportParagraph = {
+  text: string;
+  highlights: IntakeReportHighlight[];
+};
+
+// The live Case Reality Report the agent builds during the conversation.
+// Mirrors demo-context ReportData + AnalysisData (see report-structure.json) so
+// the /demo/report page can render it directly.
+export type IntakeReport = {
+  ready: boolean;
+  title: string;
+  subtitle: string;
+  paragraphs: IntakeReportParagraph[];
+  forPoints: string[];
+  counterPoints: string[];
+  summary: string;
+  prospects: "strong" | "arguable" | "weak" | "pending";
+  recommendation: "self-serve" | "escalate-to-solicitor" | "reconsider-pursuing";
+};
+
 export type IntakeTurnResult = {
   engine: "anthropic" | "local-demo";
   currentStage: IntakeStage;
@@ -59,4 +86,6 @@ export type IntakeTurnResult = {
   canEvaluateNow: boolean;
   assistantMessage: string;
   reportScaffold?: ReportScaffold;
+  // Progressively-built report; ready=false until there's enough to render.
+  report: IntakeReport;
 };

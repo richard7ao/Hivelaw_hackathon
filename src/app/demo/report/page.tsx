@@ -24,6 +24,21 @@ const RECOMMENDATION_STYLE = {
   recommended: { label: "Recommended", bg: "bg-accent-tint", border: "border-accent/40", text: "text-accent" },
 } as const;
 
+// The intake recommendation enum -> the style key used above.
+const RECOMMENDATION_KEY: Record<string, keyof typeof RECOMMENDATION_STYLE> = {
+  "escalate-to-solicitor": "escalate-to-solicitor",
+  "self-serve": "self-serve",
+  "reconsider-pursuing": "do-not-pursue",
+};
+
+const PROSPECT_TIERS = ["weak", "arguable", "strong"] as const;
+const PROSPECT_HEADLINE: Record<string, string> = {
+  strong: "A strong case, well worth pursuing.",
+  arguable: "An arguable case, worth pursuing with preparation.",
+  weak: "A weak case — proceed with caution.",
+  pending: "Assessment still in progress.",
+};
+
 function HighlightedText({ text, highlights, activeHighlights }: { text: string; highlights: { text: string; type: "support" | "flag" }[]; activeHighlights?: string[] }) {
   if (!highlights.length) return <>{text}</>;
   let result: React.ReactNode[] = [];
@@ -114,7 +129,7 @@ function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: st
 
 export default function ReportPage() {
   const router = useRouter();
-  const { messages, addMessage, reportData, analysisData, researchItems, toggleResearch, uploadedFiles, addFile } = useDemoContext();
+  const { messages, addMessage, reportData, analysisData, reportVerdict, researchItems, toggleResearch, uploadedFiles, addFile } = useDemoContext();
   const [activeTab, setActiveTab] = useState<PageTab>("Overview");
   const [analysisTab, setAnalysisTab] = useState<AnalysisTab>("Arguments for");
   const [decision, setDecision] = useState<"submit" | "escalate" | null>(null);
@@ -289,19 +304,40 @@ export default function ReportPage() {
 
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div className="rounded-2xl border border-line bg-paper p-6">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Verdict</span>
-                    <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${RECOMMENDATION_STYLE["escalate-to-solicitor"].bg} ${RECOMMENDATION_STYLE["escalate-to-solicitor"].border} ${RECOMMENDATION_STYLE["escalate-to-solicitor"].text}`}>
-                      {RECOMMENDATION_STYLE["escalate-to-solicitor"].label}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <span className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink-faint">WEAK</span>
-                    <span className="rounded-md border border-verdict-amber/40 bg-verdict-amber/10 px-2.5 py-1 text-xs font-semibold text-verdict-amber">ARGUABLE</span>
-                    <span className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink-faint">STRONG</span>
-                  </div>
-                  <p className="mt-4 font-serif text-lg leading-snug text-ink">An arguable case, worth pursuing with preparation.</p>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">The evidence supports a claim but the signed satisfaction form is a material risk. An independent survey would significantly strengthen the position.</p>
+                  {(() => {
+                    const recStyle = RECOMMENDATION_STYLE[RECOMMENDATION_KEY[reportVerdict.recommendation] ?? "escalate-to-solicitor"];
+                    return (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Verdict</span>
+                          <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${recStyle.bg} ${recStyle.border} ${recStyle.text}`}>
+                            {recStyle.label}
+                          </span>
+                        </div>
+                        <div className="mt-4 flex gap-2">
+                          {PROSPECT_TIERS.map((tier) => {
+                            const active = reportVerdict.prospects === tier;
+                            return (
+                              <span
+                                key={tier}
+                                className={`rounded-md border px-2.5 py-1 text-xs uppercase ${
+                                  active
+                                    ? "border-verdict-amber/40 bg-verdict-amber/10 font-semibold text-verdict-amber"
+                                    : "border-line font-medium text-ink-faint"
+                                }`}
+                              >
+                                {tier}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <p className="mt-4 font-serif text-lg leading-snug text-ink">
+                          {PROSPECT_HEADLINE[reportVerdict.prospects] ?? PROSPECT_HEADLINE.pending}
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-ink-soft">{analysisData.summary}</p>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 <div className="rounded-2xl border border-line bg-paper p-6">

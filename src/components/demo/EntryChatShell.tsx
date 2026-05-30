@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import SteelmanLogo from "@/components/SteelmanLogo";
+import { useDemoContext } from "@/lib/demo-context";
 import { classifyAttachment } from "@/lib/intake/files";
 import type {
   IntakeAttachmentKind,
@@ -23,6 +25,8 @@ type SessionFile = {
 };
 
 export default function EntryChatShell() {
+  const router = useRouter();
+  const { setReport } = useDemoContext();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [pendingFiles, setPendingFiles] = useState<SessionFile[]>([]);
@@ -40,6 +44,9 @@ export default function EntryChatShell() {
   // begun. Before the first message it's hidden; on the first turn the grid
   // animates the chat narrower and slides the sidebar in.
   const hasStarted = messages.length > 0;
+  // Once the report has enough to view, a non-blocking CTA fades in above the
+  // composer. Fast-forward also flips this true (it forces report.ready).
+  const reportReady = result?.report?.ready ?? false;
 
   const suggestions = [
     "My landlord won't fix the damp and mould in my flat.",
@@ -130,6 +137,19 @@ export default function EntryChatShell() {
 
         const intakeResult = (await response.json()) as IntakeTurnResult;
         setResult(intakeResult);
+
+        // Progressively push the live report into the shared demo context so the
+        // /demo/report page reflects the conversation (and is persisted locally).
+        const liveReport = intakeResult.report;
+        if (
+          liveReport &&
+          (liveReport.ready ||
+            liveReport.paragraphs.length > 0 ||
+            liveReport.forPoints.length > 0 ||
+            liveReport.counterPoints.length > 0)
+        ) {
+          setReport(liveReport);
+        }
         setMessages((current) => [
           ...current,
           {
@@ -180,7 +200,17 @@ export default function EntryChatShell() {
 
             {/* Composer */}
             <div className="border-t border-line bg-paper px-4 py-4 sm:px-6">
-              {messages.length >= 3 && !result?.reportScaffold ? (
+              {reportReady ? (
+                <button
+                  type="button"
+                  onClick={() => router.push("/demo/report")}
+                  className="report-cta-in mb-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-medium text-paper shadow-[0_8px_24px_-10px_rgba(150,20,20,0.7)] transition-colors hover:bg-accent-deep"
+                >
+                  <SteelmanLogo className="h-4 w-4" />
+                  Your case report is ready — view it
+                  <span aria-hidden>&rarr;</span>
+                </button>
+              ) : messages.length >= 3 ? (
                 <button
                   type="button"
                   onClick={() => sendTurn({ force: true })}

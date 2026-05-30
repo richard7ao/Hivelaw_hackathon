@@ -197,6 +197,21 @@ html {
   }
 }
 
+/* --- Report CTA: fade up from the composer when the report is ready --- */
+@keyframes report-cta-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.report-cta-in {
+  animation: report-cta-in 0.45s var(--ease-quint) both;
+}
+
 /* --- SteelMan 3D spin loader --- */
 .steelman-spin {
   perspective: 400px;

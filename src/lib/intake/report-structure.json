@@ -1,0 +1,29 @@
+{
+  "description": "Contract for the live Case Reality Report the intake agent builds DURING the conversation. It mirrors src/lib/demo-context.ts (ReportData + AnalysisData) so the /demo/report page can render it directly. The agent fills this in progressively as facts emerge.",
+  "report": {
+    "ready": "boolean — true ONCE there is enough information to render a meaningful report: at least a problem summary, the user's best case, and one steelman counter-argument. Keep it false on early turns while still gathering basic facts.",
+    "title": "string — short case title, e.g. 'Damp & Mould Disrepair — rented flat' (use the address only if the user gave one).",
+    "subtitle": "string — one-line framing, e.g. 'Pre-action assessment under the Housing Conditions Protocol'.",
+    "paragraphs": [
+      {
+        "text": "string — one plain-English paragraph of the assessment. Build these up in this order as the facts arrive: (1) the problem and what the user has already done, (2) the legal basis for the user's position, (3) the STRONGEST counter-argument the other side will make (the steelman), (4) the recommended next step and the evidence still needed.",
+        "highlights": [
+          {
+            "text": "string — a VERBATIM substring of THIS paragraph's text; it is rendered as an inline <mark>.",
+            "type": "support | flag — 'support' helps the user, 'flag' is a risk or weakness."
+          }
+        ]
+      }
+    ],
+    "forPoints": ["string — the arguments FOR the user's case (their strongest points)."],
+    "counterPoints": ["string — the opponent's steelman: the strongest arguments AGAINST the user."],
+    "summary": "string — a balanced 2–4 sentence verdict that ends with a clear recommendation.",
+    "prospects": "strong | arguable | weak | pending (use 'pending' before ready).",
+    "recommendation": "self-serve | escalate-to-solicitor | reconsider-pursuing"
+  },
+  "rules": [
+    "Every highlight.text MUST appear verbatim within its own paragraph.text.",
+    "Populate progressively: returning fewer paragraphs and empty arrays with ready=false is correct on early turns.",
+    "Work ONLY from the conversation and uploaded files — never invent facts, addresses, dates, or statutes."
+  ]
+}

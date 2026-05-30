@@ -6,6 +6,7 @@ import type {
   FollowUpQuestion,
   IntakeAttachmentInput,
   IntakeMessageInput,
+  IntakeReport,
   IntakeTurnResult,
 } from "./types";
 
@@ -54,6 +55,14 @@ export function runLocalIntakeDemo(
   const reportScaffold = canEvaluateNow
     ? buildReportScaffold(userTranscript, primaryCase, attachments)
     : undefined;
+  const report = buildReport(
+    userTranscript,
+    primaryCase,
+    attachments,
+    knownFacts,
+    readinessScore,
+    canEvaluateNow,
+  );
 
   const assistantMessage = canEvaluateNow
     ? forceEvaluate
@@ -74,9 +83,49 @@ export function runLocalIntakeDemo(
       canEvaluateNow,
       assistantMessage,
       reportScaffold,
+      report,
     },
     "local-demo",
   );
+}
+
+// Build the live report deterministically (no-API path). It mirrors the AI's
+// `report` structure so the /demo/report page renders the same way either way.
+function buildReport(
+  transcript: string,
+  primaryCase: CaseManifestEntry | undefined,
+  attachments: IntakeAttachmentInput[],
+  knownFacts: string[],
+  readinessScore: number,
+  canEvaluateNow: boolean,
+): IntakeReport {
+  const scaffold = buildReportScaffold(transcript, primaryCase, attachments);
+  const ready = canEvaluateNow || readinessScore >= 55;
+
+  const paragraphs = ready
+    ? [
+        { text: scaffold.bestCase, highlights: [] },
+        {
+          text: `The other side's strongest response: ${scaffold.counterArgument.join(" ")}`,
+          highlights: [],
+        },
+        { text: scaffold.recommendation, highlights: [] },
+      ]
+    : [];
+
+  return {
+    ready,
+    title: primaryCase?.title ?? "Case assessment",
+    subtitle: ready
+      ? "First-pass assessment built from your intake"
+      : "Draft assessment — still gathering facts",
+    paragraphs,
+    forPoints: knownFacts.slice(0, 4),
+    counterPoints: scaffold.counterArgument,
+    summary: scaffold.recommendation,
+    prospects: ready ? (readinessScore >= 78 ? "arguable" : "weak") : "pending",
+    recommendation: "escalate-to-solicitor",
+  };
 }
 
 function rankCases(transcript: string, cases: CaseManifestEntry[]) {
