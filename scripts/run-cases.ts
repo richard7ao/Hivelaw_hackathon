@@ -15,7 +15,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { readFile, readdir, writeFile, mkdir } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -31,6 +31,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
 const CASES_DIR = path.join(REPO_ROOT, "cases");
 const REPORTS_DIR = path.join(REPO_ROOT, "reports");
+const CORPUS_DIR = path.join(REPO_ROOT, "corpus");
+
+// Load the legal corpus (real statute text, verbatim from legislation.gov.uk).
+// Concatenated into one blob: it's injected into the prompt AND is the text every
+// legal-citation quote is string-matched against. If a citation quote isn't in
+// here, it gets STRIPPED (a wrong statute is worse than no statute).
+const CORPUS_TEXT = loadCorpus(CORPUS_DIR);
 
 // Tiny .env loader so you don't need a dependency or to export the key by hand.
 loadDotEnv(path.join(REPO_ROOT, ".env"));
@@ -71,10 +78,21 @@ Produce, via the provided tool/output format:
 4. prospects: one of "strong" | "arguable" | "weak", plus prospects_reason (one sentence).
 5. recommendation: one of "self-serve" | "escalate-to-solicitor" | "reconsider-pursuing",
    plus recommendation_detail covering the realistic cost / time / effort the client faces.
+6. legal_basis: an array of statutory grounding for the case. Each item has
+   "citation" (e.g. "Housing Act 2004, s.214(4)") and "source_quote" — text that
+   appears VERBATIM in the LEGAL CORPUS below (NOT the case file). Cite ONLY from
+   the corpus. If no corpus provision applies (e.g. a non-housing case), return an
+   empty array — do NOT cite a statute from memory. A wrong statute is worse than
+   none. Individual opponent_steelman items may also carry an optional "legal_basis"
+   array of the same shape where a specific statutory point grounds that argument.
 
 Ground every legal point in evidence and procedure (burden of proof, what a judge
-needs to see, limitation periods, pre-action conduct), not in citing specific
-statute unless the file makes it unambiguous. When unsure, say so.`;
+needs to see, limitation periods, pre-action conduct). Where the corpus directly
+supports a point, cite it via legal_basis with a verbatim quote. When unsure, say so.
+
+==================== LEGAL CORPUS (cite ONLY from this) ====================
+${CORPUS_TEXT}
+==================== END LEGAL CORPUS ====================`;
 
 // Structured-output schema. output_config.format guarantees the first text
 // block is valid JSON matching this shape — no fragile parsing.
@@ -89,8 +107,20 @@ const OUTPUT_SCHEMA = {
         properties: {
           argument: { type: "string" },
           source_quote: { type: "string" },
+          legal_basis: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                citation: { type: "string" },
+                source_quote: { type: "string" },
+              },
+              required: ["citation", "source_quote"],
+              additionalProperties: false,
+            },
+          },
         },
-        required: ["argument", "source_quote"],
+        required: ["argument", "source_quote", "legal_basis"],
         additionalProperties: false,
       },
     },
@@ -102,6 +132,18 @@ const OUTPUT_SCHEMA = {
       enum: ["self-serve", "escalate-to-solicitor", "reconsider-pursuing"],
     },
     recommendation_detail: { type: "string" },
+    legal_basis: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          citation: { type: "string" },
+          source_quote: { type: "string" },
+        },
+        required: ["citation", "source_quote"],
+        additionalProperties: false,
+      },
+    },
   },
   required: [
     "best_case",
@@ -111,11 +153,17 @@ const OUTPUT_SCHEMA = {
     "prospects_reason",
     "recommendation",
     "recommendation_detail",
+    "legal_basis",
   ],
   additionalProperties: false,
 } as const;
 
-type SteelmanPoint = { argument: string; source_quote: string };
+type LegalBasis = { citation: string; source_quote: string };
+type SteelmanPoint = {
+  argument: string;
+  source_quote: string;
+  legal_basis: LegalBasis[];
+};
 type CaseReport = {
   best_case: string;
   opponent_steelman: SteelmanPoint[];
@@ -124,6 +172,7 @@ type CaseReport = {
   prospects_reason: string;
   recommendation: "self-serve" | "escalate-to-solicitor" | "reconsider-pursuing";
   recommendation_detail: string;
+  legal_basis: LegalBasis[];
 };
 
 // ---------------------------------------------------------------------------
@@ -193,9 +242,12 @@ async function runOne(file: string) {
       {
         type: "text",
         text: SYSTEM_PROMPT,
-        // Cache the (stable) system prompt. Note: it's short, so it may fall
-        // under the model's minimum cacheable prefix and silently not cache —
-        // harmless. The big win would be a shared corpus prefix (v2).
+        // Cache the system prompt (prompt + injected corpus). Whether it actually
+        // caches depends on clearing Opus's ~4096-token minimum prefix — the
+        // current corpus (~2-3k tokens) may still be just under it, in which case
+        // this is a harmless no-op. Check usage.cache_read_input_tokens: if it's
+        // 0 across cases, the prefix is too short to cache (fine). As the corpus
+        // grows past the minimum, every case after the first reads it at ~0.1x.
         cache_control: { type: "ephemeral" },
       },
     ],
@@ -212,23 +264,44 @@ async function runOne(file: string) {
   if (!textBlock) throw new Error("no text block in response");
   const report = JSON.parse(textBlock.text) as CaseReport;
 
-  // --- Anti-hallucination guard: every source_quote MUST appear verbatim ---
+  // --- Guard 1: steelman quotes. Soft-fail — verify against the CASE FILE,
+  // flag (⚠) any that aren't found, but keep them so the lawyer can review. ---
   const verified = report.opponent_steelman.map((p) => ({
     ...p,
     verified: quoteAppears(p.source_quote, caseText),
   }));
   const verifiedAll = verified.every((v) => v.verified);
 
+  // --- Guard 2: legal citations. HARD-fail — verify against the CORPUS, and
+  // STRIP any citation whose quote isn't found verbatim. A wrong statute in
+  // front of lawyers is worse than no statute. Count what we stripped. ---
+  let strippedCitations = 0;
+  const keepGroundedCitations = (basis: LegalBasis[]): LegalBasis[] =>
+    (basis ?? []).filter((b) => {
+      const ok = quoteAppears(b.source_quote, CORPUS_TEXT);
+      if (!ok) {
+        strippedCitations++;
+        console.log(`    ✂ STRIPPED ungrounded citation: ${b.citation} — "${truncate(b.source_quote, 60)}"`);
+      }
+      return ok;
+    });
+  report.legal_basis = keepGroundedCitations(report.legal_basis);
+  for (const v of verified) v.legal_basis = keepGroundedCitations(v.legal_basis);
+
   const usage = response.usage ?? ({} as any);
   const secs = ((Date.now() - started) / 1000).toFixed(1);
+  const citeCount =
+    report.legal_basis.length +
+    verified.reduce((n, v) => n + v.legal_basis.length, 0);
   console.log(
     `${verifiedAll ? "✓" : "⚠"} ${file} — ${report.prospects} / ${report.recommendation}` +
+      ` · ${citeCount} grounded citation(s)${strippedCitations ? `, ${strippedCitations} stripped` : ""}` +
       ` (${secs}s, in ${usage.input_tokens ?? "?"} / out ${usage.output_tokens ?? "?"}` +
       `${usage.cache_read_input_tokens ? `, cache-read ${usage.cache_read_input_tokens}` : ""})`,
   );
   if (!verifiedAll) {
     for (const v of verified.filter((x) => !x.verified)) {
-      console.log(`    ⚠ UNVERIFIED quote: "${truncate(v.source_quote, 80)}"`);
+      console.log(`    ⚠ UNVERIFIED steelman quote: "${truncate(v.source_quote, 80)}"`);
     }
   }
 
@@ -286,12 +359,26 @@ async function writeReport(
     lines.push(
       `  - ${v.verified ? "✅ grounded" : "❌ UNVERIFIED — quote not found verbatim in the file"}: “${v.source_quote}”`,
     );
+    for (const lb of v.legal_basis ?? []) {
+      lines.push(`  - ⚖️ ${lb.citation}: “${lb.source_quote}”`);
+    }
   }
   lines.push("");
   lines.push("## Act 3 — Evidence gaps to close (your checklist)");
   lines.push("");
   for (const g of r.evidence_gaps) lines.push(`- [ ] ${g}`);
   lines.push("");
+  if (r.legal_basis.length > 0) {
+    lines.push("## Legal basis (verified against the corpus — ungrounded citations stripped)");
+    lines.push("");
+    for (const lb of r.legal_basis) {
+      lines.push(`- **${lb.citation}** — “${lb.source_quote}”`);
+    }
+    lines.push("");
+  } else {
+    lines.push("_No corpus provision applies to this case (the corpus currently covers housing only)._");
+    lines.push("");
+  }
   lines.push("---");
   lines.push("");
   lines.push("### Lawyer red-pen (fill in tonight)");
@@ -334,6 +421,18 @@ function badge(p: string) {
 }
 function truncate(s: string, n: number) {
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
+}
+function loadCorpus(dir: string): string {
+  // Concatenate every corpus/*.md into one blob. This is both injected into the
+  // prompt and the haystack that legal-citation quotes are matched against.
+  if (!existsSync(dir)) {
+    console.warn(`No corpus/ dir at ${dir} — legal grounding disabled this run.`);
+    return "(no legal corpus loaded)";
+  }
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith(".md"))
+    .sort();
+  return files.map((f) => readFileSync(path.join(dir, f), "utf8")).join("\n\n");
 }
 function loadDotEnv(file: string) {
   if (!existsSync(file)) return;
