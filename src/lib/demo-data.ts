@@ -253,6 +253,7 @@ export type LawyerProfile = {
   rating: number;
   casesWon: number;
   imageUrl: string;
+  profileUrl: string;
 };
 
 /**
@@ -323,35 +324,38 @@ export const STEELMAN_CHAINS: SteelmanChain[] = [
 export const MOCK_LAWYERS: LawyerProfile[] = [
   {
     id: "l1",
-    name: "Sarah Chen",
-    firm: "Ashworth & Partners",
-    specialisation: "Housing disrepair & tenant rights",
-    experience: "12 years in housing litigation. Former Shelter legal advisor.",
-    qualifications: ["LLB (Hons) UCL", "CILEX Fellow", "Housing Law Practitioners Association"],
+    name: "Katherine Jackson",
+    firm: "Lawhive",
+    specialisation: "Housing disrepair & tenant claims",
+    experience: "Experienced in damp & mould disrepair claims against local authorities and private landlords. Specialises in pre-action protocol compliance and tenant representation.",
+    qualifications: ["SQE qualified", "Housing Law Practitioners Association", "Legal Aid accredited"],
     rating: 4.9,
-    casesWon: 340,
-    imageUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=Sarah&backgroundColor=e8e0d8",
+    casesWon: 312,
+    imageUrl: "/lawyers/katherine-jackson.png",
+    profileUrl: "https://lawhive.co.uk/our-lawyers/katherine-jackson",
   },
   {
     id: "l2",
-    name: "James Okafor",
-    firm: "Temple Row Legal",
-    specialisation: "HHSRS enforcement & disrepair claims",
-    experience: "8 years. Specialises in damp & mould cases against social landlords.",
-    qualifications: ["LLB King's College London", "SQE qualified", "Legal Aid accredited"],
+    name: "Daniel Tang",
+    firm: "Lawhive",
+    specialisation: "HHSRS enforcement & fitness for habitation",
+    experience: "Specialises in Category 1 hazard enforcement and s.9A fitness claims. Expert in housing conditions litigation and single joint expert instructions.",
+    qualifications: ["LLB (Hons)", "SQE qualified", "CILEX Fellow"],
     rating: 4.8,
-    casesWon: 215,
-    imageUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=James&backgroundColor=e8e0d8",
+    casesWon: 245,
+    imageUrl: "/lawyers/daniel-tang.png",
+    profileUrl: "https://lawhive.co.uk/our-lawyers/daniel-tang",
   },
   {
     id: "l3",
-    name: "Priya Sharma",
-    firm: "Citizens Law Centre",
-    specialisation: "Tenant representation & pre-action protocol",
-    experience: "6 years. Pro bono housing clinic lead. Expert in fitness for habitation claims.",
-    qualifications: ["LLM Housing Law (LSE)", "SQE qualified", "CILEx member"],
+    name: "Rachelle Man Hiu Lam",
+    firm: "Lawhive",
+    specialisation: "Pre-action protocol & deposit disputes",
+    experience: "Expert in housing conditions protocol compliance, letter of claim drafting, and tenancy deposit penalty claims under the Housing Act 2004.",
+    qualifications: ["LLM Housing Law", "SQE qualified", "Legal Aid accredited"],
     rating: 4.7,
-    casesWon: 128,
-    imageUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=Priya&backgroundColor=e8e0d8",
+    casesWon: 158,
+    imageUrl: "/lawyers/rachelle-lam.png",
+    profileUrl: "https://lawhive.co.uk/our-lawyers/rachelle-man-hiu-lam",
   },
 ];

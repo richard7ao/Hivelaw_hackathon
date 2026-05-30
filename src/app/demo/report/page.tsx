@@ -24,6 +24,7 @@ const RECOMMENDATION_STYLE = {
   "escalate-to-solicitor": { label: "Escalate to solicitor", bg: "bg-verdict-amber/10", border: "border-verdict-amber/40", text: "text-verdict-amber" },
   "self-serve": { label: "Self-serve", bg: "bg-verdict-green/10", border: "border-verdict-green/40", text: "text-verdict-green" },
   "do-not-pursue": { label: "Do not pursue", bg: "bg-verdict-red/10", border: "border-verdict-red/40", text: "text-verdict-red" },
+  "reconsider-pursuing": { label: "Reconsider pursuing", bg: "bg-verdict-red/10", border: "border-verdict-red/40", text: "text-verdict-red" },
   recommended: { label: "Recommended", bg: "bg-accent-tint", border: "border-accent/40", text: "text-accent" },
 } as const;
 
@@ -55,9 +56,10 @@ const RELEVANCE_STYLE = {
   low: "border-line bg-canvas-deep text-ink-faint",
 } as const;
 
-function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: string; content: string }[]; addMessage: (msg: { role: "user" | "assistant"; content: string }) => void; onExpand: () => void }) {
+function FloatingChat({ messages, addMessage, addFile, addUserFile, onExpand, onRegenerate }: { messages: { role: string; content: string }[]; addMessage: (msg: { role: "user" | "assistant"; content: string }) => void; addFile: (f: { name: string; size: string }) => void; addUserFile: (f: { name: string; url: string; type: "pdf" | "image" | "other" }) => void; onExpand: () => void; onRegenerate: () => void }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const chatFileRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
     const text = input.trim();
@@ -66,7 +68,25 @@ function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: st
     setInput("");
     setTimeout(() => {
       addMessage({ role: "assistant", content: "I've noted that additional detail. Let me update the case assessment to reflect this new information." });
+      setTimeout(onRegenerate, 500);
     }, 800);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).forEach((f) => {
+      addFile({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` });
+      const url = URL.createObjectURL(f);
+      const type = f.type.startsWith("image/") ? "image" as const : f.type === "application/pdf" ? "pdf" as const : "other" as const;
+      addUserFile({ name: f.name, url, type });
+      addMessage({ role: "user", content: `[Uploaded: ${f.name}]` });
+    });
+    e.target.value = "";
+    setTimeout(() => {
+      addMessage({ role: "assistant", content: "Document received. I'll incorporate this into the case assessment." });
+      setTimeout(onRegenerate, 500);
+    }, 600);
   };
 
   if (!open) {
@@ -107,6 +127,10 @@ function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: st
       </div>
       <div className="border-t border-line px-3 py-2">
         <div className="flex items-center gap-2">
+          <button onClick={() => chatFileRef.current?.click()} className="rounded-lg p-1.5 text-ink-faint hover:bg-canvas-deep hover:text-ink" title="Upload file">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" /></svg>
+          </button>
+          <input ref={chatFileRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" className="hidden" onChange={handleFileUpload} />
           <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSend()} placeholder="Add details or evidence..." className="flex-1 bg-transparent text-xs text-ink outline-none placeholder:text-ink-faint" />
           <button onClick={handleSend} disabled={!input.trim()} className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-paper disabled:bg-ink/15 disabled:text-ink-faint">Send</button>
         </div>
@@ -117,7 +141,7 @@ function FloatingChat({ messages, addMessage, onExpand }: { messages: { role: st
 
 export default function ReportPage() {
   const router = useRouter();
-  const { messages, addMessage, reportData, analysisData, researchItems, toggleResearch, uploadedFiles, addFile } = useDemoContext();
+  const { messages, addMessage, reportData, analysisData, researchItems, toggleResearch, uploadedFiles, addFile, userFiles, addUserFile, activeCase } = useDemoContext();
   const [activeTab, setActiveTab] = useState<PageTab>("Overview");
   const [analysisTab, setAnalysisTab] = useState<AnalysisTab>("Arguments for");
   const [decision, setDecision] = useState<"submit" | "escalate" | null>(null);
@@ -130,11 +154,18 @@ export default function ReportPage() {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   // The Steelman tab: one chain expanded at a time (hero chain open by default)
   const [openChain, setOpenChain] = useState<string | null>(STEELMAN_CHAINS[0]?.id ?? null);
+  const [contactedLawyers, setContactedLawyers] = useState<Set<string>>(new Set());
+  const [linkCopied, setLinkCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const caseRefs = activeCase?.references ?? MOCK_EXTENDED_REFERENCES;
+  const caseCounterRefs = activeCase?.counterReferences ?? MOCK_COUNTER_REFERENCES;
+  const caseProspects = activeCase?.prospects ?? "arguable";
+  const caseRecommendation = activeCase?.recommendation ?? "escalate-to-solicitor";
+
   const activeHighlights = expandedRef
-    ? (MOCK_EXTENDED_REFERENCES.find((r) => r.id === expandedRef)?.highlightLinks ??
-       MOCK_COUNTER_REFERENCES.find((r) => r.id === expandedRef)?.highlightLinks ?? [])
+    ? (caseRefs.find((r) => r.id === expandedRef)?.highlightLinks ??
+       caseCounterRefs.find((r) => r.id === expandedRef)?.highlightLinks ?? [])
     : [];
 
   const toggleFileResult = (id: string) => setFileResults((prev) => prev.map((f) => (f.id === id ? { ...f, selected: !f.selected } : f)));
@@ -149,51 +180,21 @@ export default function ReportPage() {
   const handleRealUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    Array.from(files).forEach((f) => addFile({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` }));
+    Array.from(files).forEach((f) => {
+      addFile({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` });
+      const url = URL.createObjectURL(f);
+      const type = f.type.startsWith("image/") ? "image" as const : f.type === "application/pdf" ? "pdf" as const : "other" as const;
+      addUserFile({ name: f.name, url, type });
+    });
+    e.target.value = "";
   };
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = () => {
     setPdfGenerating(true);
-    const html = `
-      <h1>Case Assessment Report — Steelman</h1>
-      <h2>${reportData.title}</h2>
-      <p><em>${reportData.subtitle}</em></p>
-      ${reportData.paragraphs.map((p) => {
-        let text = p.text;
-        p.highlights.forEach((h) => {
-          text = text.replace(h.text, `<span class="${h.type === "support" ? "support" : "flag"}">${h.text}</span>`);
-        });
-        return `<p>${text}</p>`;
-      }).join("")}
-      <h2>Arguments For</h2>
-      <ul>${analysisData.forPoints.map((p) => `<li>${p}</li>`).join("")}</ul>
-      <h2>Counterarguments</h2>
-      <ul>${analysisData.counterPoints.map((p) => `<li>${p}</li>`).join("")}</ul>
-      <h2>Assessment Summary</h2>
-      <p>${analysisData.summary}</p>
-      <h2>Pre-Action Letter</h2>
-      <pre style="white-space:pre-wrap;font-family:Georgia,serif;font-size:14px;">${MOCK_SUBMISSION_PREVIEW}</pre>
-      <h2>Statutory Basis</h2>
-      ${MOCK_EXTENDED_REFERENCES.filter((r) => r.relevance === "high").map((r) => `<div class="citation"><strong>${r.citation}</strong><br/>${r.summary}</div>`).join("")}
-      <div class="footer">Generated by Steelman — Case Assessment AI. ${new Date().toLocaleDateString("en-GB")}. This is not legal advice.</div>
-    `;
-    try {
-      const res = await fetch("/api/pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html, title: "steelman-case-report" }),
-      });
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "steelman-case-report.pdf";
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
+    setTimeout(() => {
       window.print();
-    }
-    setPdfGenerating(false);
+      setPdfGenerating(false);
+    }, 200);
   };
 
   if (loading) return <Spinner message="Regenerating case assessment..." />;
@@ -222,18 +223,42 @@ export default function ReportPage() {
               <div className="mt-4 border-t border-line-soft pt-4">
                 <span className="text-xs font-medium text-ink-faint">Key statutes cited</span>
                 <ul className="mt-2 space-y-1 text-xs text-ink-soft">
-                  {MOCK_EXTENDED_REFERENCES.filter((r) => r.relevance === "high").map((r) => (
+                  {caseRefs.filter((r) => r.relevance === "high").map((r) => (
                     <li key={r.id} className="flex items-start gap-2"><span className="text-accent">&#167;</span>{r.shortLabel}</li>
                   ))}
                 </ul>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button onClick={handleDownloadPdf} disabled={pdfGenerating} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep disabled:opacity-50">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                {pdfGenerating ? "Generating..." : "Download PDF"}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-3">
+                <button onClick={handleDownloadPdf} disabled={pdfGenerating} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep disabled:opacity-50">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                  {pdfGenerating ? "Generating..." : "Download PDF"}
+                </button>
+                <button onClick={() => router.push("/demo")} className="inline-flex flex-1 items-center justify-center rounded-full border border-line px-4 py-2.5 text-xs font-medium text-ink transition-colors hover:bg-canvas-deep">Dashboard</button>
+              </div>
+              <button
+                onClick={() => {
+                  const caseId = activeCase?.id ?? "case-07";
+                  const url = `${window.location.origin}/demo/report/${caseId}`;
+                  navigator.clipboard.writeText(url);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 3000);
+                }}
+                className={`inline-flex w-full items-center justify-center gap-1.5 rounded-full border px-4 py-2.5 text-xs font-medium transition-colors ${linkCopied ? "border-verdict-green/40 bg-verdict-green/10 text-verdict-green" : "border-line text-ink hover:bg-canvas-deep"}`}
+              >
+                {linkCopied ? (
+                  <>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Link copied
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" /></svg>
+                    Share report with solicitor
+                  </>
+                )}
               </button>
-              <button onClick={() => router.push("/demo")} className="inline-flex flex-1 items-center justify-center rounded-full border border-line px-4 py-2.5 text-xs font-medium text-ink transition-colors hover:bg-canvas-deep">Dashboard</button>
             </div>
           </div>
 
@@ -241,14 +266,16 @@ export default function ReportPage() {
           <div>
             <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Recommended solicitors — housing disrepair</span>
             <div className="mt-4 space-y-4">
-              {MOCK_LAWYERS.map((lawyer) => (
-                <div key={lawyer.id} className="rounded-2xl border border-line bg-paper p-5 transition-colors hover:border-accent/30">
+              {MOCK_LAWYERS.map((lawyer) => {
+                const contacted = contactedLawyers.has(lawyer.id);
+                return (
+                <div key={lawyer.id} className={`rounded-2xl border bg-paper p-5 transition-colors ${contacted ? "border-verdict-green/30" : "border-line hover:border-accent/30"}`}>
                   <div className="flex gap-4">
-                    <img src={lawyer.imageUrl} alt={lawyer.name} className="h-16 w-16 rounded-full border border-line bg-canvas-deep" />
+                    <img src={lawyer.imageUrl} alt={lawyer.name} className="h-16 w-16 rounded-full border border-line bg-canvas-deep object-cover" />
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="text-sm font-medium text-ink">{lawyer.name}</h4>
+                          <a href={lawyer.profileUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-ink hover:text-accent">{lawyer.name}</a>
                           <p className="text-xs text-ink-soft">{lawyer.firm}</p>
                         </div>
                         <div className="flex items-center gap-1 text-xs">
@@ -265,14 +292,25 @@ export default function ReportPage() {
                       </div>
                       <div className="mt-3 flex items-center justify-between">
                         <span className="text-xs text-ink-faint">{lawyer.casesWon} cases won</span>
-                        <button className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep">
-                          Request consultation <span>&rarr;</span>
-                        </button>
+                        {contacted ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-verdict-green/40 bg-verdict-green/10 px-3 py-1.5 text-xs font-medium text-verdict-green">
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            Consultation requested
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => setContactedLawyers((prev) => new Set([...prev, lawyer.id]))}
+                            className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep"
+                          >
+                            Request consultation <span>&rarr;</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -308,7 +346,7 @@ export default function ReportPage() {
           <div className="mt-6 border-t border-line-soft pt-5">
             <span className="text-xs font-medium uppercase tracking-[0.14em] text-ink-faint">Statutory basis</span>
             <ul className="mt-3 space-y-1.5 text-xs text-ink-soft">
-              {MOCK_EXTENDED_REFERENCES.filter((r) => r.relevance === "high").map((r) => (
+              {caseRefs.filter((r) => r.relevance === "high").map((r) => (
                 <li key={r.id} className="flex items-start gap-2"><span className="mt-0.5 text-accent">&#167;</span><span>{r.citation}</span></li>
               ))}
             </ul>
@@ -387,8 +425,8 @@ export default function ReportPage() {
                 <div className="rounded-2xl border border-line bg-paper p-6">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">Verdict</span>
-                    <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${RECOMMENDATION_STYLE["escalate-to-solicitor"].bg} ${RECOMMENDATION_STYLE["escalate-to-solicitor"].border} ${RECOMMENDATION_STYLE["escalate-to-solicitor"].text}`}>
-                      {RECOMMENDATION_STYLE["escalate-to-solicitor"].label}
+                    <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${RECOMMENDATION_STYLE[caseRecommendation]?.bg ?? ""} ${RECOMMENDATION_STYLE[caseRecommendation]?.border ?? ""} ${RECOMMENDATION_STYLE[caseRecommendation]?.text ?? ""}`}>
+                      {RECOMMENDATION_STYLE[caseRecommendation]?.label ?? caseRecommendation}
                     </span>
                   </div>
                   <div className="mt-4 flex gap-2">
@@ -430,10 +468,10 @@ export default function ReportPage() {
                   <button onClick={() => setActiveTab("References")} className="text-xs font-medium text-accent hover:text-accent-deep">View all &rarr;</button>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {MOCK_EXTENDED_REFERENCES.filter((r) => r.relevance === "high").map((r) => (<span key={r.id} className="rounded-lg border border-line bg-canvas-deep px-3 py-1.5 text-xs font-medium text-ink-soft">{r.shortLabel}</span>))}
+                  {caseRefs.filter((r) => r.relevance === "high").map((r) => (<span key={r.id} className="rounded-lg border border-line bg-canvas-deep px-3 py-1.5 text-xs font-medium text-ink-soft">{r.shortLabel}</span>))}
                 </div>
                 <div className="mt-3 space-y-2">
-                  {MOCK_EXTENDED_REFERENCES.filter((r) => r.relevance === "high").map((r) => (
+                  {caseRefs.filter((r) => r.relevance === "high").map((r) => (
                     <div key={r.id} className="flex items-start gap-2 text-sm"><span className="mt-0.5 text-accent">&#167;</span><div><span className="font-medium text-ink">{r.shortLabel}</span><span className="text-ink-soft"> — {r.summary}</span></div></div>
                   ))}
                 </div>
@@ -463,14 +501,14 @@ export default function ReportPage() {
               {!previewFile && (
                 <>
                   <button
-                    onClick={() => { if (filesLoaded) { fileInputRef.current?.click(); } else { handleUpload(); } }}
+                    onClick={() => { if (!filesLoaded) { handleUpload(); } else { fileInputRef.current?.click(); } }}
                     className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-paper py-8 transition-colors hover:border-accent/40 hover:bg-accent-tint"
                   >
                     <svg className="h-8 w-8 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
                     <span className="text-sm font-medium text-ink-soft">{filesLoaded ? "Upload additional files" : "Click to upload case files"}</span>
                     <span className="text-xs text-ink-faint">PDF, images, or text files</span>
                   </button>
-                  <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleRealUpload} />
+                  <input ref={fileInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.txt,.doc,.docx" className="hidden" onChange={handleRealUpload} />
 
                   {uploadedFiles.length > 0 && (
                     <div className="space-y-2">
@@ -484,6 +522,14 @@ export default function ReportPage() {
                           )}
                           <span className="flex-1 text-sm text-ink">{f.name}</span>
                           <span className="text-xs text-ink-faint">{f.size}</span>
+                          <span className="text-xs text-accent">View &rarr;</span>
+                        </button>
+                      ))}
+                      {userFiles.map((f) => (
+                        <button key={f.url} onClick={() => setPreviewFile(f.url)} className="flex w-full items-center gap-3 rounded-xl border border-accent/30 bg-accent-tint px-4 py-3 text-left transition-colors hover:bg-accent-tint">
+                          <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                          <span className="flex-1 text-sm text-ink">{f.name}</span>
+                          <span className="rounded border border-accent/30 px-1.5 py-0.5 text-[10px] font-medium text-accent">Uploaded</span>
                           <span className="text-xs text-accent">View &rarr;</span>
                         </button>
                       ))}
@@ -527,7 +573,7 @@ export default function ReportPage() {
               </div>
               <div className="min-w-0 flex-1 space-y-4">
                 <span className="text-xs font-medium uppercase tracking-[0.16em] text-verdict-green">Supporting references</span>
-                {MOCK_EXTENDED_REFERENCES.map((ref) => (
+                {caseRefs.map((ref) => (
                   <div key={ref.id} className={`rounded-xl border bg-paper transition-colors ${expandedRef === ref.id ? "border-accent/30" : "border-line"}`}>
                     <button onClick={() => setExpandedRef(expandedRef === ref.id ? null : ref.id)} className="flex w-full items-start justify-between p-5 text-left">
                       <div className="flex-1">
@@ -562,7 +608,7 @@ export default function ReportPage() {
 
                 <div className="mt-6" />
                 <span className="text-xs font-medium uppercase tracking-[0.16em] text-verdict-red">Counterargument references</span>
-                {MOCK_COUNTER_REFERENCES.map((cr) => (
+                {caseCounterRefs.map((cr) => (
                   <div key={cr.id} className={`rounded-xl border bg-paper transition-colors ${expandedRef === cr.id ? "border-verdict-red/30" : "border-line"}`}>
                     <button onClick={() => setExpandedRef(expandedRef === cr.id ? null : cr.id)} className="flex w-full items-start justify-between p-5 text-left">
                       <div className="flex-1">
@@ -701,7 +747,7 @@ export default function ReportPage() {
         </div>
       </div>
 
-      <FloatingChat messages={messages} addMessage={addMessage} onExpand={() => router.push("/demo/chat")} />
+      <FloatingChat messages={messages} addMessage={addMessage} addFile={addFile} addUserFile={addUserFile} onExpand={() => router.push("/demo/chat")} onRegenerate={() => { setLoading(true); setTimeout(() => setLoading(false), 3000); }} />
     </>
   );
 }
