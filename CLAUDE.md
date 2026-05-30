@@ -77,13 +77,15 @@ the single-point-of-failure that sank the prior plan.
 - **Stay all-Anthropic.** Ignore the GCP/Gemini nod — Anthropic is on the panel and
   the night before is not the time to add Vertex plumbing (team decision; accept the
   small ding).
-- **Legal corpus (`/corpus`, planned — CEO-review scope addition):** real statute
-  text pulled *verbatim* from legislation.gov.uk (no paraphrase), injected
-  prompt-cached. Housing only for the demo: Housing Act 2004 ss.213–215 (deposit +
-  s.214(4) 1–3× penalty), Landlord and Tenant Act 1985 s.11, Homes (Fitness for
-  Human Habitation) Act 2018, Pre-Action Protocol for Housing Conditions Claims,
-  plus per-domain "typical outcome ranges." Named case-law precedent is **deferred to
-  v2** (LLMs hallucinate case citations).
+- **Legal corpus (`/corpus`, BUILT — CEO-review scope addition):** real statute
+  text pulled *verbatim* from legislation.gov.uk (no paraphrase), injected into the
+  prompt. Housing only for the demo. Built: Housing Act 2004 ss.213–214 (deposit +
+  s.214(4) 1–3× penalty), Landlord and Tenant Act 1985 s.11 (repairing covenant),
+  LTA 1985 s.9A (fitness for human habitation, via Homes (Fitness) Act 2018), and
+  the Pre-Action Protocol for Housing Conditions Claims, each with a "typical outcome
+  range" note. Every `legal_basis.source_quote` is string-matched against the corpus;
+  unmatched citations are **stripped**. Named case-law precedent is **deferred to v2**
+  (LLMs hallucinate case citations). Corpus is ~4.2k tokens (may engage prompt caching).
 
 ## v1 hard scope (build only this)
 
@@ -165,9 +167,11 @@ optionally re-introduce judge-picks-from-dropdown. Rehearse the 3-min core eithe
   engineers self-review (grounding + plausibility, NOT legal sign-off) to decide which
   cases are demo-safe.
 - **Reports generated:** all 10 cases ran clean; Case 07 → arguable / escalate.
-- **Not built yet:** `/corpus` (statute grounding + the legal-quote hard-fail guard),
-  the Next.js chat UI + Case Reality Report viewer, the live-pick dropdown, and the
-  pre-cached render path.
-- **Next likely actions:** assemble `/corpus`; scaffold the Next.js app + report
-  viewer; engineer case self-review table; lock + rehearse the 3-minute script;
-  record the master demo video.
+- **Legal corpus + citation guard:** BUILT in `scripts/run-cases.ts` (`legal_basis`
+  in the schema, corpus injected, ungrounded citations stripped). Not yet verified on
+  a live API run — confirm the model populates `legal_basis` and the strip-guard fires.
+- **Not built yet:** the Next.js chat UI + Case Reality Report viewer, the live-pick
+  dropdown, and the pre-cached render path.
+- **Next likely actions:** verify the corpus/citation guard on a real run; scaffold the
+  Next.js app + report viewer; lock + rehearse the 3-minute script; record the master
+  demo video.
