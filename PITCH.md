@@ -22,30 +22,37 @@
 
 ## 1. Elevator pitch (one line)
 
-**Every legal AI tells you you're right. We built the one that tells you how you'll lose — because that's the one that actually protects you.**
+**Everyone has a right to legal advice — but in practice, most people can't get it. Every legal AI tells you you're right. We built the one that tells you how you'll lose — because that's the one that actually protects you.**
 
 ---
 
 ## 2. Paragraph pitch (~30 seconds)
 
 Almost every consumer-legal AI validates the user. None of them show you how you'll
-lose. The Steelman is the legal agent that argues the *opponent's* best case against
-you, grounded in your own documents. You paste your case file; it gives you your
-strongest position, then role-plays how the other side attacks — quoting your own
-evidence back at you as a weapon — then hands you a **Case Reality Report**: your
-prospects, an actionable evidence-gap checklist, and an honest recommendation
-(handle it yourself, escalate to a Lawhive solicitor *with a prepared file*, or
-reconsider pursuing). It turns the panel's own hardest insight — that the most
-valuable thing an agent can do is sometimes talk someone out of a claim — into a
-visceral, impossible-to-fake moment. The honest "no" is a feature Lawhive wants:
-fewer dead-end intakes, lower cost-to-serve, and warm escalations that arrive with
-their evidence already mapped.
+lose. Legal services is a $1 trillion global market — and 5.1 billion people
+worldwide have an unmet justice need. Half of everyone who faces a legal problem
+can't get help. Not because they don't have a case — because they can't afford to
+find out. The Steelman changes that. It argues the *opponent's* best case against
+you, grounded in your own documents — giving everyone what only a solicitor's first
+meeting used to provide: an honest assessment of where you stand. You paste your
+case file; it gives you your strongest position, then role-plays how the other side
+attacks — quoting your own evidence back at you as a weapon — then hands you a
+**Case Reality Report**: your prospects, an actionable evidence-gap checklist, and
+an honest recommendation (handle it yourself, escalate to a Lawhive solicitor
+*with a prepared file*, or reconsider pursuing). The honest "no" is a feature
+Lawhive wants: fewer dead-end intakes, lower cost-to-serve, and warm escalations
+that arrive with their evidence already mapped.
 
 ---
 
 ## 3. Full pitch
 
 ### 3.1 The category argument (why we exist)
+
+Legal services is a **$1 trillion** global market. **5.1 billion people** worldwide
+have an unmet justice need. More than half of everyone who faces a legal problem
+cannot get help — not because they don't have a case, but because the system
+doesn't reach them.
 
 The gap between what you believe happened and what a judge needs to *see* is the
 single biggest source of friction at the start of any legal matter. Every tool on
@@ -92,12 +99,12 @@ hard ceiling — cut any word that isn't load-bearing.
 - **VIDEO:** Title card ("The Steelman"), then the case picker with validated cases;
   Crystal / Case 07 is selected and her case file opens.
 - **VOICE (Thinker):**
-  > "Every legal AI you've ever used tells you you're right. We built the one that
-  > tells you how you'll lose — because that's the one that actually protects you.
-  > Lawhive's own lawyers told us the most valuable thing an agent can do is sometimes
-  > talk someone out of a claim. So we built it. This is Crystal. Eight months of
-  > damp and black mould in her council flat, a sick child, fifteen ignored emails.
-  > Watch what our agent does with her case."
+  > "Five billion people worldwide have an unmet justice need. Not because they
+  > don't have a case — because they can't afford to find out. Every legal AI
+  > tells them they're right. We built the one that tells you how you'll lose —
+  > because that's the one that actually protects you. This is Crystal. Eight
+  > months of damp and black mould in her council flat, a sick child, fifteen
+  > ignored emails. Watch what our agent does with her case."
 
 ### Beat 2 — The three acts, the hero punch (0:35–1:55) · ENGINEER
 
@@ -134,14 +141,15 @@ hard ceiling — cut any word that isn't load-bearing.
   > the law comes from a closed library of actual statute text — and if it can't find a
   > basis there, it says so instead of guessing.
   >
-  > This is recalibration, and the honest 'no' is a feature Lawhive *wants*. Fewer
-  > dead-end intakes. And when a case should escalate, the solicitor doesn't get a
-  > panicked email — they get a prepared file with the gaps already mapped.
+  > Legal services is a trillion-dollar market — and five billion people can't get
+  > help. The honest 'no' is a feature Lawhive *wants*. Fewer dead-end intakes, and
+  > when a case should escalate, the solicitor gets a prepared file with the gaps
+  > already mapped.
   >
   > And this isn't a sizzle reel — the app is running right now. Pick any case and
-  > watch it argue against you. Every other tool tells people they're right. The tool
-  > that tells you how you'll lose is the one that finally gives people a fair shot.
-  > That's access to justice. Thank you."
+  > watch it argue against you. Everyone has a right to know where they stand. Every
+  > other tool tells people they're right. The tool that tells you how you'll lose is
+  > the one that finally gives people a fair shot. That's access to justice. Thank you."
 
 **Timing note:** the script above is ~320 words (~3:00 at a measured pace). Rehearse
 10× to a stopwatch. The video is the metronome — speakers sync to it, not vice versa.
@@ -185,20 +193,43 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 - **Technical substance.** Robust arbitrary-document ingestion + a single structured
   completion + an anti-hallucination guard that strips ungrounded quotes. Stayed
   all-Anthropic on purpose (panel signal, zero night-before plumbing risk).
-- **Access to justice.** The wedge: the only tool that tells you how you'll lose is
-  the one that actually protects you. The honest "no" lowers cost-to-serve and turns
-  dead-end intakes into prepared, warm escalations.
+- **Access to justice — backed by numbers.** $1 trillion market, 5.1 billion people
+  with unmet justice needs, more than half of those facing a legal problem can't get
+  help. The Steelman gives everyone the honest first assessment that used to require
+  a solicitor. The honest "no" lowers cost-to-serve and turns dead-end intakes into
+  prepared, warm escalations.
 
 ---
 
 ## 7. The close (the line to land on)
 
-> "Every other tool tells people they're right. The tool that tells you how you'll
-> lose is the one that finally gives people a fair shot."
+> "Everyone has a right to know where they stand. Every other tool tells people
+> they're right. The tool that tells you how you'll lose is the one that finally
+> gives people a fair shot."
 
 ---
 
-## 8. GTM (one slide / one breath if asked)
+## 8. The personal beat (optional — read the room)
+
+> Drop this in if the room feels receptive to a personal moment. Works best in
+> Beat 1 (Thinker, after the "five billion" line) or Beat 3 (Closer, before the
+> close). Pick one spot, not both. If the energy is formal or time is tight, skip
+> it — the pitch stands without it.
+
+**The line (Thinker version):**
+
+> "My mum is one of them. She typed her legal problems into ChatGPT. It told her
+> she was right. It missed every counter-argument that mattered."
+
+**The line (Closer version):**
+
+> "One of our team watched his mum type her legal problems into ChatGPT. It told
+> her she was right. It missed every counter-argument that would have sunk her
+> case."
+
+---
+
+## 9. GTM (one slide / one breath if asked)
 
 1. **Lawhive partnership** — the honest intake/triage front door. Self-serve cases
    stay self-served; escalations arrive with a prepared file. Not a competitor — a
@@ -210,7 +241,7 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 
 ---
 
-## 9. Objection handling (Q&A prep)
+## 10. Objection handling (Q&A prep)
 
 - **"Isn't this just discouraging people from getting justice?"** The opposite. We
   validate the strongest case *first*, then show the gap so it can be closed. The
@@ -243,7 +274,7 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 
 ---
 
-## 10. Production checklist (pre-stage)
+## 11. Production checklist (pre-stage)
 
 - [ ] App renders Case 07 from cache exactly per the §5 build contract.
 - [ ] Record the clean master video (case pick → 3 acts → report), projector-legible.
@@ -254,3 +285,19 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
       weak-case "honest no" contrast (Thinker narrates) before the lawyer's close —
       see `docs/steelman-plan.md` §"If the slot is actually ~5 min". Rehearse the
       3-min core either way.
+
+---
+
+## 12. Data sources (verify before quoting on stage)
+
+| Claim | Figure | Source |
+|---|---|---|
+| Global legal services market | $1 trillion (2024) | Grand View Research / IMARC Global Legal Services Market Report 2025 |
+| Global unmet justice needs | 5.1 billion people | World Justice Project, Measuring the Justice Gap (2019) |
+| People who can't resolve legal problems | >50% globally | World Justice Project, Global Insights on Access to Justice |
+| UK consumer law market value | £19bn (2024) | IRN / ResearchAndMarkets UK Legal Services Market Report 2025 |
+| UK unmet legal needs per year | 6 million adults (England & Wales) | Legal Services Board, Legal Needs Survey 2024 |
+| UK — people with civil issue who got no help | 38% | Legal Services Board, Legal Needs Survey 2024 |
+| UK — think they can afford a lawyer | Only 33% | Lawyer Monthly / YouGov, Oct 2025 |
+| UK legal aid cases pre-LASPO → post-LASPO | 925,000 → 497,000 (−46%) | Law Society, LASPO Act impact data |
+| UK housing legal aid deserts | 44% of areas have no provider | Law Society, Feb 2024 |
