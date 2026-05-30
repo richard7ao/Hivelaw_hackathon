@@ -157,17 +157,44 @@ target). The **VOICE (live)** column is what the named speaker says on stage, ti
 land with the video. All three speak. 3:00 is a hard ceiling — cut any word that isn't
 load-bearing.
 
+---
+
+## 1. Elevator pitch (one line)
+
+**Everyone has a right to legal advice — but in practice, most people can't get it. Every legal AI tells you you're right. We built the one that tells you how you'll lose — because that's the one that actually protects you.**
+
+---
+
+## 2. Paragraph pitch (~30 seconds)
+
+Almost every consumer-legal AI validates the user. None of them show you how you'll
+lose. Legal services is a $1 trillion global market — and 5.1 billion people
+worldwide have an unmet justice need. Half of everyone who faces a legal problem
+can't get help. Not because they don't have a case — because they can't afford to
+find out. The Steelman changes that. It argues the *opponent's* best case against
+you, grounded in your own documents — giving everyone what only a solicitor's first
+meeting used to provide: an honest assessment of where you stand. You paste your
+case file; it gives you your strongest position, then role-plays how the other side
+attacks — quoting your own evidence back at you as a weapon — then hands you a
+**Case Reality Report**: your prospects, an actionable evidence-gap checklist, and
+an honest recommendation (handle it yourself, escalate to a Lawhive solicitor
+*with a prepared file*, or reconsider pursuing). The honest "no" is a feature
+Lawhive wants: fewer dead-end intakes, lower cost-to-serve, and warm escalations
+that arrive with their evidence already mapped.
+
+
 ### Beat 1 — Cold open + the honest-no thesis (0:00–0:35) · THINKER
 
-- **VIDEO:** Title card ("The Steelman"), then the case dashboard; the damp-and-mould
-  case at 12 Ardwick Court is selected and the case file opens.
+- **VIDEO:** Landing Page
 - **VOICE (Thinker):**
-  > "Half the people who face a legal problem can't get help — not because they don't
+  > "Everyone has a right to good legal advice — but in practice, most people can't get it.
+  > Half the people who face a legal problem can't get help — not because they don't
   > have a case, but because they can't afford to find out where they stand. Every legal
   > AI fills that gap by telling them they're right. We built the opposite. The most
   > useful thing a legal AI can do is tell you the truth — including when to stand down.
+- **VIDEO:** Go to Demo - the (first case) damp-and-mould case at 12 Ardwick Court is selected and the case file opens.
   > This is a damp-and-mould case: eight months, a sick child, fifteen ignored emails.
-  > Watch it stay honest."
+  > Watch what steel man says about it.
 
 ### Beat 2 — Grounded assessment + the Steelman punch (0:35–1:55) · ENGINEER
 
