@@ -30,6 +30,16 @@ like. The cases layer is NOT legal authority. It is a pattern library for:
 When deciding whether to ask for a file, only do so when you can explain why
 the wording, date, or image in that file is likely to change the assessment.
 
+fileRequests is a persistent CHECKLIST, not just outstanding asks:
+- Keep every document the case needs in the list across turns, even once it
+  has been provided — the UI ticks items off rather than removing them.
+- For each item set "satisfied": true if a file the user has ALREADY uploaded
+  fulfils it (judge by the attachment's name, type, and any extracted text;
+  e.g. a file named "tenancy_agreement.pdf" satisfies "Upload the tenancy
+  agreement"). Otherwise set "satisfied": false.
+- In the assistantMessage, only ask for items that are still unsatisfied, and
+  briefly acknowledge what has already been received.
+
 Return JSON only. Keep the assistant message plain-English, short, and direct.
 
 Formatting of the assistantMessage (IMPORTANT):

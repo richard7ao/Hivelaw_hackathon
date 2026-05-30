@@ -39,8 +39,9 @@ export const INTAKE_OUTPUT_SCHEMA = {
           title: { type: "string" },
           reason: { type: "string" },
           optional: { type: "boolean" },
+          satisfied: { type: "boolean" },
         },
-        required: ["title", "reason", "optional"],
+        required: ["title", "reason", "optional", "satisfied"],
         additionalProperties: false,
       },
     },
@@ -95,7 +96,10 @@ export function normalizeIntakeResult(
     knownFacts: raw.knownFacts ?? [],
     missingFacts: raw.missingFacts ?? [],
     followUpQuestions: raw.followUpQuestions ?? [],
-    fileRequests: raw.fileRequests ?? [],
+    fileRequests: (raw.fileRequests ?? []).map((request) => ({
+      ...request,
+      satisfied: request.satisfied ?? false,
+    })),
     canEvaluateNow: raw.canEvaluateNow ?? false,
     assistantMessage:
       raw.assistantMessage ??

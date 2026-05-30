@@ -480,22 +480,65 @@ function EvidenceRequestCard({
 }: {
   requests: IntakeTurnResult["fileRequests"];
 }) {
+  const done = requests.filter((request) => request.satisfied).length;
+
   return (
     <div className="rounded-2xl border border-accent/25 bg-accent-tint p-5">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">
-        Evidence request
-      </p>
-      <div className="mt-3 space-y-3">
-        {requests.map((request) => (
-          <div key={request.title} className="rounded-xl border border-accent/15 bg-paper px-4 py-3">
-            <p className="text-sm font-medium text-ink">{request.title}</p>
-            <p className="mt-1 text-sm leading-relaxed text-ink-soft">{request.reason}</p>
-            <p className="mt-2 text-xs text-ink-faint">
-              {request.optional ? "Optional, but useful if you have it." : "Recommended for the first full assessment."}
-            </p>
-          </div>
-        ))}
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">
+          Evidence checklist
+        </p>
+        <span className="rounded-full bg-paper/70 px-2.5 py-0.5 text-xs font-medium text-accent">
+          {done}/{requests.length} provided
+        </span>
       </div>
+      <ul className="mt-3 space-y-2">
+        {requests.map((request) => (
+          <li
+            key={request.title}
+            className={`flex gap-3 rounded-xl border px-3 py-2.5 transition-colors ${
+              request.satisfied
+                ? "border-verdict-green/30 bg-verdict-green/5"
+                : "border-accent/15 bg-paper"
+            }`}
+          >
+            <span
+              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                request.satisfied
+                  ? "border-verdict-green bg-verdict-green text-paper"
+                  : "border-ink-faint/40"
+              }`}
+            >
+              {request.satisfied ? (
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : null}
+            </span>
+            <div className="min-w-0">
+              <p
+                className={`text-sm font-medium ${
+                  request.satisfied ? "text-ink-soft line-through decoration-verdict-green/40" : "text-ink"
+                }`}
+              >
+                {request.title}
+              </p>
+              {request.satisfied ? (
+                <p className="mt-0.5 text-xs font-medium text-verdict-green">Received</p>
+              ) : (
+                <>
+                  <p className="mt-0.5 text-sm leading-relaxed text-ink-soft">{request.reason}</p>
+                  <p className="mt-1 text-xs text-ink-faint">
+                    {request.optional
+                      ? "Optional, but useful if you have it."
+                      : "Recommended for the first full assessment."}
+                  </p>
+                </>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

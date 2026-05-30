@@ -202,71 +202,71 @@ function buildFileRequests(
   attachments: IntakeAttachmentInput[],
   primaryCase: CaseManifestEntry | undefined,
 ) {
-  const requests: FileRequest[] = [];
-
   const hasNamedAttachment = (keyword: string) =>
     attachments.some((attachment) => attachment.name.toLowerCase().includes(keyword));
+  const hasImage = attachments.some((attachment) => attachment.kind === "image-evidence");
+
+  // The checklist is persistent: every item the case needs stays in the list,
+  // and `satisfied` flips to true once a matching upload is detected. The UI
+  // ticks items off rather than dropping them.
+  const requests: FileRequest[] = [];
 
   if (primaryCase?.domain === "housing-disrepair") {
-    if (!hasNamedAttachment("tenancy")) {
-      requests.push({
-        title: "Upload the tenancy agreement",
-        reason:
-          "The repair obligations and parties are usually confirmed fastest from the tenancy wording.",
-        optional: false,
-      });
-    }
-    if (!attachments.some((attachment) => attachment.kind === "image-evidence")) {
-      requests.push({
-        title: "Upload dated photos of the damp or mould",
-        reason:
-          "Progression over time is often more persuasive than a summary, especially where the other side may say it is only condensation.",
-        optional: false,
-      });
-    }
-    if (/email|emails|council|landlord|report/i.test(transcript) && !hasNamedAttachment("email")) {
+    requests.push({
+      title: "Upload the tenancy agreement",
+      reason:
+        "The repair obligations and parties are usually confirmed fastest from the tenancy wording.",
+      optional: false,
+      satisfied: hasNamedAttachment("tenancy"),
+    });
+    requests.push({
+      title: "Upload dated photos of the damp or mould",
+      reason:
+        "Progression over time is often more persuasive than a summary, especially where the other side may say it is only condensation.",
+      optional: false,
+      satisfied: hasImage || hasNamedAttachment("photo"),
+    });
+    if (/email|emails|council|landlord|report/i.test(transcript)) {
       requests.push({
         title: "Upload the email chain or written complaint trail",
         reason:
           "The dates and wording will show notice, delay, and whether the response changed over time.",
         optional: false,
+        satisfied: hasNamedAttachment("email") || hasNamedAttachment("chain"),
       });
     }
-    if (/gp|doctor|cough|asthma|health|child|children/i.test(transcript) && !hasNamedAttachment("gp")) {
+    if (/gp|doctor|cough|asthma|health|child|children/i.test(transcript)) {
       requests.push({
         title: "Upload any GP or medical letter",
         reason:
           "Health impact can materially strengthen the seriousness of the case and the urgency of action.",
         optional: true,
+        satisfied: hasNamedAttachment("gp") || hasNamedAttachment("medical") || hasNamedAttachment("doctor"),
       });
     }
   }
 
   if (primaryCase?.domain === "deposit-protection") {
-    if (!hasNamedAttachment("tenancy")) {
-      requests.push({
-        title: "Upload the tenancy agreement",
-        reason:
-          "It usually confirms the tenancy start date, deposit amount, and how the landlord described deposit protection.",
-        optional: false,
-      });
-    }
-    if (!hasNamedAttachment("bank") && !/bank statement|payment proof/i.test(transcript)) {
-      requests.push({
-        title: "Upload proof of the deposit payment",
-        reason:
-          "The payment date is central to whether protection deadlines were missed.",
-        optional: false,
-      });
-    }
-    if (!attachments.some((attachment) => /dps|tds|mydeposits/i.test(attachment.name))) {
-      requests.push({
-        title: "Upload screenshots from the deposit scheme searches",
-        reason:
-          "They are the quickest way to show the deposit cannot currently be found in the main schemes.",
-        optional: true,
-      });
-    }
+    requests.push({
+      title: "Upload the tenancy agreement",
+      reason:
+        "It usually confirms the tenancy start date, deposit amount, and how the landlord described deposit protection.",
+      optional: false,
+      satisfied: hasNamedAttachment("tenancy"),
+    });
+    requests.push({
+      title: "Upload proof of the deposit payment",
+      reason: "The payment date is central to whether protection deadlines were missed.",
+      optional: false,
+      satisfied: hasNamedAttachment("bank") || hasNamedAttachment("receipt") || hasNamedAttachment("payment"),
+    });
+    requests.push({
+      title: "Upload screenshots from the deposit scheme searches",
+      reason:
+        "They are the quickest way to show the deposit cannot currently be found in the main schemes.",
+      optional: true,
+      satisfied: attachments.some((attachment) => /dps|tds|mydeposits/i.test(attachment.name)),
+    });
   }
 
   return requests.filter(

@@ -34,6 +34,9 @@ export type FileRequest = {
   title: string;
   reason: string;
   optional: boolean;
+  // True when the model judges that an already-uploaded file satisfies this
+  // request — drives the ticked-off state in the evidence checklist.
+  satisfied: boolean;
 };
 
 export type ReportScaffold = {
