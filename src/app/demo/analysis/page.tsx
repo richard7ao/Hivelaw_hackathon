@@ -33,10 +33,10 @@ export default function AnalysisPage() {
               : "Your pre-action letter has been prepared and is ready to send."}
           </p>
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/demo")}
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-accent-deep"
           >
-            Back to home
+            Back to dashboard
             <span aria-hidden>&rarr;</span>
           </button>
         </div>

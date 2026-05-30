@@ -1,116 +1,161 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useDemoContext } from "@/lib/demo-context";
-import { MOCK_ASSISTANT_REPLY } from "@/lib/demo-data";
+import Link from "next/link";
 
-export default function EntryChat() {
-  const router = useRouter();
-  const { messages, addMessage } = useDemoContext();
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [showContinue, setShowContinue] = useState(false);
-  const threadRef = useRef<HTMLDivElement>(null);
+const STATUS_STYLE = {
+  complete: { label: "Complete", dot: "bg-verdict-green", text: "text-verdict-green" },
+  "in-progress": { label: "In progress", dot: "bg-verdict-amber", text: "text-verdict-amber" },
+  new: { label: "New", dot: "bg-accent", text: "text-accent" },
+} as const;
 
-  useEffect(() => {
-    threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, isTyping]);
+const PROSPECT_STYLE = {
+  strong: { label: "Strong", bg: "bg-verdict-green/10", border: "border-verdict-green/40", text: "text-verdict-green" },
+  arguable: { label: "Arguable", bg: "bg-verdict-amber/10", border: "border-verdict-amber/40", text: "text-verdict-amber" },
+  weak: { label: "Weak", bg: "bg-verdict-red/10", border: "border-verdict-red/40", text: "text-verdict-red" },
+  pending: { label: "Pending", bg: "bg-canvas-deep", border: "border-line", text: "text-ink-faint" },
+} as const;
 
-  const handleSend = () => {
-    const text = input.trim();
-    if (!text || isTyping) return;
-    addMessage({ role: "user", content: text });
-    setInput("");
-    setIsTyping(true);
-    setTimeout(() => {
-      addMessage({ role: "assistant", content: MOCK_ASSISTANT_REPLY });
-      setIsTyping(false);
-      setShowContinue(true);
-    }, 1500);
-  };
+type CaseItem = {
+  id: string;
+  title: string;
+  description: string;
+  status: keyof typeof STATUS_STYLE;
+  prospects: keyof typeof PROSPECT_STYLE;
+  date: string;
+  recommendation?: string;
+};
 
+const MOCK_CASES: CaseItem[] = [
+  {
+    id: "case-001",
+    title: "Damp & mould — 12 Ardwick Court",
+    description: "Persistent damp and mould in bedroom, 3 written reports to landlord since January 2026. No inspection or repair carried out.",
+    status: "complete",
+    prospects: "arguable",
+    date: "28 May 2026",
+    recommendation: "Escalate to solicitor",
+  },
+  {
+    id: "case-002",
+    title: "Deposit dispute — 45 Regent Terrace",
+    description: "Landlord failed to protect deposit within 30 days. Tenancy started September 2025, deposit of £1,200 not registered with any scheme.",
+    status: "complete",
+    prospects: "strong",
+    date: "27 May 2026",
+    recommendation: "Self-serve",
+  },
+  {
+    id: "case-003",
+    title: "Heating failure — Flat 8, Elm House",
+    description: "Boiler broken since February, landlord unresponsive. Two young children in the property.",
+    status: "in-progress",
+    prospects: "pending",
+    date: "29 May 2026",
+  },
+  {
+    id: "case-004",
+    title: "Noise complaint — 22 Park Lane",
+    description: "Neighbour dispute over noise levels. Looking into whether this is a landlord or council matter.",
+    status: "new",
+    prospects: "pending",
+    date: "30 May 2026",
+  },
+];
+
+export default function Dashboard() {
   return (
-    <div className="mx-auto flex h-[calc(100dvh-4rem)] max-w-3xl flex-col px-4">
-      {/* Thread */}
-      <div ref={threadRef} className="flex-1 overflow-y-auto py-8">
-        {messages.length === 0 && !isTyping && (
-          <div className="flex h-full flex-col items-center justify-center text-center">
-            <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-ink-faint">
-              <span className="h-1 w-1 rounded-full bg-accent" />
-              Case assessment
-            </span>
-            <h1 className="mt-4 max-w-md text-3xl leading-snug text-ink sm:text-4xl">
-              Describe your legal issue
-            </h1>
-            <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-ink-soft">
-              Tell us what happened, in plain English. We'll research the relevant law and assess your position.
-            </p>
-          </div>
-        )}
-
-        <div className="space-y-4">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[80%] rounded-2xl px-5 py-3 text-[15px] leading-relaxed ${
-                  msg.role === "user"
-                    ? "bg-accent text-paper"
-                    : "border border-line bg-paper text-ink"
-                }`}
-              >
-                {msg.content}
-              </div>
-            </div>
-          ))}
-
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-1.5 rounded-2xl border border-line bg-paper px-5 py-3">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-ink-faint" />
-                <span className="h-2 w-2 animate-pulse rounded-full bg-ink-faint [animation-delay:150ms]" />
-                <span className="h-2 w-2 animate-pulse rounded-full bg-ink-faint [animation-delay:300ms]" />
-              </div>
-            </div>
-          )}
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-ink-faint">
+            <span className="h-1 w-1 rounded-full bg-accent" />
+            Dashboard
+          </span>
+          <h1 className="mt-3 text-3xl leading-snug text-ink sm:text-4xl">
+            Your cases
+          </h1>
+          <p className="mt-2 max-w-md text-[15px] leading-relaxed text-ink-soft">
+            Track and manage your legal assessments. Start a new case or pick up where you left off.
+          </p>
         </div>
-
-        {showContinue && (
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={() => router.push("/demo/research")}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-accent-deep"
-            >
-              Continue to research
-              <span aria-hidden>&rarr;</span>
-            </button>
-          </div>
-        )}
+        <Link
+          href="/demo/chat"
+          className="inline-flex h-11 items-center gap-2 self-start rounded-full bg-accent px-6 text-sm font-medium text-paper transition-colors hover:bg-accent-deep"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          New case
+        </Link>
       </div>
 
-      {/* Input */}
-      <div className="border-t border-line py-4">
-        <div className="flex items-center gap-3 rounded-2xl border border-line bg-paper px-4 py-3 shadow-[0_1px_0_rgba(0,0,0,0.02),0_8px_20px_-12px_rgba(40,20,20,0.25)]">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Describe your damp & mould problem in plain English..."
-            className="flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-faint"
-            disabled={isTyping}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isTyping}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent px-4 text-sm font-medium text-paper transition-colors hover:bg-accent-deep disabled:cursor-not-allowed disabled:bg-ink/15 disabled:text-ink-faint"
-          >
-            Send
-          </button>
-        </div>
+      {/* Stats row */}
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          { label: "Total cases", value: MOCK_CASES.length.toString() },
+          { label: "Complete", value: MOCK_CASES.filter((c) => c.status === "complete").length.toString() },
+          { label: "In progress", value: MOCK_CASES.filter((c) => c.status === "in-progress").length.toString() },
+          { label: "New", value: MOCK_CASES.filter((c) => c.status === "new").length.toString() },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-xl border border-line bg-paper px-4 py-3">
+            <p className="text-xs text-ink-faint">{stat.label}</p>
+            <p className="mt-1 font-serif text-2xl text-ink">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Case list */}
+      <div className="mt-8 space-y-3">
+        {MOCK_CASES.map((c) => {
+          const status = STATUS_STYLE[c.status];
+          const prospect = PROSPECT_STYLE[c.prospects];
+
+          return (
+            <Link
+              key={c.id}
+              href="/demo/chat"
+              className="group flex flex-col gap-4 rounded-2xl border border-line bg-paper p-5 transition-colors hover:border-accent/30 hover:bg-accent-tint sm:flex-row sm:items-center sm:p-6"
+            >
+              {/* Left — info */}
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h3 className="text-[15px] font-medium text-ink group-hover:text-accent">
+                    {c.title}
+                  </h3>
+                  <span className="flex items-center gap-1.5 text-xs">
+                    <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+                    <span className={status.text}>{status.label}</span>
+                  </span>
+                </div>
+                <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-soft">
+                  {c.description}
+                </p>
+              </div>
+
+              {/* Right — meta */}
+              <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end sm:gap-2">
+                <span
+                  className={`rounded-md border px-2.5 py-1 text-xs font-medium ${prospect.bg} ${prospect.border} ${prospect.text}`}
+                >
+                  {prospect.label}
+                </span>
+                {c.recommendation && (
+                  <span className="text-xs text-ink-faint">{c.recommendation}</span>
+                )}
+                <span className="text-xs text-ink-faint">{c.date}</span>
+              </div>
+
+              {/* Arrow */}
+              <svg
+                className="hidden h-5 w-5 text-ink-faint transition-transform group-hover:translate-x-0.5 group-hover:text-accent sm:block"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
