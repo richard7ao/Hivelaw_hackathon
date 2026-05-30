@@ -16,6 +16,7 @@ type ChatMessage = {
   role: "user" | "assistant";
   content: string;
   attachments: Array<{ name: string; kind: IntakeAttachmentKind }>;
+  highlights?: Array<{ text: string; type: "support" | "flag" }>;
 };
 
 type SessionFile = {
@@ -157,6 +158,7 @@ export default function EntryChatShell() {
             role: "assistant",
             content: intakeResult.assistantMessage,
             attachments: [],
+            highlights: intakeResult.assistantHighlights,
           },
         ]);
       } catch (submissionError) {
@@ -419,7 +421,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         {isUser ? (
           <p className="whitespace-pre-wrap">{message.content}</p>
         ) : (
-          <FormattedMessage content={message.content} />
+          <FormattedMessage content={message.content} highlights={message.highlights ?? []} />
         )}
         {message.attachments.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -632,7 +634,15 @@ function ReportHandoffCard({ result }: { result: IntakeTurnResult }) {
 // numbered lists, and **bold**. Deliberately tiny — no dependency — because the
 // model only ever emits these few constructs. Grouping consecutive list lines
 // into a single <ul>/<ol> is what turns inline "(1)…(2)…" prose into clean lists.
-function FormattedMessage({ content }: { content: string }) {
+type MsgHighlight = { text: string; type: "support" | "flag" };
+
+function FormattedMessage({
+  content,
+  highlights = [],
+}: {
+  content: string;
+  highlights?: MsgHighlight[];
+}) {
   const lines = content.replace(/\r\n/g, "\n").split("\n");
   const blocks: React.ReactNode[] = [];
   let list: { ordered: boolean; items: string[] } | null = null;
@@ -642,7 +652,7 @@ function FormattedMessage({ content }: { content: string }) {
     if (!list) return;
     const items = list.items.map((item, i) => (
       <li key={i} className="leading-relaxed">
-        {renderInline(item)}
+        {renderInline(item, highlights)}
       </li>
     ));
     blocks.push(
@@ -685,7 +695,7 @@ function FormattedMessage({ content }: { content: string }) {
       flushList();
       blocks.push(
         <p key={key++} className="leading-relaxed">
-          {renderInline(line)}
+          {renderInline(line, highlights)}
         </p>,
       );
     }
@@ -695,8 +705,48 @@ function FormattedMessage({ content }: { content: string }) {
   return <div className="space-y-2.5">{blocks}</div>;
 }
 
-// Render **bold** spans within a line; everything else is plain text.
-function renderInline(text: string): React.ReactNode {
+// Same green(support)/red(flag) semantics as the report's HighlightedText.
+function markClass(type: "support" | "flag") {
+  return type === "support"
+    ? "rounded px-0.5 bg-verdict-green/15 text-verdict-green"
+    : "rounded px-0.5 bg-verdict-red/15 text-verdict-red";
+}
+
+// Render a line with green/red <mark> highlights (verbatim substrings) and
+// **bold**. Highlights are applied first; bold is applied to the gaps between.
+function renderInline(text: string, highlights: MsgHighlight[] = []): React.ReactNode {
+  const ranges = highlights
+    .map((h) => ({ ...h, start: text.indexOf(h.text) }))
+    .filter((r) => r.start !== -1)
+    .sort((a, b) => a.start - b.start)
+    .reduce<Array<MsgHighlight & { start: number; end: number }>>((acc, r) => {
+      const end = r.start + r.text.length;
+      // Skip overlapping matches.
+      if (acc.length && r.start < acc[acc.length - 1].end) return acc;
+      acc.push({ ...r, end });
+      return acc;
+    }, []);
+
+  if (ranges.length === 0) return renderBold(text);
+
+  const nodes: React.ReactNode[] = [];
+  let cursor = 0;
+  let key = 0;
+  for (const r of ranges) {
+    if (r.start > cursor) nodes.push(<span key={key++}>{renderBold(text.slice(cursor, r.start))}</span>);
+    nodes.push(
+      <mark key={key++} className={markClass(r.type)}>
+        {r.text}
+      </mark>,
+    );
+    cursor = r.end;
+  }
+  if (cursor < text.length) nodes.push(<span key={key++}>{renderBold(text.slice(cursor))}</span>);
+  return nodes;
+}
+
+// Render **bold** spans within a string; everything else is plain text.
+function renderBold(text: string): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) =>
     part.startsWith("**") && part.endsWith("**") ? (
