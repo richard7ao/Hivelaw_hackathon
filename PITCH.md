@@ -22,8 +22,8 @@
 ## 2. Paragraph pitch (~30 seconds)
 
 Almost every consumer-legal AI validates the user. None of them show you how you'll
-lose. Consumer law in the UK is a £19 billion market — and six million adults have
-an unmet legal need every year. 38% of people with a civil legal issue get no help
+lose. Legal services is a $1 trillion global market. Consumer law in the UK alone is
+worth £19 billion — and six million adults have an unmet legal need every year. 38% of people with a civil legal issue get no help
 at all. Not because they don't have a case — because they can't afford to find out.
 The Steelman changes that. It argues the *opponent's* best case against you,
 grounded in your own documents — giving everyone what only a solicitor's first
@@ -42,7 +42,8 @@ that arrive with their evidence already mapped.
 
 ### 3.1 The category argument (why we exist)
 
-Consumer law is a **£19 billion** market. **Six million adults** in England and
+Legal services is a **$1 trillion** global market. Consumer law in the UK alone is
+**£19 billion**. **Six million adults** in England and
 Wales face an unmet legal need every year — and only **33%** think they can afford
 a lawyer. Since LASPO gutted civil legal aid in 2012, cases dropped from 925,000
 to under 500,000, and **44% of local authority areas** now have no housing legal
@@ -254,6 +255,7 @@ The matching real output already exists in `reports/case_07_Problem_Statement.re
 
 | Claim | Figure | Source |
 |---|---|---|
+| Global legal services market | $1 trillion (2024) | Grand View Research / IMARC Global Legal Services Market Report 2025 |
 | UK consumer law market value | £19bn (2024) | IRN / ResearchAndMarkets UK Legal Services Market Report 2025 |
 | Total UK legal services market | £55bn (2025) | IRN / GlobeNewsWire UK Legal Services Market Report 2026 |
 | Unmet legal needs per year | 6 million adults (England & Wales) | Legal Services Board, Legal Needs Survey 2024 |
