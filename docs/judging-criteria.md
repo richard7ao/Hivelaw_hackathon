@@ -1,4 +1,4 @@
-# Judging Criteria — Lawhive Hackathon (Hivelaw)
+# Judging Criteria — Lawhive Hackathon (Steeleman)
 
 > The official lens framework the judges score against. **Access to Justice (Lens A)
 > is the headline** — every other lens is in service of it. Build decisions in this

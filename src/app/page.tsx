@@ -5,7 +5,7 @@ import Reveal from "@/components/Reveal";
 import Sponsors from "@/components/Sponsors";
 
 /*
-  Hivelaw landing — pitch deck as a single scroll.
+  Steeleman landing — pitch deck as a single scroll.
   Source of narrative: brief.md (§0 pitch, §8 slides). Visual lane: background-agents.com.
 
   LEGAL / FACTUAL CLAIMS TO SPOT-CHECK (flagged for the lawyer per project norms):
@@ -140,7 +140,7 @@ export default function Home() {
               <span className="italic text-accent">Before</span> you fight for it.
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-ink-soft sm:text-xl">
-              Hivelaw reads a renter’s evidence, grounds every answer in current
+              Steeleman reads a renter’s evidence, grounds every answer in current
               law, and says where they really stand. It prepares the letter when
               it’s worth sending, and saves them the year when it isn’t.
             </p>
@@ -310,7 +310,7 @@ export default function Home() {
                       Vanilla AI chatbot
                     </th>
                     <th className="px-5 py-4 text-sm font-semibold text-ink">
-                      Hivelaw
+                      Steeleman
                     </th>
                   </tr>
                 </thead>
@@ -393,7 +393,7 @@ export default function Home() {
             <div className="mt-7 max-w-xl space-y-5 text-lg leading-relaxed text-canvas/70">
               <p>
                 Lawhive’s own brief says the first conversation isn’t legal
-                analysis, it’s recalibration. So Hivelaw is built to return RED:
+                analysis, it’s recalibration. So Steeleman is built to return RED:
                 not an actionable claim. With reasons. With citations. With the
                 cheaper, faster step to take instead.
               </p>
@@ -452,13 +452,13 @@ export default function Home() {
               Not advice. Correspondence a solicitor would sign.
             </h2>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-ink-soft">
-              When the case is real, Hivelaw drafts a pre-action protocol letter
+              When the case is real, Steeleman drafts a pre-action protocol letter
               and a pre-filled environmental-health complaint. Every legal claim
               is footnoted to its source, formatted to the protocol exactly, and
               downloadable as PDF.
             </p>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink-faint">
-              Citizens Advice gives advice. Hivelaw produces the sendable
+              Citizens Advice gives advice. Steeleman produces the sendable
               document, with the weak points already flagged for the renter.
             </p>
           </Reveal>
@@ -632,12 +632,12 @@ export default function Home() {
               <div className="flex items-center gap-2.5">
                 <span className="block h-2.5 w-2.5 rounded-[2px] bg-accent" />
                 <span className="font-serif text-lg font-semibold text-canvas">
-                  Hivelaw
+                  Steeleman
                 </span>
               </div>
               <p className="max-w-md text-xs leading-relaxed text-canvas/45">
                 A concept built for the Lawhive hackathon, Hoxton, 30 May 2026
-                (Track B). Hivelaw is a legal assistant, not a solicitor: it
+                (Track B). Steeleman is a legal assistant, not a solicitor: it
                 gives information, not advice.
               </p>
             </div>

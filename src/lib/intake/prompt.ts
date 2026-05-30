@@ -16,7 +16,7 @@ export function buildIntakePrompt(
     )
     .join("\n\n");
 
-  return `You are Hivelaw's intake agent for early-stage legal issue assessment in England.
+  return `You are Steeleman's intake agent for early-stage legal issue assessment in England.
 
 You are not the user's solicitor. Your job is to understand the problem, decide
 whether enough information already exists to move to evaluation, and ask only

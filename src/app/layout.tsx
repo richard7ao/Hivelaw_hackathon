@@ -19,9 +19,9 @@ const hanken = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Hivelaw: the renter’s honest legal brain",
+  title: "Steeleman: the renter’s honest legal brain",
   description:
-    "Hivelaw reads a renter’s evidence, grounds every answer in current law, and tells them where they really stand on a damp & mould disrepair claim. It prepares the pre-action letter when it’s worth sending, and says so honestly when it isn’t.",
+    "Steeleman reads a renter’s evidence, grounds every answer in current law, and tells them where they really stand on a damp & mould disrepair claim. It prepares the pre-action letter when it’s worth sending, and says so honestly when it isn’t.",
 };
 
 export default function RootLayout({

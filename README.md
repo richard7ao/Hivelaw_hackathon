@@ -1,12 +1,12 @@
-# Hivelaw
+# Steeleman
 
 Legal case assessment demo for the Lawhive hackathon (30 May 2026).
 
 ## Quick start
 
 ```bash
-git clone https://github.com/richard7ao/Hivelaw_hackathon.git
-cd Hivelaw_hackathon
+git clone https://github.com/richard7ao/Steeleman_hackathon.git
+
 npm install
 ```
 
