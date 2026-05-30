@@ -78,7 +78,7 @@ export default function Dashboard() {
   const handleCaseClick = (c: DashboardCase) => {
     if (c.case) {
       setActiveCase(c.case);
-      router.push("/demo/report");
+      router.push(`/demo/report/${c.case.id}`);
     } else {
       router.push("/demo/chat");
     }

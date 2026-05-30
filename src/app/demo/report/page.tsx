@@ -151,6 +151,7 @@ export default function ReportPage() {
   const [filesLoaded, setFilesLoaded] = useState(false);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [contactedLawyers, setContactedLawyers] = useState<Set<string>>(new Set());
+  const [linkCopied, setLinkCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const caseRefs = activeCase?.references ?? MOCK_EXTENDED_REFERENCES;
@@ -260,12 +261,36 @@ export default function ReportPage() {
                 </ul>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button onClick={handleDownloadPdf} disabled={pdfGenerating} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep disabled:opacity-50">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                {pdfGenerating ? "Generating..." : "Download PDF"}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-3">
+                <button onClick={handleDownloadPdf} disabled={pdfGenerating} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-xs font-medium text-paper transition-colors hover:bg-accent-deep disabled:opacity-50">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                  {pdfGenerating ? "Generating..." : "Download PDF"}
+                </button>
+                <button onClick={() => router.push("/demo")} className="inline-flex flex-1 items-center justify-center rounded-full border border-line px-4 py-2.5 text-xs font-medium text-ink transition-colors hover:bg-canvas-deep">Dashboard</button>
+              </div>
+              <button
+                onClick={() => {
+                  const caseId = activeCase?.id ?? "case-07";
+                  const url = `${window.location.origin}/demo/report/${caseId}`;
+                  navigator.clipboard.writeText(url);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 3000);
+                }}
+                className={`inline-flex w-full items-center justify-center gap-1.5 rounded-full border px-4 py-2.5 text-xs font-medium transition-colors ${linkCopied ? "border-verdict-green/40 bg-verdict-green/10 text-verdict-green" : "border-line text-ink hover:bg-canvas-deep"}`}
+              >
+                {linkCopied ? (
+                  <>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Link copied
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" /></svg>
+                    Share report with solicitor
+                  </>
+                )}
               </button>
-              <button onClick={() => router.push("/demo")} className="inline-flex flex-1 items-center justify-center rounded-full border border-line px-4 py-2.5 text-xs font-medium text-ink transition-colors hover:bg-canvas-deep">Dashboard</button>
             </div>
           </div>
 
