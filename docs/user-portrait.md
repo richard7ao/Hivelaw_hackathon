@@ -1,12 +1,18 @@
 # User Portrait & Before/After — The Steelman
 
-> Companion to [`steelman-plan.md`](./steelman-plan.md). Purpose: give the Thinker
-> a tight, grounded narrative for the pitch and the written submission, and give
-> the whole team one shared picture of who we serve and what we change.
+> **This is the *why behind the pitch* — user research, not the script.**
+> [`PITCH.md`](../PITCH.md) is canonical for what the demo says and shows;
+> [`steelman-plan.md`](./steelman-plan.md) is canonical for build scope. This doc
+> gives the team one shared picture of who we serve and what we change, and feeds
+> the written submission. If wording here drifts from `PITCH.md`, `PITCH.md` wins.
 >
-> **Stage-time rule (from CEO review):** in a 3-minute slot we do NOT present a
-> persona — we *embody* one (Crystal). This doc is prep and submission material.
-> The only thing that goes on stage is the 15-second "before" line at the end.
+> **Team reality:** three engineers, no lawyer. Credibility is structural (verbatim
+> quote-matching + closed statute corpus), not personal. Nobody claims to be a
+> lawyer on stage. See `steelman-plan.md` → "Legal-soundness posture."
+>
+> **Stage-time rule:** in a 3-minute slot we do NOT present a persona — we *embody*
+> one (Crystal). This doc is prep and submission material. The only thing that goes
+> on stage is the 15-second "before" line (and `PITCH.md` already carries it).
 
 ## The category line (open and close on this)
 
@@ -167,10 +173,17 @@ access to justice, not less. (This is also the answer to "isn't this bad for
 Lawhive's lead volume?" — filtering out the non-cases lowers cost-to-serve and
 raises the quality of every enquiry that lands.)
 
-## Assumptions to verify (lawyer spot-check)
+## Claims to sanity-check before stage (no lawyer — engineer self-review)
 
-- Initial-consult fee range (£150–300) — illustrative; confirm a defensible figure.
-- Citizens Advice "general advice, not case-specific evidence read" — confirm the
-  framing is fair, not a strawman.
-- The solicitor-intake pain points are quoted/paraphrased from the Lawhive problem
-  pack; keep them close to the source so the room recognises their own words.
+We have no legal professional to validate these, so the rule is: only assert what's
+verifiable or sourced, and soften anything we can't stand behind in a room of real
+lawyers. A Lawhive lawyer pressure-testing these is the explicit v2 loop.
+
+- **Initial-consult fee range (£150–300)** — illustrative. Either find a citable
+  source or soften to "a few hundred pounds" (which `PITCH.md` already does). Don't
+  let a soft number anchor the "before" and become the thing a judge challenges.
+- **Citizens Advice "general advice, not case-specific evidence read"** — keep it
+  factual and non-dismissive (they're respected; one is even a GTM partner). Frame
+  as a gap in the *system*, not a knock on them.
+- **Solicitor-intake pain points** — quoted/paraphrased from the Lawhive problem
+  pack. Keep close to the source so the room recognises their own words.
