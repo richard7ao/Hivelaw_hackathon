@@ -268,7 +268,7 @@ export default function ReportPage() {
                 return (
                 <div key={lawyer.id} className={`rounded-2xl border bg-paper p-5 transition-colors ${contacted ? "border-verdict-green/30" : "border-line hover:border-accent/30"}`}>
                   <div className="flex gap-4">
-                    <img src={lawyer.imageUrl} alt={lawyer.name} className="h-16 w-16 rounded-full border border-line bg-canvas-deep" />
+                    <img src={lawyer.imageUrl} alt={lawyer.name} className="h-16 w-16 rounded-full border border-line bg-canvas-deep object-cover" />
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <div>
