@@ -155,6 +155,9 @@ export default function ReportPage() {
   const [showEmailCompose, setShowEmailCompose] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [emailTo, setEmailTo] = useState("");
+  const [letterBody, setLetterBody] = useState(MOCK_SUBMISSION_PREVIEW);
+  const [emailAttachments, setEmailAttachments] = useState<string[]>(["Pre-Action Letter.pdf", ...CASE_07_FILES.map((f) => f.name)]);
+  const removeAttachment = (name: string) => setEmailAttachments((prev) => prev.filter((a) => a !== name));
   // The Steelman tab: one chain expanded at a time (hero chain open by default)
   const [openChain, setOpenChain] = useState<string | null>(STEELMAN_CHAINS[0]?.id ?? null);
   const [contactedLawyers, setContactedLawyers] = useState<Set<string>>(new Set());
@@ -381,24 +384,28 @@ export default function ReportPage() {
 
             {/* Attachments */}
             <div className="border-b border-line-soft px-5 py-3">
-              <span className="text-xs font-medium uppercase tracking-[0.14em] text-ink-faint">Attachments ({CASE_07_FILES.length + 1})</span>
+              <span className="text-xs font-medium uppercase tracking-[0.14em] text-ink-faint">Attachments ({emailAttachments.length})</span>
               <div className="mt-2 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-accent-tint px-3 py-1.5 text-xs font-medium text-accent">
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-                  Pre-Action Letter.pdf
-                </span>
-                {CASE_07_FILES.map((f) => (
-                  <span key={f.path} className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-canvas-deep px-3 py-1.5 text-xs text-ink-soft">
+                {emailAttachments.map((name) => (
+                  <span key={name} className={`group inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs ${name === "Pre-Action Letter.pdf" ? "border-accent/30 bg-accent-tint font-medium text-accent" : "border-line bg-canvas-deep text-ink-soft"}`}>
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" /></svg>
-                    {f.name}
+                    {name}
+                    <button onClick={() => removeAttachment(name)} className="ml-1 rounded-full p-0.5 opacity-0 transition-opacity hover:bg-ink/10 group-hover:opacity-100">
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Letter body */}
+            {/* Letter body — editable */}
             <div className="px-5 py-4">
-              <pre className="whitespace-pre-wrap font-serif text-sm leading-relaxed text-ink">{MOCK_SUBMISSION_PREVIEW}</pre>
+              <textarea
+                value={letterBody}
+                onChange={(e) => setLetterBody(e.target.value)}
+                className="w-full resize-none whitespace-pre-wrap rounded-lg border border-line-soft bg-transparent p-3 font-serif text-sm leading-relaxed text-ink outline-none transition-colors focus:border-accent/40 focus:ring-1 focus:ring-accent/20"
+                rows={16}
+              />
               <div className="mt-4 border-t border-line-soft pt-4">
                 <span className="text-xs text-ink-faint">Statutory basis:</span>
                 <ul className="mt-1 space-y-0.5 text-xs text-ink-soft">
@@ -413,10 +420,11 @@ export default function ReportPage() {
             <div className="border-t border-line p-5">
               <button
                 onClick={() => { setEmailSent(true); }}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent-deep"
+                disabled={!emailTo.trim()}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-accent-deep disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
-                Send with {CASE_07_FILES.length + 1} attachments
+                {emailAttachments.length > 0 ? `Send with ${emailAttachments.length} attachments` : "Send letter"}
               </button>
             </div>
           </div>
