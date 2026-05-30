@@ -76,7 +76,7 @@ export async function runAnthropicIntake(
 
   const response = await client.messages.create({
     model: process.env.STEELMAN_INTAKE_MODEL ?? "claude-sonnet-4-5",
-    max_tokens: 2200,
+    max_tokens: 4096,
     system: buildIntakePrompt(cases, conversation, evaluationMode),
     messages: [{ role: "user", content: contentBlocks }],
     output_config: {
@@ -98,10 +98,47 @@ export async function runAnthropicIntake(
     throw new Error("Anthropic intake response did not include a text block.");
   }
 
-  return normalizeIntakeResult(
-    JSON.parse(textBlock.text) as Partial<IntakeTurnResult>,
-    "anthropic",
-  );
+  const parsed = parseStructuredIntakeResponse(textBlock.text);
+
+  if (!parsed) {
+    console.warn("Anthropic intake response was not valid JSON; falling back to local intake.", {
+      stopReason: response.stop_reason,
+      responsePreview: textBlock.text.slice(0, 300),
+    });
+    return null;
+  }
+
+  return normalizeIntakeResult(parsed, "anthropic");
+}
+
+function parseStructuredIntakeResponse(text: string): Partial<IntakeTurnResult> | null {
+  const candidates = [text.trim(), stripCodeFence(text), extractJsonObject(text)].filter(Boolean);
+
+  for (const candidate of candidates) {
+    try {
+      return JSON.parse(candidate) as Partial<IntakeTurnResult>;
+    } catch {
+      // Try the next candidate; malformed or truncated model JSON should fall
+      // back to the deterministic local intake path instead of crashing.
+    }
+  }
+
+  return null;
+}
+
+function stripCodeFence(text: string) {
+  return text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+}
+
+function extractJsonObject(text: string) {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+
+  if (start === -1 || end === -1 || end <= start) {
+    return "";
+  }
+
+  return text.slice(start, end + 1);
 }
 
 function buildConversationSummary(

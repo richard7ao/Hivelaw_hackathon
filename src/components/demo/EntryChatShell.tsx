@@ -194,12 +194,22 @@ export default function EntryChatShell() {
           body: formData,
         });
 
+        const responseText = await response.text();
+        const payload = parseJsonResponse(responseText);
+
         if (!response.ok) {
-          const payload = (await response.json()) as { error?: string };
-          throw new Error(payload.error ?? "The intake request failed.");
+          throw new Error(
+            payload && typeof payload === "object" && "error" in payload
+              ? String(payload.error ?? "The intake request failed.")
+              : "The intake request failed.",
+          );
         }
 
-        const intakeResult = (await response.json()) as IntakeTurnResult;
+        if (!payload) {
+          throw new Error("The intake response was malformed.");
+        }
+
+        const intakeResult = payload as IntakeTurnResult;
         setResult(intakeResult);
 
         // Progressively push the live report into the shared demo context so the
@@ -462,6 +472,14 @@ function summarizeFileNames(files: SessionFile[]) {
   }
 
   return `${files[0].file.name}, ${files[1].file.name}, and ${files.length - 2} more files`;
+}
+
+function parseJsonResponse(text: string) {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 function BrandMark() {
